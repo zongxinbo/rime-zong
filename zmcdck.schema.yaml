@@ -1,0 +1,142 @@
+# Rime schema settings
+# encoding: utf-8
+
+schema:
+  schema_id: zmcdck
+  name: 郑码超大词库版
+  version: "2016.04.04"
+  author:
+    - 发明人 郑易里教授
+    - 方案制作 疏影孤桐
+  description:
+    郑码超大词库版
+    通过【袖珍简化字拼音】实现 ` 键拼音反查
+    简入繁出 需要安装 opencc 简繁转换词典
+  dependencies:
+    - pinyin_simp
+
+switches:
+  - name: ascii_mode
+    reset: 0
+    states: [ 中文, 西文 ]
+  - name: full_shape
+    reset: 0
+    states: [ 半角, 全角 ]
+  - name: zhs_zht
+    reset: 0
+    states: [ 简体, 繁體 ]
+  - name: ascii_punct
+    reset: 1
+    states: [ ，。, ，． ]
+	
+engine:
+  processors:
+    - ascii_composer
+    - recognizer
+    - key_binder
+    - speller
+    - punctuator
+    - selector
+    - navigator
+    - express_editor
+  segmentors:
+    - ascii_segmentor
+    - matcher
+    - affix_segmentor@pinyin
+    - abc_segmentor
+    - punct_segmentor
+    - fallback_segmentor
+  translators:
+    - punct_translator
+    - table_translator@custom_phrase
+    - table_translator
+    - script_translator@pinyin
+  filters:
+    - simplifier
+    - uniquifier
+    - reverse_lookup_filter@zhengma_lookup
+
+speller:
+  alphabet: abcdefghijklmnopqrstuvwxyz
+  delimiter: " '"
+  max_code_length: 4
+  auto_select: true
+#  auto_select_unique_candidate: true
+
+translator:
+  dictionary: &dict
+    zmcdck
+
+  enable_charset_filter: false
+  enable_user_dict: false
+  enable_sentence: false
+  enable_encoder: true 
+  encode_commit_history: true
+  max_phrase_length: 4 
+  initial_quality: 0.75
+
+custom_phrase:
+  dictionary: ""
+  user_dict: zm_custom_phrase
+  db_class: stabledb
+  enable_sentence: false
+  initial_quality: 1
+
+#abc_segmentor:
+#  extra_tags:
+#    - pinyin
+
+pinyin:
+  tag: pinyin
+  dictionary: pinyin_simp
+  prefix: "`"
+  suffix: ";"
+  tips: 〔拼音〕
+  preedit_format:
+    - xform/([nl])v/$1ü/
+    - xform/([nl])ue/$1üe/
+    - xform/([jqxy])v/$1u/
+  closing_tips: 〔郑码〕
+  initial_quality: 0.2
+
+simplifier:
+  opencc_config: s2t.json
+  option_name: zhs_zht
+  tags: [ zhs_zht ]
+  tips: all
+
+zhengma_lookup:
+  tags: [ pinyin ]
+  dictionary: *dict
+  overwrite_comment: false
+
+punctuator:
+  import_preset: symbols
+
+key_binder:
+  import_preset: default
+  bindings:
+    - {accept: Return, send: Escape, when: composing }
+    - {accept: "Control+Shift+4", toggle: zhs_zht, when: always}
+    - {accept: "Control+Shift+dollar", toggle: zhs_zht, when: always}
+
+recognizer:
+  import_preset: default
+  patterns:
+    punct: "^/[0-9]*[a-z]*$"
+    pinyin: "`[a-z']*;?$"
+
+menu:
+  page_size: 5 
+
+style:
+  horizontal: false
+
+ascii_composer:
+  switch_key:
+    Caps_Lock: clear
+    Control_L: noop
+    Control_R: noop
+    Eisu_toggle: clear
+    Shift_L: commit_code
+    Shift_R: commit_text
