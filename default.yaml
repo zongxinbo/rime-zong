@@ -4,10 +4,10 @@
 config_version: "0.36"
 
 schema_list:
-  - schema: pinyin_simp
-  - schema: sjhm
   - schema: zmcdck
   - schema: zmcdzj
+  - schema: pinyin_simp
+  - schema: sjhm
 
 switcher:
   caption: 〔方案選單〕
