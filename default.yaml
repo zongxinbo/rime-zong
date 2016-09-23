@@ -4,10 +4,8 @@
 config_version: "0.36"
 
 schema_list:
-  - schema: zmcdck
-  - schema: zmcdzj
+  - schema: zmcdzc
   - schema: pinyin_simp
-  - schema: sjhm
 
 switcher:
   caption: 〔方案選單〕
@@ -110,8 +108,8 @@ key_binder:
     - { when: composing, accept: Control+h, send: BackSpace }
     - { when: composing, accept: Control+g, send: Escape }
     - { when: composing, accept: Control+bracketleft, send: Escape }
-    - { when: composing, accept: Alt+v, send: Page_Up }
-    - { when: composing, accept: Control+v, send: Page_Down }
+    # - { when: composing, accept: Alt+v, send: Page_Up }
+    # - { when: composing, accept: Control+v, send: Page_Down }
     # paging keys
     - { when: composing, accept: ISO_Left_Tab, send: Page_Up }
     - { when: composing, accept: Shift+Tab, send: Page_Up }

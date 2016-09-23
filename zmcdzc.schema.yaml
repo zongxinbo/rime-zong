@@ -2,14 +2,14 @@
 # encoding: utf-8
 
 schema:
-  schema_id: zmcdck
-  name: 郑码超大词库版
-  version: "2016.04.04"
+  schema_id: zmcdzc
+  name: 郑码超大字词
+  version: "2016.08.22"
   author:
     - 发明人 郑易里教授
     - 方案制作 疏影孤桐
   description:
-    郑码超大词库版
+    郑码超大字词
     通过【袖珍简化字拼音】实现 ` 键拼音反查
     简入繁出 需要安装 opencc 简繁转换词典
   dependencies:
@@ -20,15 +20,20 @@ switches:
     reset: 0
     states: [ 中文, 西文 ]
   - name: full_shape
-    reset: 0
     states: [ 半角, 全角 ]
   - name: zhs_zht
-    reset: 0
     states: [ 简体, 繁體 ]
+  # - name: extended_charset
+    # states: [ 通用, 增廣 ]
   - name: ascii_punct
-    reset: 1
     states: [ ，。, ，． ]
-	
+  - options: [ utf8, gbk, gb2312, big5 ]
+    states:	  
+    - UTF-8
+    - GBK
+    - GB2312
+    - BIG5
+
 engine:
   processors:
     - ascii_composer
@@ -54,23 +59,29 @@ engine:
   filters:
     - simplifier
     - uniquifier
-    - reverse_lookup_filter@zhengma_lookup
+    - charset_filter@utf8
+    - charset_filter@gbk
+    - charset_filter@gb2312
+    - charset_filter@big5
+    - reverse_lookup_filter@reverse_lookup
 
 speller:
   alphabet: abcdefghijklmnopqrstuvwxyz
   delimiter: " '"
   max_code_length: 4
   auto_select: true
-#  auto_select_unique_candidate: true
+  auto_select_unique_candidate: false
+  auto_clear: auto
 
 translator:
   dictionary: &dict
-    zmcdck
+    zmcdzc
 
+  enable_completion: true
   enable_charset_filter: false
   enable_user_dict: false
   enable_sentence: false
-  enable_encoder: true 
+  enable_encoder: false 
   encode_commit_history: true
   max_phrase_length: 4 
   initial_quality: 0.75
@@ -86,6 +97,12 @@ custom_phrase:
 #  extra_tags:
 #    - pinyin
 
+simplifier:
+  opencc_config: s2t.json
+  option_name: zhs_zht
+  tags: [ zhs_zht ]
+  tips: all
+
 pinyin:
   tag: pinyin
   dictionary: pinyin_simp
@@ -99,13 +116,7 @@ pinyin:
   closing_tips: 〔郑码〕
   initial_quality: 0.2
 
-simplifier:
-  opencc_config: s2t.json
-  option_name: zhs_zht
-  tags: [ zhs_zht ]
-  tips: all
-
-zhengma_lookup:
+reverse_lookup:
   tags: [ pinyin ]
   dictionary: *dict
   overwrite_comment: false
@@ -113,24 +124,29 @@ zhengma_lookup:
 punctuator:
   import_preset: symbols
 
-key_binder:
-  import_preset: default
-  bindings:
-    - {accept: Return, send: Escape, when: composing }
-    - {accept: "Control+Shift+4", toggle: zhs_zht, when: always}
-    - {accept: "Control+Shift+dollar", toggle: zhs_zht, when: always}
-
 recognizer:
   import_preset: default
   patterns:
     punct: "^/[0-9]*[a-z]*$"
-    pinyin: "`[a-z']*;?$"
+    pinyin: "`[a-z']*;?$"  
+
+key_binder:
+  import_preset: default
+  bindings:
+    - { when: composing, accept: Return, send: Escape }
+    - { when: always, accept: "Control+Shift+dollar", toggle: zhs_zht }
+    - { when: always, accept: "Control+Shift+percent", toggle: encode }
+    - { when: has_menu, accept: comma, send: comma }
+    - { when: has_menu, accept: period, send: period }
+    - { when: has_menu, accept: semicolon, send: 2 }
+    - { when: has_menu, accept: apostrophe, send: 3 }
 
 menu:
-  page_size: 5 
+  page_size: 5
 
 style:
   horizontal: false
+  font_face: HanaMinB
 
 ascii_composer:
   switch_key:

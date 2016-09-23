@@ -10,7 +10,7 @@ schema:
   description: |
     源自 Android 拼音
   dependencies:
-    - zmcdck
+    - zmcdzc
 
 switches:
   - name: ascii_mode
@@ -67,7 +67,7 @@ translator:
     - xform/([jqxy])v/$1u/
 
 reverse_lookup:
-  dictionary: zmcdck
+  dictionary: zmcdzc
   enable_completion: true
   prefix: "`"
   suffix: "'"
