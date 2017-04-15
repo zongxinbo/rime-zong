@@ -144,10 +144,6 @@ key_binder:
 menu:
   page_size: 5
 
-style:
-  horizontal: false
-  font_face: HanaMinB
-
 ascii_composer:
   switch_key:
     Caps_Lock: clear

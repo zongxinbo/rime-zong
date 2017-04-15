@@ -26578,8 +26578,8 @@ encoder:
 括囊拱手	dadm
 救死扶伤	dadn
 打扮	dado
-打折	dadp
 打援	dadp
+打折	dadp
 打抖	dadt
 打拼	dadu
 抑恶扬善	dadu
@@ -33144,7 +33144,6 @@ encoder:
 撞上	dsiv
 掊	dsj
 𢭹	dsj
-热衷于	dsja
 接口	dsja
 寸口	dsja
 提高班	dsjc
@@ -42300,10 +42299,10 @@ encoder:
 䠢	elwj
 真神	elwk
 𣊔	elwk
-直视	elwl
 蔑视	elwl
 瞢	elwl
 节骨眼	elwl
+直视	elwl
 南迁	elwm
 直选	elwm
 直追	elwm
@@ -50383,7 +50382,6 @@ encoder:
 枝	fexs
 𬂵	fexs
 覆蕉寻鹿	fext
-横屏	fexu
 朽索驭马	fexx
 棋局	fexy
 栉	fey
@@ -52097,7 +52095,6 @@ encoder:
 露洞	fjvl
 杯中物	fjvm
 𪴁	fjvr
-西游	fjvs
 整流	fjvs
 西洋	fjvu
 杏	fjvv
@@ -64915,7 +64912,6 @@ encoder:
 原处	gnri
 原名	gnrj
 奢侈品	gnrj
-原旨	gnrk
 磁化水	gnrk
 硫化黑	gnrl
 碳化物	gnrm
@@ -82689,8 +82685,8 @@ encoder:
 品行	jjoi
 回行	jjoi
 串行	jjoi
-回馈	jjoj
 喇叭口	jjoj
+回馈	jjoj
 嗷嗷待哺	jjoj
 𫪟	jjoj
 哭得	jjok
@@ -82868,8 +82864,8 @@ encoder:
 回游	jjvs
 咿呀学语	jjvs
 圆润	jjvt
-中国海关	jjvu
 回溯	jjvu
+中国海关	jjvu
 吕	jjvv
 中国海洋石油总公司	jjvv
 中国海洋	jjvv
@@ -85169,8 +85165,8 @@ encoder:
 𠱟	jrf
 𡂢	jrf
 𫪧	jrf
-图标	jrfb
 路标	jrfb
+图标	jrfb
 吹棒	jrfc
 路霸	jrfe
 图森	jrff
@@ -88158,7 +88154,6 @@ encoder:
 日	ka
 曰	kaa
 𫩏	kaaa
-⺜	kaaa
 量刑	kaae
 日刊	kaae
 题型	kaae
@@ -96832,7 +96827,6 @@ encoder:
 紧承	kxxk
 归属	kxxm
 当属	kxxm
-竖屏	kxxu
 暇	kxxx
 𣇽	kxxx
 当即	kxxy
@@ -112792,8 +112786,9 @@ encoder:
 智力	mjym
 智除	mjyo
 手足异处	mjyr
-智障	mjys
 和弦	mjys
+特别强调	mjys
+智障	mjys
 积习	mjyt
 积弱	mjyt
 特别奖	mjyt
@@ -125159,6 +125154,7 @@ encoder:
 亿则屡中	nlxj
 齂	nlxk
 𦤰	nlxl
+自验	nlxo
 侠骨柔肠	nlxq
 使眼色	nlxr
 自尽	nlxs
@@ -127559,8 +127555,8 @@ encoder:
 位标	nsfb
 保证需要	nsff
 停柩	nsfh
-信赖	nsfj
 依赖	nsfj
+信赖	nsfj
 位相	nsfl
 儭	nsfl
 位高权重	nsfm
@@ -159195,7 +159191,6 @@ encoder:
 解除负担	ryrd
 比张比李	ryrf
 解除疑虑	ryri
-包名	ryrj
 𠣪	ryrj
 𠣧	ryrk
 𩸹	ryrk
@@ -162582,6 +162577,7 @@ encoder:
 𨚳	shzy
 试出	shzz
 让	si
+让	sia
 龍	sia
 𠅁	sia
 蛮干	siae
@@ -186143,7 +186139,6 @@ encoder:
 关贸总协定	urue
 㥌	uruf
 燃烧	uruh
-灼烧	uruh
 炊烟	uruj
 烽烟	uruj
 燃着	urul
@@ -204762,7 +204757,6 @@ encoder:
 必要	wmfv
 透雨	wmfv
 追根	wmfx
-适配	wmfy
 选配	wmfy
 袄	wmg
 官复原职	wmgc
@@ -206548,6 +206542,7 @@ encoder:
 安全空间	wowt
 遁入空门	wowt
 军令状	wowt
+容灾	wowu
 穴道	wowu
 社会安定	woww
 𥨭	woww
@@ -212190,8 +212185,8 @@ encoder:
 礼毕	wzrr
 𢖻	wzrs
 心急	wzrx
-礼包	wzry
 心包	wzry
+礼包	wzry
 案语	wzsb
 心语	wzsb
 心计	wzse
@@ -218651,8 +218646,8 @@ encoder:
 登录号	xxkj
 矜矜业业	xxkk
 柔曼	xxkl
-预览	xxkm
 双星	xxkm
+预览	xxkm
 叠影	xxks
 𫘧	xxkv
 双掌	xxkw
@@ -220556,8 +220551,8 @@ encoder:
 𠚦	ydzs
 导发	ydzv
 乙级	ydzy
-民事纠纷	ydzz
 导出	ydzz
+民事纠纷	ydzz
 及其	ye
 异于	yead
 异型	yeae
@@ -226705,7 +226700,6 @@ encoder:
 𢏁	yzzz
 𢏷	yzzz
 发	z
-出	z
 参与	za
 糸	zaa
 𠃉	zaa
