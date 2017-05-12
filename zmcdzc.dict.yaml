@@ -2,7 +2,7 @@
 ### This file must be encoded into UTF-8.
 ---
 name: zmcdzc
-version: "2016.08.21"
+version: "20170512"
 sort: original
 #use_preset_vocabulary: true
 columns:
@@ -29415,7 +29415,6 @@ encoder:
 扣留	djrs
 把兄弟	djru
 接踵比肩	djrw
-报国务院	djry
 事务	djry
 𪭦	djry
 描图纸	djrz
@@ -113361,8 +113360,8 @@ encoder:
 利达	mkwg
 重赏之下，必有勇夫	mkwg
 垂堂之戒	mkwh
-刮宫	mkwj
 重启	mkwj
+刮宫	mkwj
 复审	mkwk
 重审	mkwk
 重视	mkwl
@@ -150834,8 +150833,8 @@ encoder:
 服务的	qryd
 服务区	qryh
 脃	qryi
-服务员	qryj
 服务器	qryj
+服务员	qryj
 服务业	qryk
 𦞧	qryk
 服务网	qryl
@@ -189622,8 +189621,8 @@ encoder:
 涌现出	vcvz
 清迈	vcwa
 清福	vcwa
-清远	vcwb
 清空	vcwb
+清远	vcwb
 清寒	vcwe
 清还	vcwg
 清寂	vcwi
@@ -204757,6 +204756,7 @@ encoder:
 必要	wmfv
 透雨	wmfv
 追根	wmfx
+适配	wmfy
 选配	wmfy
 袄	wmg
 官复原职	wmgc
