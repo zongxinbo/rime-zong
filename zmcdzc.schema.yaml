@@ -3,7 +3,7 @@
 
 schema:
   schema_id: zmcdzc
-  name: 郑码超大字词
+  name: 郑码
   version: "2016.08.22"
   author:
     - 发明人 郑易里教授
@@ -152,3 +152,7 @@ ascii_composer:
     Eisu_toggle: clear
     Shift_L: commit_code
     Shift_R: commit_text
+
+style:
+  font_face:TH-Tshyn
+  font_point:15
