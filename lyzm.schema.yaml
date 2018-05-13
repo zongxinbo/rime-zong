@@ -44,7 +44,7 @@ schema:
     - pinyin_simp
   description: ""
   name: "龙渊郑码"
-  schema_id: zhengma
+  schema_id: lyzm
   version: 0.21.custom.2517821110
 speller:
   auto_clear: auto
@@ -64,7 +64,7 @@ switches:
     states: ["。，", "．，"]
 translator:
   auto_select: true
-  dictionary: zhengma
+  dictionary: lyzm
   enable_charset_filter: true
   enable_encoder: true
   enable_sentence: false
