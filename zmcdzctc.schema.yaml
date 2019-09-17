@@ -2,8 +2,8 @@
 # encoding: utf-8
 
 schema:
-  schema_id: zmcdzc
-  name: 郑码
+  schema_id: zmcdzctc
+  name: 郑码繁体
   version: "2016.08.22"
   author:
     - 发明人 郑易里教授
@@ -22,7 +22,7 @@ switches:
   - name: full_shape
     states: [ 半角, 全角 ]
   - name: zhs_zht
-    reset: 0
+    reset: 1
     states: [ 简体, 繁體 ]
   # - name: extended_charset
     # states: [ 通用, 增廣 ]
