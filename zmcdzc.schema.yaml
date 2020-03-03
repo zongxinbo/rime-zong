@@ -4,10 +4,9 @@
 schema:
   schema_id: zmcdzc
   name: 郑码
-  version: "2016.08.22"
+  version: "2020.03.03"
   author:
     - 发明人 郑易里教授
-    - 方案制作 疏影孤桐
   description:
     郑码超大字词
     通过【袖珍简化字拼音】实现 ` 键拼音反查
@@ -18,22 +17,16 @@ schema:
 switches:
   - name: ascii_mode
     reset: 0
-    states: [ 中文, 西文 ]
+    states: [ 中文, 英文 ]
   - name: full_shape
     states: [ 半角, 全角 ]
   - name: zhs_zht
     reset: 0
     states: [ 简体, 繁體 ]
-  # - name: extended_charset
-    # states: [ 通用, 增廣 ]
+  - name: extended_charset
+    states: [ 常用, 增廣 ]
   - name: ascii_punct
     states: [ ，。, ，． ]
-  - options: [ utf8, gbk, gb2312, big5 ]
-    states:	  
-    - UTF-8
-    - GBK
-    - GB2312
-    - BIG5
 
 engine:
   processors:
@@ -48,55 +41,36 @@ engine:
   segmentors:
     - ascii_segmentor
     - matcher
-    - affix_segmentor@pinyin
     - abc_segmentor
     - punct_segmentor
     - fallback_segmentor
   translators:
     - punct_translator
-    - table_translator@custom_phrase
     - table_translator
-    - script_translator@pinyin
+    - reverse_lookup_translator
   filters:
     - simplifier
     - uniquifier
-    - charset_filter@utf8
-    - charset_filter@gbk
-    - charset_filter@gb2312
-    - charset_filter@big5
-    - reverse_lookup_filter@reverse_lookup
 
 speller:
   alphabet: abcdefghijklmnopqrstuvwxyz
   delimiter: " '"
-  max_code_length: 4
-  auto_select: true
-  auto_select_unique_candidate: false
+  max_code_length: 4  # 四码顶字上屏
+  auto_select: true  # 自动上屏
   auto_clear: auto
 
 translator:
-  dictionary: &dict
-    zmcdzc
+  dictionary: zmcdzc
+  enable_charset_filter: true  # 字符集过滤
+  enable_sentence: false  # 自动造句
+  enable_encoder: false  # 自动造词
+  enable_user_dict: false  # 用戶詞典
+  encode_commit_history: false  # 对已上屏词自动成词
+  max_phrase_length: 4  # 最大自动成词词长
 
-  enable_completion: true
-  enable_charset_filter: false
-  enable_user_dict: false
-  enable_sentence: false
-  enable_encoder: false 
-  encode_commit_history: true
-  max_phrase_length: 4 
-  initial_quality: 0.75
-
-custom_phrase:
-  dictionary: ""
-  user_dict: zm_custom_phrase
-  db_class: stabledb
-  enable_sentence: false
-  initial_quality: 1
-
-#abc_segmentor:
-#  extra_tags:
-#    - pinyin
+abc_segmentor:
+  extra_tags:
+#    - reverse_lookup  # 与拼音（反查码）混打
 
 simplifier:
   opencc_config: s2t.json
@@ -104,8 +78,7 @@ simplifier:
   tags: [ zhs_zht ]
   tips: all
 
-pinyin:
-  tag: pinyin
+reverse_lookup:
   dictionary: pinyin_simp
   prefix: "`"
   suffix: ";"
@@ -114,13 +87,6 @@ pinyin:
     - xform/([nl])v/$1ü/
     - xform/([nl])ue/$1üe/
     - xform/([jqxy])v/$1u/
-  closing_tips: 〔郑码〕
-  initial_quality: 0.2
-
-reverse_lookup:
-  tags: [ pinyin ]
-  dictionary: *dict
-  overwrite_comment: false
 
 punctuator:
   import_preset: symbols
@@ -128,15 +94,13 @@ punctuator:
 recognizer:
   import_preset: default
   patterns:
-    punct: "^/[0-9]*[a-z]*$"
-    pinyin: "`[a-z']*;?$"  
+    punct: "^/([0-9]0?|[a-z]+)$"
+    reverse_lookup: "`[a-z]*'?$|[a-z]*'$"
 
 key_binder:
   import_preset: default
   bindings:
     - { when: composing, accept: Return, send: Escape }
-    - { when: always, accept: "Control+Shift+dollar", toggle: zhs_zht }
-    - { when: always, accept: "Control+Shift+percent", toggle: encode }
     - { when: has_menu, accept: comma, send: comma }
     - { when: has_menu, accept: period, send: period }
     - { when: has_menu, accept: semicolon, send: 2 }
@@ -153,7 +117,3 @@ ascii_composer:
     Eisu_toggle: clear
     Shift_L: commit_code
     Shift_R: commit_text
-
-style:
-  font_face:TH-Tshyn
-  font_point:15

@@ -4,7 +4,7 @@
 schema:
   schema_id: pinyin_simp
   name: 拼音
-  version: "0.7"
+  version: "0.8"
   author:
     - 佚名
   description: |
@@ -15,7 +15,7 @@ schema:
 switches:
   - name: ascii_mode
     reset: 0
-    states: [ 中文, 西文 ]
+    states: [ 中文, 英文 ]
   - name: full_shape
     states: [ 半角, 全角 ]
   - name: ascii_punct
@@ -61,6 +61,7 @@ speller:
 
 translator:
   dictionary: pinyin_simp
+  enable_user_dict: false
   preedit_format:
     - xform/([nl])v/$1ü/
     - xform/([nl])ue/$1üe/
@@ -76,7 +77,7 @@ reverse_lookup:
 #    - xlit/hspnz/一丨丿丶乙/
 
 punctuator:
-  import_preset: default
+  import_preset: symbols
 
 key_binder:
   import_preset: default
@@ -84,4 +85,8 @@ key_binder:
 recognizer:
   import_preset: default
   patterns:
+    # hack: to enable "/fh" style symbols, '/' must be mapped to a [list].
+    # so those who have customized '/' for direct commit won't be affected by
+    # this change.
+    punct: "^/([0-9]+[a-z]*|[a-z]+)$"
     reverse_lookup: "`[a-z]*'?$"
