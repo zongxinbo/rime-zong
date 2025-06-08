@@ -4,22 +4,23 @@
 schema:
   schema_id: pinyin_simp
   name: 拼音
-  version: "0.8"
+  version: '0.9'
   author:
     - 佚名
   description: |
+    袖珍简化字拼音
     源自 Android 拼音
   dependencies:
-    - zmcdzc
+    - cangjie5
 
 switches:
   - name: ascii_mode
     reset: 0
-    states: [ 中文, 英文 ]
+    states: [ 中文, 西文 ]
   - name: full_shape
     states: [ 半角, 全角 ]
   - name: ascii_punct
-    states: [ ，。, ，． ]
+    states: [ 。，, ．， ]
 
 engine:
   processors:
@@ -46,6 +47,10 @@ speller:
   alphabet: zyxwvutsrqponmlkjihgfedcba
   delimiter: " '"
   algebra:
+    - erase/^hm$/
+    - erase/^m$/
+    - erase/^n$/
+    - erase/^ng$/
     - abbrev/^([a-z]).+$/$1/
     - abbrev/^([zcs]h).+$/$1/
     - derive/^([nl])ue$/$1ve/
@@ -61,20 +66,19 @@ speller:
 
 translator:
   dictionary: pinyin_simp
-  enable_user_dict: false
   preedit_format:
     - xform/([nl])v/$1ü/
     - xform/([nl])ue/$1üe/
     - xform/([jqxy])v/$1u/
 
 reverse_lookup:
-  dictionary: zmcdzc
+  dictionary: cangjie5
   enable_completion: true
   prefix: "`"
   suffix: "'"
-  tips: 〔郑码〕
-#  preedit_format:
-#    - xlit/hspnz/一丨丿丶乙/
+  tips: 〔倉頡五代〕
+  # preedit_format:
+  #   - xlit/hspnz/一丨丿丶乙/
 
 punctuator:
   import_preset: symbols

@@ -10,7 +10,7 @@ schema:
   description: |
     四角号码	27585字
   dependencies:
-    - zmcdzj
+    - pinyin_simp
 
 switches:
   - name: ascii_mode
@@ -57,9 +57,9 @@ translator:
     - 'xlit/~/ /'
 	
 reverse_lookup:
-  dictionary: zmcdzj
+  dictionary: pinyin_simp
   prefix: "`"
-  tips: 〔郑码〕
+  tips: 〔拼音〕
   preedit_format:
     - xform/([nljqxy])v/$1ü/
 
