@@ -26,6 +26,7 @@ switches:
   - name: ascii_punct
     states: [ 。，, ．， ]
   - options: [ noop, s2t, simplification ]
+    reset: 0
     states: [ 默认汉字, 繁體漢字, 简体汉字 ]
 
 engine:
