@@ -1,0 +1,125 @@
+﻿# Rime schema settings
+# encoding: utf-8
+#
+# 使用说明：
+# 1. 输入四角号码的 5 位数字编码，纯单字输入。
+# 2. 大键盘数字和小键盘数字都可以输入编码。
+# 3. 取消 5 码自动上屏，输入完后手动选字或空格上屏。
+# 4. 候选选择键：Space / a / s / d / f 对应第 1 到第 5 候选。
+# 5. 翻页键：w 上页，e 下页。
+
+schema:
+  schema_id: sijiao
+  name: "四角号码"
+  version: "1.0"
+  author:
+    - 发明人 王云五先生
+  description: |
+    四角号码	27585字
+  dependencies:
+    - pinyin_simp
+
+switches:
+  - name: ascii_mode
+    reset: 0
+    states: [ 中文, 西文 ]
+  - name: full_shape
+    states: [ 半角, 全角 ]
+
+engine:
+  processors:
+    - ascii_composer
+    - recognizer
+    - key_binder
+    - speller
+    - punctuator
+    - selector
+    - navigator
+    - express_editor
+  segmentors:
+    - ascii_segmentor
+    - matcher
+    - abc_segmentor
+    - punct_segmentor
+    - fallback_segmentor
+  translators:
+    - punct_translator
+    - table_translator
+    - reverse_lookup_translator
+
+speller:
+  # 四角号码直接输入 5 位数字编码，关闭 5 码自动上屏。
+  alphabet: "0123456789"
+  delimiter: " ;'"
+  max_code_length: 5
+  auto_select: false
+  auto_select_unique_candidate: false
+
+translator:
+  dictionary: sijiao
+  enable_user_dict: false
+  enable_sentence: false
+  enable_encoder: false
+  comment_format: 
+    - 'xlit/~/ /'
+	
+reverse_lookup:
+  dictionary: pinyin_simp
+  prefix: "`"
+  tips: 〔拼音〕
+  preedit_format:
+    - xform/([nljqxy])v/$1ü/
+
+punctuator:
+  import_preset: default
+
+key_binder:
+  import_preset: default
+  bindings:
+    - { when: composing, accept: Return, send: Escape }
+    # 小键盘数字输入四角码；兼容部分环境把小键盘识别成导航键。
+    - { when: always, accept: KP_0, send: 0 }
+    - { when: always, accept: KP_1, send: 1 }
+    - { when: always, accept: KP_2, send: 2 }
+    - { when: always, accept: KP_3, send: 3 }
+    - { when: always, accept: KP_4, send: 4 }
+    - { when: always, accept: KP_5, send: 5 }
+    - { when: always, accept: KP_6, send: 6 }
+    - { when: always, accept: KP_7, send: 7 }
+    - { when: always, accept: KP_8, send: 8 }
+    - { when: always, accept: KP_9, send: 9 }
+    - { when: always, accept: Insert, send: 0 }
+    - { when: always, accept: End, send: 1 }
+    - { when: always, accept: Down, send: 2 }
+    - { when: always, accept: Next, send: 3 }
+    - { when: always, accept: Left, send: 4 }
+    - { when: always, accept: Clear, send: 5 }
+    - { when: always, accept: Right, send: 6 }
+    - { when: always, accept: Home, send: 7 }
+    - { when: always, accept: Up, send: 8 }
+    - { when: always, accept: Prior, send: 9 }
+    # 候选翻页：w 上页，e 下页。
+    - { when: has_menu, accept: w, send: Page_Up }
+    - { when: has_menu, accept: e, send: Page_Down }
+
+recognizer:
+  import_preset: default
+  patterns:
+    reverse_lookup: "`[a-z]*$"
+
+menu:
+  # 选字键：Space/a/s/d/f 对应第 1 到第 5 候选。
+  alternative_select_keys: " asdf"
+  page_size: 5 
+
+style:
+  horizontal: false
+
+ascii_composer:
+  switch_key:
+    Caps_Lock: clear
+    Control_L: noop
+    Control_R: noop
+    Eisu_toggle: clear
+    Shift_L: commit_code
+    Shift_R: commit_text
