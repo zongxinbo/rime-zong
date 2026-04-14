@@ -25,7 +25,7 @@ switches:
     states: [ 常用, 增廣 ]
   - name: ascii_punct
     states: [ 。，, ．， ]
-  - options: [ noop, s2t, simplification ]
+  - options: [ noop, traditionalization, simplification ]
     reset: 0
     states: [ 默认汉字, 繁體漢字, 简体汉字 ]
 
@@ -51,7 +51,7 @@ engine:
     - table_translator
   filters:
     - simplifier
-    - simplifier@s2t
+    - simplifier@traditionalization
     - uniquifier
     - single_char_filter
 
@@ -62,21 +62,14 @@ speller:
 translator:
   dictionary: cangjie5
   enable_charset_filter: true
-  encode_commit_history: true
-  enable_encoder: true
-  enable_sentence: true
   enable_user_dict: false
-  max_phrase_length: 5
+  max_phrase_length: 1
   preedit_format:
     - 'xform/(?<![^x])x/#/'
     - "xlit|abcdefghijklmnopqrstuvwxyz#|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜片重|"
   comment_format:
     - 'xform/(?<![^x])x/#/'
     - "xlit|abcdefghijklmnopqrstuvwxyz#~|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜片重～|"
-  disable_user_dict_for_patterns:
-    - "^[a-x]$"
-    - "^z.*$"
-    - "^yyy.*$"
 
 abc_segmentor:
   extra_tags:
@@ -99,9 +92,9 @@ reverse_lookup:
 simplifier:
   tips: all  # 簡化字模式下提示對應的傳統漢字
 
-s2t:
+traditionalization:
   opencc_config: s2t.json
-  option_name: s2t
+  option_name: traditionalization
   tips: all
 
 punctuator:
