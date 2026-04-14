@@ -58,11 +58,18 @@ engine:
 speller:
   alphabet: zyxwvutsrqponmlkjihgfedcba
   delimiter: " ;"
-  #max_code_length: 5  # 五碼頂字上屏
+  max_code_length: 5
+  auto_select: false
+  auto_select_unique_candidate: false
+
 translator:
   dictionary: cangjie5
   enable_charset_filter: true
+  encode_commit_history: false
+  enable_encoder: false
+  enable_completion: true
   enable_user_dict: false
+  enable_sentence: false
   max_phrase_length: 1
   preedit_format:
     - 'xform/(?<![^x])x/#/'
@@ -102,6 +109,9 @@ punctuator:
 
 key_binder:
   import_preset: default
+  bindings:
+    - { when: has_menu, accept: space, send: space }
+    - { when: composing, accept: space, send: Escape }
 
 recognizer:
   import_preset: default
