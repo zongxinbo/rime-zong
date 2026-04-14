@@ -7,5 +7,5 @@ RIME方案 (郑码、仓颉、四角号码)
 - cangjie5: [倉頡五代](https://github.com/Jackchows/Cangjie5) 簡化字優先
 - zmcdzc: 郑码超大字词
 - lyzm: 龙渊郑码
-- sjhm: 四角号码 27585字
+- sijiao: 四角号码 27585字
 - symbols: 符号
