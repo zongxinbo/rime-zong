@@ -7,6 +7,7 @@ schema_list:
   - schema: pinyin_simp
   - schema: cangjie5
   - schema: cangjie5_pinyin
+  - schema: jaroomaji
 
 switcher:
   caption: 〔方案選單〕
