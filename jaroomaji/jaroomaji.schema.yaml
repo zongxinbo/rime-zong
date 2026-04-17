@@ -5,32 +5,32 @@
 # Author: lazy fox chan
 
 # # # # # # # # # # # # # # # # # # # #
-# スキーマの基本情報の設定
+# 方案基本信息设置
 # # # # # # # # # # # # # # # # # # # #
 schema:
   schema_id: jaroomaji
-  name: 日本語ローマ字
+  name: 日本語罗马字
   version: "1.0"
   author:
     - lazy fox chan
   description: |
-    日本語ローマ字入力
-    ・でも「-」キーだけじゃなくてLキーも伸ばし棒
-    ・Shift押しながら入力すると強制カタカナ入力だにょ
+    日本語罗马字输入
+    ・不仅「-」键可以输入长音符号，L 键也可以
+    ・按住 Shift 输入时会强制输出片假名
 
 # # # # # # # # # # # # # # # # # # # #
-# 機能切り替えの設定
+# 功能切换设置
 # # # # # # # # # # # # # # # # # # # #
 switches:
   - name: ascii_mode
     states: [ あ, A ]
-    reset: 1  # デフォルトで英数モード
+    reset: 1  # 默认使用英文数字模式
   - name: full_shape
     states: [ 半角記号, 全角記号 ]
-    reset: 0  # デフォルトで半角記号モード
+    reset: 0  # 默认使用半角符号模式
 
 # # # # # # # # # # # # # # # # # # # #
-# 読み込むエンジンの設定
+# 引擎加载设置
 # # # # # # # # # # # # # # # # # # # #
 engine:
   processors:
@@ -56,9 +56,9 @@ engine:
     - uniquifier
 
 # # # # # # # # # # # # # # # # # # # #
-# 文字入力の設定
-# 複数入力方法があるものはalgebraで設定する
-# 但し、拗音はここでは対応できないので辞書ファイルで対応する
+# 文字输入设置
+# 存在多种输入方式的内容，在 algebra 中统一设置
+# 但拗音无法在这里处理，因此改由词典文件支持
 # # # # # # # # # # # # # # # # # # # #
 speller:
   alphabet: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-"
@@ -231,18 +231,18 @@ speller:
     - "abbrev/NN/N/"
 
 # # # # # # # # # # # # # # # # # # # #
-# 変換候補と変換候補の上に出てくる入力文字の設定
-# Enterキーを押して直接確定した場合は
-# preedit_formatで設定した文字が直接入力される
+# 候选项和候选上方输入串的显示设置
+# 当按 Enter 直接上屏时
+# 会直接输出 preedit_format 中设置的文字
 # # # # # # # # # # # # # # # # # # # #
 translator:
   dictionary: jaroomaji
-  enable_user_dict: true  # 学習機能ON
+  enable_user_dict: true  # 开启学习功能
   enable_completion: false
   preedit_format:
-    # 区切り文字の空白は消す
+    # 去掉分隔空格
     - "xform/ //"
-    # ひらがな(変換優先順)
+    # 平假名（按转换优先顺序）
     - "xform/nn/ん/"
     - "xform/xtsu/っ/"
     - "xform/xwa/ゎ/"
@@ -508,7 +508,7 @@ translator:
     - "xform/i/い/"
     - "xform/a/あ/"
     - "xform/n/ん/"
-    # 小さい「っ」
+    # 小写「っ」
     - "xform/k/っ/"
     - "xform/c/っ/"
     - "xform/q/っ/"
@@ -527,7 +527,7 @@ translator:
     - "xform/y/っ/"
     - "xform/r/っ/"
     - "xform/w/っ/"
-    # カタカナ(変換優先順)
+    # 片假名（按转换优先顺序）
     - "xform/NN/ン/"
     - "xform/XTSU/ッ/"
     - "xform/XWA/ヮ/"
@@ -793,7 +793,7 @@ translator:
     - "xform/I/イ/"
     - "xform/A/ア/"
     - "xform/N/ン/"
-    # 小さい「ッ」
+    # 小写「ッ」
     - "xform/K/ッ/"
     - "xform/C/ッ/"
     - "xform/Q/ッ/"
@@ -812,13 +812,13 @@ translator:
     - "xform/Y/ッ/"
     - "xform/R/ッ/"
     - "xform/W/ッ/"
-    # 記号
+    # 符号
     - "xform/l/ー/"
     - "xform/L/ー/"
     - "xform/-/ー/"
 
 # # # # # # # # # # # # # # # # # # # #
-# 記号入力の設定
+# 符号输入设置
 # # # # # # # # # # # # # # # # # # # #
 punctuator:
   full_shape:
@@ -837,7 +837,7 @@ punctuator:
     '{' : [ '『', '〖', '｛' ]
     '}' : [ '』', '〗', '｝' ]
   half_shape:
-    ' ' : '　'  # 半角記号モードでも全角スペースにする
+    ' ' : '　'  # 即使在半角符号模式下也输出全角空格
     ',' : '、'
     '.' : '。'
     '?' : '？'
@@ -853,17 +853,17 @@ punctuator:
     '}' : [ '』', '〗', '｝', '}' ]
 
 # # # # # # # # # # # # # # # # # # # #
-# キーバインドの設定
+# 按键绑定设置
 # # # # # # # # # # # # # # # # # # # #
 key_binder:
   import_preset: default
   bindings:
-    - { when: has_menu, accept: minus, send: minus }  # 「ー」入力用
-    - { when: has_menu, accept: Return, send: Shift+Return }  # Enterで変換しないで直接確定
-    - { when: has_menu, accept: Shift+Return, send: Return }  # Shift + Enterで英字確定
+    - { when: has_menu, accept: minus, send: minus }  # 用于输入「ー」
+    - { when: has_menu, accept: Return, send: Shift+Return }  # Enter 不进行转换，直接上屏
+    - { when: has_menu, accept: Shift+Return, send: Return }  # Shift+Enter 直接提交英文字母
 
 # # # # # # # # # # # # # # # # # # # #
-# メールアドレスやURLを入力したときに英字モードに自動切り替え
+# 输入邮箱地址或 URL 时自动切换到英文模式
 # # # # # # # # # # # # # # # # # # # #
 recognizer:
   import_preset: default
