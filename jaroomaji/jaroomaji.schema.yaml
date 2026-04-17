@@ -9,14 +9,31 @@
 # # # # # # # # # # # # # # # # # # # #
 schema:
   schema_id: jaroomaji
-  name: 日本語罗马字
+  name: 日本語
   version: "1.0"
   author:
     - lazy fox chan
   description: |
-    日本語罗马字输入
-    ・不仅「-」键可以输入长音符号，L 键也可以
-    ・按住 Shift 输入时会强制输出片假名
+    日本語罗马字输入方案
+    特点：
+      罗马字输入日语；
+      支持仓颉反查、拼音反查。
+    操作：
+      - 和 L：输入长音符号「ー」；
+      , 和 .：候选翻页；
+      按住Shift：强制输出片假名；
+      空格：有候选时上屏，无匹配时清码；
+      Tab：清码；
+      Caps Lock：清码并切到西文模式；
+      左Shift：提交当前编码并切到西文模式；
+      右Shift：提交当前文字并切到西文模式。
+    反查：
+      输入 ` 可仓颉反查；
+      输入 `P 可拼音反查。
+
+  dependencies:
+    - cangjie5
+    - pinyin_simp
 
 # # # # # # # # # # # # # # # # # # # #
 # 功能切换设置
@@ -24,7 +41,7 @@ schema:
 switches:
   - name: ascii_mode
     states: [ あ, A ]
-    reset: 1  # 默认使用英文数字模式
+    reset: 0  # 默认使用日文输入模式
   - name: full_shape
     states: [ 半角記号, 全角記号 ]
     reset: 0  # 默认使用半角符号模式
@@ -46,12 +63,15 @@ engine:
     - ascii_segmentor
     - matcher
     - abc_segmentor
+    - affix_segmentor@pinyin_lookup
     - punct_segmentor
     - fallback_segmentor
   translators:
     - echo_translator
     - punct_translator
+    - reverse_lookup_translator
     - script_translator
+    - reverse_lookup_translator@pinyin_lookup
   filters:
     - uniquifier
 
@@ -239,7 +259,7 @@ translator:
   dictionary: jaroomaji
   enable_user_dict: true  # 开启学习功能
   enable_completion: false
-  preedit_format:
+  preedit_format: &jaroomaji_kana_format
     # 去掉分隔空格
     - "xform/ //"
     # 平假名（按转换优先顺序）
@@ -816,6 +836,31 @@ translator:
     - "xform/l/ー/"
     - "xform/L/ー/"
     - "xform/-/ー/"
+  comment_format: *jaroomaji_kana_format
+
+reverse_lookup:
+  dictionary: cangjie5
+  enable_completion: true
+  prefix: "`"
+  suffix: "'"
+  tips: 〔倉頡〕
+  preedit_format:
+    - 'xform/(?<![^x])x/#/'
+    - "xlit|abcdefghijklmnopqrstuvwxyz#|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜片重|"
+  comment_format: *jaroomaji_kana_format
+
+pinyin_lookup:
+  tag: pinyin_lookup
+  prefix: "`P"
+  suffix: "'"
+  dictionary: pinyin_simp
+  prism: pinyin_simp
+  tips: 〔拼音〕
+  preedit_format:
+    - xform/([nl])v/$1ü/
+    - xform/([nl])ue/$1üe/
+    - xform/([jqxy])v/$1u/
+  comment_format: *jaroomaji_kana_format
 
 # # # # # # # # # # # # # # # # # # # #
 # 符号输入设置
@@ -823,13 +868,13 @@ translator:
 punctuator:
   full_shape:
     ' ' : '　'
-    ',' : '、'
+    ',' : '，'
     '.' : '。'
     '?' : '？'
     '!' : '！'
     '<' : [ '《', '〈' ]
     '>' : [ '》', '〉' ]
-    '/' : [ '・', '…', '，', '／' ]
+    '/' : [ '、', '・', '…', '／' ]
     '\' : [ '＼', '￥', '￦' ]
     '_' : [ '＿', '－', '～', '——', '➖', '〰' ]
     '[' : [ '「', '【', '〔', '［' ]
@@ -837,14 +882,14 @@ punctuator:
     '{' : [ '『', '〖', '｛' ]
     '}' : [ '』', '〗', '｝' ]
   half_shape:
-    ' ' : '　'  # 即使在半角符号模式下也输出全角空格
-    ',' : '、'
+    ' ' : ' '  # 半角符号模式下输出半角空格
+    ',' : '，'
     '.' : '。'
     '?' : '？'
     '!' : '！'
     '<' : [ '《', '〈', '<' ]
     '>' : [ '》', '〉', '>' ]
-    '/' : [ '・', '…', '，', '／' ]
+    '/' : [ '、', '・', '…', '/', '／' ]
     '\' : [ '\', '￥', '￦' ]
     '_' : [ '_', '－', '～', '——', '➖', '〰' ]
     '[' : [ '「', '【', '〔', '［', '[' ]
@@ -858,12 +903,27 @@ punctuator:
 key_binder:
   import_preset: default
   bindings:
-    - { when: has_menu, accept: minus, send: minus }  # 用于输入「ー」
-    - { when: has_menu, accept: Return, send: Shift+Return }  # Enter 不进行转换，直接上屏
-    - { when: has_menu, accept: Shift+Return, send: Return }  # Shift+Enter 直接提交英文字母
+    - { when: has_menu, accept: space, send: space }
+    - { when: has_menu, accept: Tab, send: Escape }
+    - { when: composing, accept: space, send: Escape }
+    - { when: composing, accept: Tab, send: Escape }
+    - { when: has_menu, accept: minus, send: minus }
+    - { when: has_menu, accept: equal, send: equal }
+    - { when: has_menu, accept: comma, send: Page_Up }
+    - { when: has_menu, accept: period, send: Page_Down }
+
+ascii_composer:
+  switch_key:
+    Caps_Lock: clear
+    Shift_L: commit_code
+    Shift_R: commit_text
 
 # # # # # # # # # # # # # # # # # # # #
 # 输入邮箱地址或 URL 时自动切换到英文模式
 # # # # # # # # # # # # # # # # # # # #
 recognizer:
   import_preset: default
+  patterns:
+    punct: "^/([0-9]0?|[a-z]+)$"
+    reverse_lookup: "`[a-z]*'?$|[a-z]*'$"
+    pinyin_lookup: "`P[a-z]*'?$"
