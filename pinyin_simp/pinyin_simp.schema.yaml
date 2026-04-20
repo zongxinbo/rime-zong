@@ -76,7 +76,7 @@ reverse_lookup:
   enable_completion: true
   prefix: "`"
   suffix: "'"
-  tips: 〔倉頡五代〕
+  tips: 〔倉頡〕
   # preedit_format:
   #   - xlit/hspnz/一丨丿丶乙/
 
