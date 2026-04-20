@@ -3,7 +3,7 @@
 
 schema:
   schema_id: cangjie5_ice
-  name: "倉頡五代·霧凇"
+  name: "倉頡五代·雾凇"
   version: "2026.04.16"
   author:
     - 發明人 朱邦復先生
@@ -13,7 +13,7 @@ schema:
     由「倉頡之友·馬來西亞」發佈的「倉頡平台2012」軟件所含「五倉世紀」碼表修改而來。
     網址：www.chinesecj.com
 
-    倉頡五代 + 霧凇拼音混合输入方案
+    倉頡五代 + 雾凇拼音混合输入方案
     特点：
       仓颉保持单字取向；
       拼音可直接参与混合输入，并保留词组候选；
@@ -26,7 +26,7 @@ schema:
       Caps Lock：清码并切到英文模式；
       左Shift：提交当前编码并切到英文模式；
       右Shift：提交当前文字并切到英文模式。
-    反查：输入 ` 可使用霧凇拼音反查。
+    反查：输入 ` 可使用雾凇拼音反查。
   dependencies:
     - pinyin_ice
 
@@ -93,14 +93,14 @@ translator:
 
 abc_segmentor:
   extra_tags:
-    - reverse_lookup  # 與霧凇拼音（反查碼）混打
+    - reverse_lookup  # 與雾凇拼音（反查碼）混打
 
 reverse_lookup:
   dictionary: pinyin_ice
   prism: pinyin_ice
   prefix: "`"
   suffix: "'"
-  tips: 〔霧凇拼音〕
+  tips: 〔雾凇拼音〕
   preedit_format:
     - xform/([nl])v/$1ü/
     - xform/([nl])ue/$1üe/

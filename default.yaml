@@ -5,8 +5,11 @@ config_version: '0.40'
 
 schema_list:
   - schema: pinyin_simp
+  - schema: pinyin_ice
+  - schema: pinyin_ice_cangjie5
   - schema: cangjie5
   - schema: cangjie5_pinyin
+  - schema: cangjie5_ice
   - schema: jaroomaji
 
 switcher:
