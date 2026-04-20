@@ -1,0 +1,122 @@
+# Rime schema settings
+# encoding: utf-8
+
+patch:
+  "menu/page_size": 5
+
+  "ascii_composer/good_old_caps_lock": true
+  "ascii_composer/switch_key":
+    Caps_Lock: clear
+    Shift_L: commit_code
+    Shift_R: commit_text
+    Control_L: noop
+    Control_R: noop
+
+  "navigator/bindings":
+    Left: left_by_char_no_loop
+    Right: right_by_char_no_loop
+    Shift+Left: left_by_syllable
+    Shift+Right: right_by_syllable
+
+  "punctuator/digit_separators": ",.:"
+  "punctuator/full_shape":
+    ' ': { commit: '　' }
+    ',': { commit: ， }
+    '.': { commit: 。 }
+    '<': [ 《, 〈, «, ‹ ]
+    '>': [ 》, 〉, », › ]
+    '/': [ ／, ÷ ]
+    '?': { commit: ？ }
+    ';': { commit: ； }
+    ':': { commit: ： }
+    '''': { pair: [ '‘', '’' ] }
+    '"': { pair: [ '“', '”' ] }
+    '\': [ 、, ＼ ]
+    '|': [ ·, ｜, '§', '¦' ]
+    '`': ｀
+    '~': ～
+    '!': { commit: ！ }
+    '@': [ ＠, ☯ ]
+    '#': [ ＃, ⌘ ]
+    '%': [ ％, '°', '℃' ]
+    '$': [ ￥, '$', '€', '£', '¥', '¢', '¤' ]
+    '^': { commit: …… }
+    '&': ＆
+    '*': [ ＊, ·, ・, ×, ※, ❂ ]
+    '(': （
+    ')': ）
+    '-': －
+    '_': ——
+    '+': ＋
+    '=': ＝
+    '[': [ 「, 【, 〔, ［ ]
+    ']': [ 」, 】, 〕, ］ ]
+    '{': [ 『, 〖, ｛ ]
+    '}': [ 』, 〗, ｝ ]
+  "punctuator/half_shape":
+    ',': '，'
+    '.': '。'
+    '<': '《'
+    '>': '》'
+    '/': '/'
+    '?': '？'
+    ';': '；'
+    ':': '：'
+    '''': { pair: [ '‘', '’' ] }
+    '"': { pair: [ '“', '”' ] }
+    '\': '、'
+    '|': '|'
+    '`': '·'
+    '~': '~'
+    '!': '！'
+    '@': '@'
+    '#': '#'
+    '%': '%'
+    '$': '¥'
+    '^': '……'
+    '&': '&'
+    '*': '*'
+    '(': '（'
+    ')': '）'
+    '-': '-'
+    '_': ——
+    '+': '+'
+    '=': '='
+    '[': '【'
+    ']': '】'
+    '{': '「'
+    '}': '」'
+
+  "recognizer/patterns/email": "^[A-Za-z][-_.0-9A-Za-z]*@.*$"
+  "recognizer/patterns/url": "^(www[.]|https?:|ftp[.:]|mailto:|file:).*$|^[a-z]+[.].+$"
+  "recognizer/patterns/underscore": "^[A-Za-z]+_.*"
+
+  "key_binder/select_first_character": bracketleft
+  "key_binder/select_last_character": bracketright
+  "key_binder/bindings":
+    - { when: composing, accept: Shift+Tab, send: Shift+Left }
+    - { when: composing, accept: Tab, send: Shift+Right }
+    - { when: composing, accept: Alt+Left, send: Shift+Left }
+    - { when: composing, accept: Alt+Right, send: Shift+Right }
+    - { when: has_menu, accept: minus, send: Page_Up }
+    - { when: has_menu, accept: equal, send: Page_Down }
+    - { when: always, accept: Control+Shift+3, toggle: ascii_punct }
+    - { when: always, accept: Control+Shift+numbersign, toggle: ascii_punct }
+    - { when: always, accept: Control+Shift+4, toggle: traditionalization }
+    - { when: always, accept: Control+Shift+dollar, toggle: traditionalization }
+    - { accept: KP_0, send: 0, when: composing }
+    - { accept: KP_1, send: 1, when: composing }
+    - { accept: KP_2, send: 2, when: composing }
+    - { accept: KP_3, send: 3, when: composing }
+    - { accept: KP_4, send: 4, when: composing }
+    - { accept: KP_5, send: 5, when: composing }
+    - { accept: KP_6, send: 6, when: composing }
+    - { accept: KP_7, send: 7, when: composing }
+    - { accept: KP_8, send: 8, when: composing }
+    - { accept: KP_9, send: 9, when: composing }
+    - { accept: KP_Decimal, send: period, when: composing }
+    - { accept: KP_Multiply, send: asterisk, when: composing }
+    - { accept: KP_Add, send: plus, when: composing }
+    - { accept: KP_Subtract, send: minus, when: composing }
+    - { accept: KP_Divide, send: slash, when: composing }
+    - { accept: KP_Enter, send: Return, when: composing }
