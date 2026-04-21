@@ -1,7 +1,7 @@
 # Rime default settings
 # encoding: utf-8
 
-config_version: '0.40'
+config_version: '0.50'
 
 schema_list:
   - schema: pinyin_simp
@@ -15,8 +15,6 @@ schema_list:
 switcher:
   caption: 〔方案選單〕
   hotkeys:
-    - Control+grave
-    - Control+Shift+grave
     - F4
   save_options:
     - full_shape
@@ -47,6 +45,13 @@ key_binder:
       - key_bindings:/paging_with_minus_equal
       - key_bindings:/paging_with_comma_period
       - key_bindings:/numbered_mode_switch
+      - key_bindings:/optimized_mode_switch
+
+selector:
+  bindings:
+    ISO_Left_Tab: previous_candidate
+    Shift+Tab: previous_candidate
+    Tab: next_candidate
 
 recognizer:
   patterns:
