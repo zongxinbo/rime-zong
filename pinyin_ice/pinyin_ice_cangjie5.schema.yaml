@@ -9,7 +9,8 @@ schema:
     - Dvel
   description: |
     雾凇拼音 + 仓颉五代辅助码方案。
-    支持 `;` / `,` 引导仓颉首尾辅码筛选，词语按最后一个字过滤；支持 ` 引导完整仓颉反查。
+    支持 `;` / `,` 引导仓颉辅码筛选；单字取首尾码，词语取首尾字首码。
+    支持 ` 引导完整仓颉反查。
   dependencies:
     - cangjie5
 
@@ -26,7 +27,7 @@ switches:
 engine:
   processors:
     - ascii_composer
-    - lua_processor@*pinyin_ice_cangjie5_aux*processor
+    - lua_processor@*aux_code_filter*processor
     - recognizer
     - key_binder
     - speller
@@ -46,9 +47,17 @@ engine:
     - table_translator@custom_phrase
     - reverse_lookup_translator
   filters:
-    - lua_filter@*pinyin_ice_cangjie5_aux*filter
+    - lua_filter@*aux_code_filter*filter
     - simplifier@traditionalize
     - uniquifier
+
+aux_code_filter:
+  dictionary: cangjie5
+  separators: ";,"
+  match_strategy: word_first_last
+  max_code_length: 2
+  show_prompt: true
+  property_prefix: pinyin_ice_cangjie5_aux
 
 translator:
   dictionary: pinyin_ice
