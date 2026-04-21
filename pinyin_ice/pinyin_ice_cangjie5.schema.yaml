@@ -56,8 +56,8 @@ aux_code_filter:
   separators: ";,"
   match_strategy: word_first_last
   max_code_length: 2
-  show_prompt: true
-  property_prefix: pinyin_ice_cangjie5_aux
+  # 仓颉码表里 x/z 多为兼容码；多码字优先取常规码，避免「文」优先使用 xxyk。
+  low_priority_code_prefixes: "xz"
 
 translator:
   dictionary: pinyin_ice

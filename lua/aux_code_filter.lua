@@ -5,8 +5,13 @@ local DEFAULT_DICTIONARY = "cangjie5"
 local DEFAULT_SEPARATORS = ";,"
 local DEFAULT_MATCH_STRATEGY = "word_first_last"
 local DEFAULT_MAX_CODE_LENGTH = 2
+local DEFAULT_SHOW_PROMPT = true
 local DEFAULT_PROPERTY_PREFIX = "aux_code_filter"
+local DEFAULT_IGNORED_CODE_PREFIXES = ""
+local DEFAULT_LOW_PRIORITY_CODE_PREFIXES = ""
 
+-- Rime 的 key:repr() 对常见标点返回的是按键名，不一定是字符本身。
+-- 这里同时登记两种写法，方便 schema 里只配置实际分隔符字符。
 local KEY_NAMES = {
   [";"] = "semicolon",
   [","] = "comma",
@@ -69,15 +74,21 @@ end
 local function load_settings(env)
   local config = env.engine.schema.config
   local schema_id = config_string(config, "schema/schema_id", DEFAULT_PROPERTY_PREFIX)
-  local match_strategy = config_string(config, CONFIG_ROOT .. "/match_strategy", "")
-  if match_strategy == "" then
-    match_strategy = config_string(config, CONFIG_ROOT .. "/target", DEFAULT_MATCH_STRATEGY)
-  end
   local settings = {
     dictionary = config_string(config, CONFIG_ROOT .. "/dictionary", DEFAULT_DICTIONARY),
-    match_strategy = match_strategy,
+    ignored_code_prefixes = config_string(
+      config,
+      CONFIG_ROOT .. "/ignored_code_prefixes",
+      DEFAULT_IGNORED_CODE_PREFIXES
+    ),
+    low_priority_code_prefixes = config_string(
+      config,
+      CONFIG_ROOT .. "/low_priority_code_prefixes",
+      DEFAULT_LOW_PRIORITY_CODE_PREFIXES
+    ),
+    match_strategy = config_string(config, CONFIG_ROOT .. "/match_strategy", DEFAULT_MATCH_STRATEGY),
     max_code_length = config_int(config, CONFIG_ROOT .. "/max_code_length", DEFAULT_MAX_CODE_LENGTH),
-    show_prompt = config_bool(config, CONFIG_ROOT .. "/show_prompt", true),
+    show_prompt = config_bool(config, CONFIG_ROOT .. "/show_prompt", DEFAULT_SHOW_PROMPT),
     property_prefix = config_string(config, CONFIG_ROOT .. "/property_prefix", "aux_code_filter_" .. schema_id),
   }
   settings.separators = build_separator_map(
@@ -102,6 +113,7 @@ local function get_prop(ctx, key)
 end
 
 local function set_state(ctx, settings, code, base, separator)
+  -- 辅码不写入 context.input，避免污染拼音输入串；这里只存在 context property。
   ctx:set_property(settings.prop_code, code or "")
   ctx:set_property(settings.prop_base, base or "")
   ctx:set_property(settings.prop_separator, separator or "")
@@ -138,17 +150,40 @@ local function utf8_len(text)
   return count
 end
 
-local function split_codes(code_string)
+local function code_is_ignored(code, settings)
+  -- 个别码表会把兼容区或特殊字放在某些前缀下；默认不忽略，交给具体方案配置。
+  local prefixes = settings.ignored_code_prefixes or ""
+  return prefixes ~= "" and code:match("^[" .. prefixes .. "]") ~= nil
+end
+
+local function split_codes(code_string, settings)
   local codes = {}
   for code in (code_string or ""):gmatch("[a-z]+") do
-    if not code:match("^[xz]") then
+    if not code_is_ignored(code, settings) then
       table.insert(codes, code)
     end
   end
   return codes
 end
 
+local function code_is_low_priority(code, settings)
+  -- 低优先级码不会被丢弃，只在同一个字有多个编码时排在常规码之后。
+  -- 适合处理仓颉里的 x/z 兼容码：有常规码时优先常规码，只有兼容码时仍可匹配。
+  local prefixes = settings.low_priority_code_prefixes or ""
+  return prefixes ~= "" and code:match("^[" .. prefixes .. "]") ~= nil
+end
+
+local function preferred_code(codes, settings)
+  for _, code in ipairs(codes) do
+    if not code_is_low_priority(code, settings) then
+      return code
+    end
+  end
+  return codes[1] or ""
+end
+
 local function code_matches(aux, code, settings)
+  -- 一码匹配首码；两码匹配首码 + 末码。
   local key = (aux or ""):sub(1, settings.max_code_length)
   if key == "" then
     return true
@@ -159,26 +194,65 @@ local function code_matches(aux, code, settings)
   return #code >= 1 and (code:sub(1, 1) .. code:sub(-1)) == key
 end
 
-local function first_code_char(reverse, text)
-  local char = first_utf8_char(text)
+local function lookup_codes(reverse, char, settings)
   if char == "" then
-    return ""
+    return {}
   end
-  for _, code in ipairs(split_codes(reverse:lookup(char))) do
-    if code ~= "" then
-      return code:sub(1, 1)
+  return split_codes(reverse:lookup(char), settings)
+end
+
+local function utf8_chars(text)
+  return (text or ""):gmatch("[%z\1-\127\194-\244][\128-\191]*")
+end
+
+local function first_code_info(reverse, text, settings)
+  -- 取第一个能查到编码的字符，而不是机械取字符串首字符。
+  -- 这样能兼容包含数字、字母、符号的自动注音词条。
+  for char in utf8_chars(text) do
+    local codes = lookup_codes(reverse, char, settings)
+    if #codes > 0 then
+      return char, codes
     end
   end
-  return ""
+  return "", {}
+end
+
+local function last_code_info(reverse, text, settings)
+  local last_char = ""
+  local last_codes = {}
+  for char in utf8_chars(text) do
+    local codes = lookup_codes(reverse, char, settings)
+    if #codes > 0 then
+      last_char = char
+      last_codes = codes
+    end
+  end
+  return last_char, last_codes
+end
+
+local function code_bearing_char_count(reverse, text, settings, limit)
+  local count = 0
+  for char in utf8_chars(text) do
+    if #lookup_codes(reverse, char, settings) > 0 then
+      count = count + 1
+      if limit and count >= limit then
+        return count
+      end
+    end
+  end
+  return count
 end
 
 local function word_first_last_matches(aux, text, reverse, settings)
+  -- word_first_last:
+  -- 单字按该字首末码过滤；词语按首个可编码字符与末个可编码字符的首码过滤。
   local key = (aux or ""):sub(1, settings.max_code_length)
   if key == "" then
     return true
   end
-  if utf8_len(text) <= 1 then
-    for _, code in ipairs(split_codes(reverse:lookup(text))) do
+  if utf8_len(text) <= 1 or code_bearing_char_count(reverse, text, settings, 2) <= 1 then
+    local _, codes = first_code_info(reverse, text, settings)
+    for _, code in ipairs(codes) do
       if code_matches(key, code, settings) then
         return true
       end
@@ -186,16 +260,19 @@ local function word_first_last_matches(aux, text, reverse, settings)
     return false
   end
 
-  local first_code = first_code_char(reverse, text)
+  local _, first_codes = first_code_info(reverse, text, settings)
+  local first_code = preferred_code(first_codes, settings):sub(1, 1)
   if #key == 1 then
     return first_code == key
   end
 
-  local last_code = first_code_char(reverse, last_utf8_char(text))
+  local _, last_codes = last_code_info(reverse, text, settings)
+  local last_code = preferred_code(last_codes, settings):sub(1, 1)
   return first_code ~= "" and last_code ~= "" and (first_code .. last_code) == key
 end
 
 local function sync_prompt(ctx, settings)
+  -- prompt 只负责把分隔符和辅码显示在编码区，不参与真实输入。
   if not settings.show_prompt then
     return
   end
@@ -256,6 +333,7 @@ local function processor_fini(env)
 end
 
 local function refresh_menu(ctx, settings)
+  -- 辅码状态变化不会自动重算候选，需要主动刷新当前未确认的组合。
   if ctx and ctx:is_composing() then
     ctx:refresh_non_confirmed_composition()
   end
@@ -277,6 +355,7 @@ local function processor_func(key, env)
 
   if base ~= "" then
     if typed_separator then
+      -- 已在辅码状态时再次按分隔符要吞掉，避免触发标点上屏或首选提交。
       refresh_menu(ctx, s)
       return 1
     end
@@ -336,7 +415,7 @@ local function filter_func(input, env)
     else
       local char = target_char(cand.text, s)
       if char ~= "" then
-        for _, code in ipairs(split_codes(reverse:lookup(char))) do
+      for _, code in ipairs(split_codes(reverse:lookup(char), s)) do
           if code_matches(aux, code, s) then
             matched = true
             break
