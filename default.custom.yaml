@@ -1,0 +1,6 @@
+# Rime default patch for mobile
+# encoding: utf-8
+
+patch:
+  key_binder/bindings/+:
+    - { when: always, accept: backslash, select: .next }

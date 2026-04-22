@@ -35,6 +35,13 @@ Rime 方案集合，包含拼音、仓颉、郑码、四角号码和日语罗马
 | [`symbols.yaml`](symbols.yaml) | 符号输入预设。 |
 | [`lua/aux_code_filter.lua`](lua/aux_code_filter.lua) | 通用辅助码过滤器，目前用于 `pinyin_ice_cangjie5`。 |
 
+## 平台配置
+
+| 文件 | 用途 |
+| --- | --- |
+| [`default.yaml`](default.yaml) | 桌面/通用默认配置。 |
+| [`default.custom.yaml`](default.custom.yaml) | 移动端覆盖配置，目前用于移动端软键盘通过 `backslash` 快速切换到下一个方案。 |
+
 ## 通用按键
 
 以下按键来自 `default.yaml` 引入的 Rime 默认按键预设。个别 schema 会覆盖局部行为，以上方“方案说明”为准。
@@ -43,6 +50,7 @@ Rime 方案集合，包含拼音、仓颉、郑码、四角号码和日语罗马
 | --- | --- |
 | `F4` | 打开方案选单。 |
 | `Control+Shift+Space` / `Control+Shift+1` | 切换到下一个方案。 |
+| `backslash` | 在移动端配置中切换到下一个方案。 |
 | `Shift+Space` / `Control+Shift+2` | 切换中西文模式。 |
 | `Control+comma` / `Control+Shift+3` | 切换全角/半角。 |
 | `Control+period` | 切换中西文标点。 |
