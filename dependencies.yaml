@@ -5,16 +5,6 @@ schemes:
     name: "倉頡五代"
     schema_dependencies:
       - "pinyin_simp"
-    files:
-      - "cangjie5/cangjie5.custom.yaml"
-      - "cangjie5/cangjie5.dict.yaml"
-      - "cangjie5/cangjie5.schema.yaml"
-      - "opencc/STCharacters.ocd2"
-      - "opencc/STPhrases.ocd2"
-      - "opencc/s2t.json"
-      - "pinyin_simp/pinyin_simp.dict.yaml"
-      - "pinyin_simp/pinyin_simp.schema.yaml"
-      - "symbols.yaml"
     groups:
       schema:
         - "cangjie5/cangjie5.schema.yaml"
@@ -43,26 +33,6 @@ schemes:
     name: "倉頡五代·雾凇"
     schema_dependencies:
       - "pinyin_ice"
-    files:
-      - "cangjie5/cangjie5.custom.yaml"
-      - "cangjie5/cangjie5.dict.yaml"
-      - "cangjie5/cangjie5.schema.yaml"
-      - "cangjie5/cangjie5_ice.schema.yaml"
-      - "opencc/STCharacters.ocd2"
-      - "opencc/STPhrases.ocd2"
-      - "opencc/s2t.json"
-      - "pinyin_ice/pinyin_ice.41448.dict.yaml"
-      - "pinyin_ice/pinyin_ice.8105.dict.yaml"
-      - "pinyin_ice/pinyin_ice.base.dict.yaml"
-      - "pinyin_ice/pinyin_ice.custom.yaml"
-      - "pinyin_ice/pinyin_ice.dict.yaml"
-      - "pinyin_ice/pinyin_ice.ext.dict.yaml"
-      - "pinyin_ice/pinyin_ice.others.dict.yaml"
-      - "pinyin_ice/pinyin_ice.schema.yaml"
-      - "pinyin_ice/pinyin_ice.tencent.dict.yaml"
-      - "pinyin_simp/pinyin_simp.dict.yaml"
-      - "pinyin_simp/pinyin_simp.schema.yaml"
-      - "symbols.yaml"
     groups:
       schema:
         - "cangjie5/cangjie5.schema.yaml"
@@ -101,17 +71,6 @@ schemes:
     name: "倉頡五代·拼音"
     schema_dependencies:
       - "pinyin_simp"
-    files:
-      - "cangjie5/cangjie5.custom.yaml"
-      - "cangjie5/cangjie5.dict.yaml"
-      - "cangjie5/cangjie5.schema.yaml"
-      - "cangjie5/cangjie5_pinyin.schema.yaml"
-      - "opencc/STCharacters.ocd2"
-      - "opencc/STPhrases.ocd2"
-      - "opencc/s2t.json"
-      - "pinyin_simp/pinyin_simp.dict.yaml"
-      - "pinyin_simp/pinyin_simp.schema.yaml"
-      - "symbols.yaml"
     groups:
       schema:
         - "cangjie5/cangjie5.schema.yaml"
@@ -142,24 +101,6 @@ schemes:
     schema_dependencies:
       - "cangjie5"
       - "pinyin_simp"
-    files:
-      - "cangjie5/cangjie5.custom.yaml"
-      - "cangjie5/cangjie5.dict.yaml"
-      - "cangjie5/cangjie5.schema.yaml"
-      - "jaroomaji/jaroomaji.dict.yaml"
-      - "jaroomaji/jaroomaji.jmdict.dict.yaml"
-      - "jaroomaji/jaroomaji.kana_kigou.dict.yaml"
-      - "jaroomaji/jaroomaji.kanjidic2.dict.yaml"
-      - "jaroomaji/jaroomaji.mozc.dict.yaml"
-      - "jaroomaji/jaroomaji.mozcemoji.dict.yaml"
-      - "jaroomaji/jaroomaji.schema.yaml"
-      - "jaroomaji/jaroomaji.user.dict.yaml"
-      - "opencc/STCharacters.ocd2"
-      - "opencc/STPhrases.ocd2"
-      - "opencc/s2t.json"
-      - "pinyin_simp/pinyin_simp.dict.yaml"
-      - "pinyin_simp/pinyin_simp.schema.yaml"
-      - "symbols.yaml"
     groups:
       schema:
         - "cangjie5/cangjie5.schema.yaml"
@@ -196,19 +137,6 @@ schemes:
     name: "龙渊郑码"
     schema_dependencies:
       - "pinyin_simp"
-    files:
-      - "cangjie5/cangjie5.custom.yaml"
-      - "cangjie5/cangjie5.dict.yaml"
-      - "cangjie5/cangjie5.schema.yaml"
-      - "lyzm/lyzm.custom.yaml"
-      - "lyzm/lyzm.dict.yaml"
-      - "lyzm/lyzm.schema.yaml"
-      - "opencc/STCharacters.ocd2"
-      - "opencc/STPhrases.ocd2"
-      - "opencc/s2t.json"
-      - "pinyin_simp/pinyin_simp.dict.yaml"
-      - "pinyin_simp/pinyin_simp.schema.yaml"
-      - "symbols.yaml"
     groups:
       schema:
         - "cangjie5/cangjie5.schema.yaml"
@@ -240,25 +168,6 @@ schemes:
     name: "雾凇拼音"
     schema_dependencies:
       - "cangjie5"
-    files:
-      - "cangjie5/cangjie5.custom.yaml"
-      - "cangjie5/cangjie5.dict.yaml"
-      - "cangjie5/cangjie5.schema.yaml"
-      - "opencc/STCharacters.ocd2"
-      - "opencc/STPhrases.ocd2"
-      - "opencc/s2t.json"
-      - "pinyin_ice/pinyin_ice.41448.dict.yaml"
-      - "pinyin_ice/pinyin_ice.8105.dict.yaml"
-      - "pinyin_ice/pinyin_ice.base.dict.yaml"
-      - "pinyin_ice/pinyin_ice.custom.yaml"
-      - "pinyin_ice/pinyin_ice.dict.yaml"
-      - "pinyin_ice/pinyin_ice.ext.dict.yaml"
-      - "pinyin_ice/pinyin_ice.others.dict.yaml"
-      - "pinyin_ice/pinyin_ice.schema.yaml"
-      - "pinyin_ice/pinyin_ice.tencent.dict.yaml"
-      - "pinyin_simp/pinyin_simp.dict.yaml"
-      - "pinyin_simp/pinyin_simp.schema.yaml"
-      - "symbols.yaml"
     groups:
       schema:
         - "cangjie5/cangjie5.schema.yaml"
@@ -296,25 +205,6 @@ schemes:
     name: "雾凇拼音·倉頡"
     schema_dependencies:
       - "cangjie5"
-    files:
-      - "cangjie5/cangjie5.custom.yaml"
-      - "cangjie5/cangjie5.dict.yaml"
-      - "cangjie5/cangjie5.schema.yaml"
-      - "lua/aux_code_filter.lua"
-      - "opencc/STCharacters.ocd2"
-      - "opencc/STPhrases.ocd2"
-      - "opencc/s2t.json"
-      - "pinyin_ice/pinyin_ice.41448.dict.yaml"
-      - "pinyin_ice/pinyin_ice.8105.dict.yaml"
-      - "pinyin_ice/pinyin_ice.base.dict.yaml"
-      - "pinyin_ice/pinyin_ice.dict.yaml"
-      - "pinyin_ice/pinyin_ice.ext.dict.yaml"
-      - "pinyin_ice/pinyin_ice.others.dict.yaml"
-      - "pinyin_ice/pinyin_ice.tencent.dict.yaml"
-      - "pinyin_ice/pinyin_ice_cangjie5.schema.yaml"
-      - "pinyin_simp/pinyin_simp.dict.yaml"
-      - "pinyin_simp/pinyin_simp.schema.yaml"
-      - "symbols.yaml"
     groups:
       schema:
         - "cangjie5/cangjie5.schema.yaml"
@@ -352,16 +242,6 @@ schemes:
     name: "拼音"
     schema_dependencies:
       - "cangjie5"
-    files:
-      - "cangjie5/cangjie5.custom.yaml"
-      - "cangjie5/cangjie5.dict.yaml"
-      - "cangjie5/cangjie5.schema.yaml"
-      - "opencc/STCharacters.ocd2"
-      - "opencc/STPhrases.ocd2"
-      - "opencc/s2t.json"
-      - "pinyin_simp/pinyin_simp.dict.yaml"
-      - "pinyin_simp/pinyin_simp.schema.yaml"
-      - "symbols.yaml"
     groups:
       schema:
         - "cangjie5/cangjie5.schema.yaml"
@@ -390,21 +270,6 @@ schemes:
     name: "三码仓颉·五代"
     schema_dependencies:
       - "pinyin_simp"
-    files:
-      - "cangjie5/cangjie5.custom.yaml"
-      - "cangjie5/cangjie5.dict.yaml"
-      - "cangjie5/cangjie5.schema.yaml"
-      - "opencc/STCharacters.ocd2"
-      - "opencc/STPhrases.ocd2"
-      - "opencc/s2t.json"
-      - "pinyin_simp/pinyin_simp.dict.yaml"
-      - "pinyin_simp/pinyin_simp.schema.yaml"
-      - "sancang5/essay-zh-hans.txt"
-      - "sancang5/grammar.yaml"
-      - "sancang5/sancang5.dict.yaml"
-      - "sancang5/sancang5.schema.yaml"
-      - "sancang5/zh-hans-t-essay-bgw.gram"
-      - "symbols.yaml"
     groups:
       schema:
         - "cangjie5/cangjie5.schema.yaml"
@@ -438,18 +303,6 @@ schemes:
     name: "四角号码"
     schema_dependencies:
       - "pinyin_simp"
-    files:
-      - "cangjie5/cangjie5.custom.yaml"
-      - "cangjie5/cangjie5.dict.yaml"
-      - "cangjie5/cangjie5.schema.yaml"
-      - "opencc/STCharacters.ocd2"
-      - "opencc/STPhrases.ocd2"
-      - "opencc/s2t.json"
-      - "pinyin_simp/pinyin_simp.dict.yaml"
-      - "pinyin_simp/pinyin_simp.schema.yaml"
-      - "sijiao/sijiao.dict.yaml"
-      - "sijiao/sijiao.schema.yaml"
-      - "symbols.yaml"
     groups:
       schema:
         - "cangjie5/cangjie5.schema.yaml"
@@ -480,18 +333,6 @@ schemes:
     name: "郑码"
     schema_dependencies:
       - "pinyin_simp"
-    files:
-      - "cangjie5/cangjie5.custom.yaml"
-      - "cangjie5/cangjie5.dict.yaml"
-      - "cangjie5/cangjie5.schema.yaml"
-      - "opencc/STCharacters.ocd2"
-      - "opencc/STPhrases.ocd2"
-      - "opencc/s2t.json"
-      - "pinyin_simp/pinyin_simp.dict.yaml"
-      - "pinyin_simp/pinyin_simp.schema.yaml"
-      - "symbols.yaml"
-      - "zmcdzc/zmcdzc.dict.yaml"
-      - "zmcdzc/zmcdzc.schema.yaml"
     groups:
       schema:
         - "cangjie5/cangjie5.schema.yaml"

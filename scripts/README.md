@@ -4,7 +4,7 @@
 
 ## 生成三码仓颉五代
 
-从 `cangjie5/cangjie5.dict.yaml` 生成 `sancang5/sancang5.dict.yaml`：
+从 `cangjie5/cangjie5.dict.yaml` 按三码规则取码生成 `sancang5/sancang5.dict.yaml`：
 
 ```powershell
 python scripts\gen_sancang5.py
@@ -29,7 +29,7 @@ python scripts\gen_sancang5.py --include-phrases --generated-phrase-min-weight 1
 
 ## 生成依赖清单
 
-扫描正式方案并生成仓库根目录的 `scheme_dependencies.yaml`：
+扫描正式方案并生成仓库根目录的 `dependencies.yaml`：
 
 ```powershell
 python scripts\scheme_dependencies.py
@@ -38,7 +38,7 @@ python scripts\scheme_dependencies.py
 可指定输出路径：
 
 ```powershell
-python scripts\scheme_dependencies.py --output scheme_dependencies.yaml
+python scripts\scheme_dependencies.py --output dependencies.yaml
 ```
 
 说明：
@@ -47,24 +47,24 @@ python scripts\scheme_dependencies.py --output scheme_dependencies.yaml
 - 扫描时会跳过目录名以 `_` 开头的临时目录。
 - 清单会记录 schema、dict、词频文件、grammar/gram、OpenCC、Lua、符号预设，以及 Rime 内置或外部预设。
 
-## 拷贝方案依赖
+## 导出方案依赖
 
-把一个或多个方案及其依赖拷贝到输出目录：
+把一个或多个方案及其依赖导出到输出目录：
 
 ```powershell
-python scripts\copy_scheme_dependencies.py sancang5
-python scripts\copy_scheme_dependencies.py sancang5 cangjie5_ice
+python scripts\export_schemes.py sancang5
+python scripts\export_schemes.py sancang5 cangjie5_ice
 ```
 
-默认输出到 `_output`。可指定目录并在拷贝前清空：
+默认输出到 `_output`。可指定目录并在导出前清空：
 
 ```powershell
-python scripts\copy_scheme_dependencies.py sancang5 --output _output_sancang5 --clean
+python scripts\export_schemes.py sancang5 --output _output_sancang5 --clean
 ```
 
 说明：
 
-- schema、dict、txt、gram、custom、symbols 等文件会拷贝到输出目录根部。
+- schema、dict、txt、gram、custom、symbols 等文件会导出到输出目录根部。
 - `opencc/` 和 `lua/` 会保留子目录结构。
 - `--clean` 只允许清空仓库内且目录名以 `_` 开头的目录，避免误删。
 - 输出目录默认以 `_` 开头，已通过 `.gitignore` 排除。
