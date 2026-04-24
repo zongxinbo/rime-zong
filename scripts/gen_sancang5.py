@@ -61,11 +61,21 @@ class OutputEntry:
     weight: int
 
 
+@dataclass(frozen=True)
+class FrequencyEntry:
+    text: str
+    weight: int
+
+
 def is_han_char(text: str) -> bool:
     if len(text) != 1:
         return False
     cp = ord(text)
     return any(start <= cp <= end for start, end in HAN_RANGES)
+
+
+def is_han_text(text: str) -> bool:
+    return bool(text) and all(is_han_char(char) for char in text)
 
 
 def project_code(code: str) -> str:
@@ -104,12 +114,13 @@ def parse_cangjie_dict(path: Path) -> list[Entry]:
     return entries
 
 
-def parse_frequency_file(path: Path) -> dict[str, int]:
-    """读取 essay-zh-hans.txt，提取单字频率。"""
-    frequencies: dict[str, int] = {}
+def parse_frequency_file(path: Path) -> tuple[dict[str, int], list[FrequencyEntry]]:
+    """读取 essay-zh-hans.txt，提取单字频率和词语频率。"""
+    char_frequencies: dict[str, int] = {}
+    phrase_frequencies: dict[str, int] = {}
 
     if not path.is_file():
-        return frequencies
+        return char_frequencies, []
 
     for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
         if not line or line.startswith("#"):
@@ -120,18 +131,24 @@ def parse_frequency_file(path: Path) -> dict[str, int]:
             continue
 
         text, weight_text = parts[0], parts[1]
-        if not is_han_char(text):
-            continue
 
         try:
             weight = int(weight_text)
         except ValueError as exc:
             raise ValueError(f"{path}:{lineno}: 遇到异常词频 {weight_text!r}") from exc
 
-        if weight > frequencies.get(text, -1):
-            frequencies[text] = weight
+        if is_han_char(text):
+            if weight > char_frequencies.get(text, -1):
+                char_frequencies[text] = weight
+        elif len(text) > 1 and is_han_text(text):
+            if weight > phrase_frequencies.get(text, -1):
+                phrase_frequencies[text] = weight
 
-    return frequencies
+    phrases = [
+        FrequencyEntry(text=text, weight=weight)
+        for text, weight in phrase_frequencies.items()
+    ]
+    return char_frequencies, phrases
 
 
 def normalize_prefixes(prefixes: list[str]) -> tuple[str, ...]:
@@ -160,15 +177,19 @@ def build_output(
     vocabulary: str | None,
     max_phrase_length: int,
     min_phrase_weight: int,
+    generated_phrase_min_weight: int,
+    include_phrases: bool,
     only_han: bool,
     excluded_prefixes: tuple[str, ...],
     source_path: Path,
     frequency_path: Path,
     frequencies: dict[str, int],
+    phrases: list[FrequencyEntry],
 ) -> tuple[str, Counter]:
     stats: Counter = Counter()
     emitted: set[tuple[str, str]] = set()
     output_entries: list[OutputEntry] = []
+    char_codes: dict[str, str] = {}
 
     for source_index, entry in enumerate(entries):
         stats["seen"] += 1
@@ -197,7 +218,47 @@ def build_output(
                 weight=frequencies.get(entry.text, 0),
             )
         )
+        char_codes.setdefault(entry.text, new_code)
         stats["kept"] += 1
+
+    if include_phrases:
+        phrase_source_base = len(entries)
+        for phrase_index, phrase in enumerate(phrases):
+            stats["phrase_seen"] += 1
+
+            if len(phrase.text) > max_phrase_length:
+                stats["phrase_dropped_by_length"] += 1
+                continue
+
+            if phrase.weight < generated_phrase_min_weight:
+                stats["phrase_dropped_by_weight"] += 1
+                continue
+
+            code_parts: list[str] = []
+            for char in phrase.text:
+                char_code = char_codes.get(char)
+                if not char_code:
+                    stats["phrase_dropped_by_missing_code"] += 1
+                    break
+                code_parts.append(char_code)
+            else:
+                phrase_code = "".join(code_parts)
+                item = (phrase.text, phrase_code)
+                if item in emitted:
+                    stats["phrase_dropped_duplicate"] += 1
+                    continue
+
+                emitted.add(item)
+                output_entries.append(
+                    OutputEntry(
+                        text=phrase.text,
+                        code=phrase_code,
+                        original_code=phrase_code,
+                        source_index=phrase_source_base + phrase_index,
+                        weight=phrase.weight,
+                    )
+                )
+                stats["phrase_kept"] += 1
 
     output_entries.sort(
         key=lambda item: (
@@ -217,12 +278,18 @@ def build_output(
         f"# 词频排序：{display_path(frequency_path)}",
         "# 规则：1 至 3 码保留原码；4 码及以上取首码、次码、末码",
         "# 排序：先按三码编码分组；同码内按单字词频降序排列",
-        "#",
-        "---",
-        f"name: {name}",
-        f"version: '{version}'",
-        f"sort: {sort}",
     ]
+    if include_phrases:
+        header.append("# 词语：由词频文件逐字取三码并拼接生成")
+    header.extend(
+        [
+            "#",
+            "---",
+            f"name: {name}",
+            f"version: '{version}'",
+            f"sort: {sort}",
+        ]
+    )
     if vocabulary:
         header.extend(
             [
@@ -282,6 +349,17 @@ def parse_args() -> argparse.Namespace:
         help="用于排序单字候选的词频文件；找不到时所有单字按 0 频处理",
     )
     parser.add_argument(
+        "--include-phrases",
+        action="store_true",
+        help="根据词频文件生成多字词条；词语编码为每个字的三码直接拼接",
+    )
+    parser.add_argument(
+        "--generated-phrase-min-weight",
+        type=int,
+        default=1,
+        help="生成多字词条时使用的最低词频；不影响 YAML min_phrase_weight 字段",
+    )
+    parser.add_argument(
         "--version",
         default=_dt.date.today().isoformat(),
         help="写入 YAML 头部的字典版本",
@@ -336,7 +414,7 @@ def main() -> int:
     excluded_prefixes = normalize_prefixes(prefixes)
 
     entries = parse_cangjie_dict(args.source)
-    frequencies = parse_frequency_file(args.frequency_file)
+    frequencies, phrases = parse_frequency_file(args.frequency_file)
     output_text, stats = build_output(
         entries,
         name=args.name,
@@ -345,11 +423,14 @@ def main() -> int:
         vocabulary=None if args.no_vocabulary else args.vocabulary,
         max_phrase_length=args.max_phrase_length,
         min_phrase_weight=args.min_phrase_weight,
+        generated_phrase_min_weight=args.generated_phrase_min_weight,
+        include_phrases=args.include_phrases,
         only_han=not args.keep_non_han,
         excluded_prefixes=excluded_prefixes,
         source_path=args.source,
         frequency_path=args.frequency_file,
         frequencies=frequencies,
+        phrases=phrases,
     )
 
     if str(args.output) == "-":
@@ -368,12 +449,28 @@ def main() -> int:
         f" 按前缀过滤={stats['dropped_by_prefix']}"
         f" 非汉字过滤={stats['dropped_non_han']}"
         f" 重复过滤={stats['dropped_duplicate']}"
+        f" 词语保留={stats['phrase_kept']}"
         f" 输出={args.output}",
         file=sys.stderr,
     )
     if excluded_prefixes:
         print(f"过滤前缀：{', '.join(excluded_prefixes)}", file=sys.stderr)
-    print(f"单字词频：{args.frequency_file} 条目={len(frequencies)}", file=sys.stderr)
+    print(
+        f"词频文件：{args.frequency_file}"
+        f" 单字={len(frequencies)}"
+        f" 词语={len(phrases)}"
+        f" 生成词语={'是' if args.include_phrases else '否'}",
+        file=sys.stderr,
+    )
+    if args.include_phrases:
+        print(
+            "词语过滤："
+            f" 超长={stats['phrase_dropped_by_length']}"
+            f" 低频<{args.generated_phrase_min_weight}={stats['phrase_dropped_by_weight']}"
+            f" 缺字码={stats['phrase_dropped_by_missing_code']}"
+            f" 重复={stats['phrase_dropped_duplicate']}",
+            file=sys.stderr,
+        )
     print(
         f"仅保留汉字={'否' if args.keep_non_han else '是'}"
         f" 词语模型={'无' if args.no_vocabulary else args.vocabulary}",
