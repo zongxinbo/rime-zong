@@ -1,0 +1,98 @@
+# Rime schema settings
+# encoding: utf-8
+
+schema:
+  schema_id: sancang5
+  name: 三码仓颉·五代
+  version: '0.1'
+  author:
+    - zongxinbo <https://github.com/zongxinbo>
+  description: |
+    三码仓颉五代，由仓颉五代码表投影生成。
+    生成规则：一至三码保留原码；四码及以上取首码、次码、末码。
+    默认过滤 z 开头的兼容汉字、部首、笔画及符号编码，并保留单字汉字。
+    码表来源：仓颉五代补完计划 https://github.com/Jackchows/Cangjie5
+    方案来源：三码苍颉 https://github.com/lotem/rime-sancang
+    仓颉输入法发明人：朱邦复先生。
+  dependencies:
+    - pinyin_simp
+
+switches:
+  - name: ascii_mode
+    reset: 0
+    states: [ 中文, 西文 ]
+  - name: full_shape
+    states: [ 半角, 全角 ]
+  - name: ascii_punct
+    states: [ 。，, ．， ]
+
+engine:
+  processors:
+    - ascii_composer
+    - recognizer
+    - key_binder
+    - speller
+    - punctuator
+    - selector
+    - navigator
+    - express_editor
+  segmentors:
+    - ascii_segmentor
+    - matcher
+    - abc_segmentor
+    - punct_segmentor
+    - fallback_segmentor
+  translators:
+    - punct_translator
+    - script_translator
+    - reverse_lookup_translator
+  filters:
+    - uniquifier
+
+speller:
+  alphabet: zyxwvutsrqponmlkjihgfedcba
+  delimiter: " ;'"
+
+translator:
+  dictionary: sancang5
+  prism: sancang5
+  preedit_format:
+    - 'xform/(?<![^x])x/#/'
+    - "xlit|abcdefghijklmnopqrstuvwxyz#|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜片重|"
+  comment_format:
+    - 'xform/(?<![^x])x/#/'
+    - "xlit|abcdefghijklmnopqrstuvwxyz#~|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜片重～|"
+  disable_user_dict_for_patterns:
+    - "^z.*$"
+
+reverse_lookup:
+  dictionary: pinyin_simp
+  prism: pinyin_simp
+  prefix: "`"
+  suffix: "'"
+  tips: 〔拼音〕
+  preedit_format:
+    - xform/([nl])v/$1ü/
+    - xform/([nl])ue/$1üe/
+    - xform/([jqxy])v/$1u/
+  comment_format:
+    - 'xform/(?<![^x])x/#/'
+    - "xlit|abcdefghijklmnopqrstuvwxyz#~|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜片重～|"
+
+punctuator:
+  import_preset: symbols
+
+key_binder:
+  import_preset: default
+
+recognizer:
+  import_preset: default
+  patterns:
+    punct: '^/([0-9]0?|[A-Za-z]+)$'
+    reverse_lookup: "`[a-z]*'?$"
+
+__patch:
+  # 使用八股文简化字模型
+  - grammar:/hans?
+  # 用家自选配置
+  - sancang5.custom:/patch?
