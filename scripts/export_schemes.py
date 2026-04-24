@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""按 schema_id 拷贝 Rime 方案依赖到输出目录。"""
+"""按 schema_id 导出 Rime 方案依赖到输出目录。"""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ DEFAULT_OUTPUT = REPO_ROOT / "_output"
 
 
 def deploy_path(source: Path) -> Path:
-    """转换为 Rime 用户目录中的目标相对路径。"""
+    """转换为导出目录中的目标相对路径。"""
     relative = source.resolve().relative_to(REPO_ROOT)
     if relative.parts and relative.parts[0] in {"lua", "opencc"}:
         return Path(*relative.parts)
@@ -33,12 +33,12 @@ def ensure_safe_clean(output: Path) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="根据一个或多个 schema_id 拷贝所需文件到输出目录。"
+        description="根据一个或多个 schema_id 导出所需文件到输出目录。"
     )
     parser.add_argument(
         "schema_ids",
         nargs="+",
-        help="要拷贝的方案 ID，可用空格分开传入多个，例如 sancang5 cangjie5",
+        help="要导出的方案 ID，可用空格分开传入多个，例如 sancang5 cangjie5",
     )
     parser.add_argument(
         "-o",
@@ -50,7 +50,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--clean",
         action="store_true",
-        help="拷贝前清空输出目录；为安全起见，目录必须位于仓库内且名称以 _ 开头",
+        help="导出前清空输出目录；为安全起见，目录必须位于仓库内且名称以 _ 开头",
     )
     return parser.parse_args()
 

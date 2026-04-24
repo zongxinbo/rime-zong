@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""从仓颉五代码表生成投影版三码字典。
+"""从仓颉五代码表按三码规则取码生成字典。
 
-默认投影规则：
+默认取码规则：
 - 1 至 3 码字：保留原码
 - 4 码及以上：取首码、次码、末码
 
@@ -304,7 +304,7 @@ def build_output(
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="把仓颉五代单字编码投影成三码字典。",
+        description="从仓颉五代单字编码按三码规则取码生成字典。",
         usage="%(prog)s [选项]",
         add_help=False,
     )

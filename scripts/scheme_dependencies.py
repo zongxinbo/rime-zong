@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """生成并使用 Rime 方案依赖清单。
 
-该脚本扫描仓库中的正式方案，生成 `scheme_dependencies.yaml`。
+该脚本扫描仓库中的正式方案，生成 `dependencies.yaml`。
 依赖清单包含 schema、字典、词频文件、语法模型、OpenCC 资源、Lua
 组件以及 Rime 外部预设等信息。目录名以 `_` 开头的临时目录会被跳过。
 """
@@ -20,7 +20,7 @@ from typing import Any, Iterable
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
-DEFAULT_OUTPUT = REPO_ROOT / "scheme_dependencies.yaml"
+DEFAULT_OUTPUT = REPO_ROOT / "dependencies.yaml"
 
 
 SCALAR_RE_CACHE: dict[str, re.Pattern[str]] = {}
@@ -492,7 +492,6 @@ class DependencyScanner:
             schemes[schema_id] = {
                 "name": closure.name,
                 "schema_dependencies": closure.direct_schema_dependencies,
-                "files": [rel(path) for path in closure.files],
                 "groups": {
                     "schema": existing_sorted(closure.schema_files),
                     "custom": existing_sorted(closure.custom_files),
@@ -522,7 +521,7 @@ def parse_args() -> argparse.Namespace:
         "--output",
         type=Path,
         default=DEFAULT_OUTPUT,
-        help="输出 YAML 文件路径，默认写到仓库根目录 scheme_dependencies.yaml",
+        help="输出 YAML 文件路径，默认写到仓库根目录 dependencies.yaml",
     )
     return parser.parse_args()
 

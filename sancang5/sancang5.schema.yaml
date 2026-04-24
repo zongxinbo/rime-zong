@@ -8,7 +8,7 @@ schema:
   author:
     - zongxinbo <https://github.com/zongxinbo>
   description: |
-    三码仓颉五代，由仓颉五代码表投影生成。
+    三码仓颉五代，由仓颉五代码表按三码规则取码生成。
     码表来源：仓颉五代补完计划 https://github.com/Jackchows/Cangjie5
     方案来源：三码仓颉 https://github.com/lotem/rime-sancang
     当前方案：https://github.com/zongxinbo/rime-zong
