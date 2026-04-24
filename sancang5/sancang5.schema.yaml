@@ -9,11 +9,23 @@ schema:
     - zongxinbo <https://github.com/zongxinbo>
   description: |
     三码仓颉五代，由仓颉五代码表投影生成。
-    生成规则：一至三码保留原码；四码及以上取首码、次码、末码。
-    默认过滤 z 开头的兼容汉字、部首、笔画及符号编码，并保留单字汉字。
     码表来源：仓颉五代补完计划 https://github.com/Jackchows/Cangjie5
-    方案来源：三码苍颉 https://github.com/lotem/rime-sancang
+    方案来源：三码仓颉 https://github.com/lotem/rime-sancang
+    当前方案：https://github.com/zongxinbo/rime-zong
     仓颉输入法发明人：朱邦复先生。
+
+    特点：
+      一至三码保留原码；四码及以上取首码、次码、末码；
+      默认过滤 z 开头的兼容汉字、部首、笔画及符号编码，并保留单字汉字；
+      支持拼音反查、扩展字符和简繁转换。
+    操作：
+      空格：有候选时上屏，无匹配时清码；
+      Tab：清码；
+      回车：提交当前编码但不切英文；
+      Caps Lock：清码并切到英文模式；
+      左Shift：提交当前编码并切到英文模式；
+      右Shift：提交当前文字并切到英文模式。
+    反查：输入 ` 可拼音反查。
   dependencies:
     - pinyin_simp
 
@@ -23,8 +35,13 @@ switches:
     states: [ 中文, 西文 ]
   - name: full_shape
     states: [ 半角, 全角 ]
+  - name: extended_charset
+    states: [ 常用, 增廣 ]
   - name: ascii_punct
     states: [ 。，, ．， ]
+  - options: [ noop, traditionalization, simplification ]
+    reset: 0
+    states: [ 默认汉字, 繁體漢字, 简体汉字 ]
 
 engine:
   processors:
@@ -47,6 +64,9 @@ engine:
     - script_translator
     - reverse_lookup_translator
   filters:
+    - simplifier
+    - simplifier@traditionalization
+    - charset_filter@
     - uniquifier
 
 speller:
@@ -84,12 +104,31 @@ punctuator:
 
 key_binder:
   import_preset: default
+  bindings:
+    - { when: has_menu, accept: space, send: space }
+    - { when: has_menu, accept: Tab, send: Escape }
+    - { when: composing, accept: space, send: Escape }
+    - { when: composing, accept: Tab, send: Escape }
+
+simplifier:
+  tips: all
+
+traditionalization:
+  opencc_config: s2t.json
+  option_name: traditionalization
+  tips: all
+
+ascii_composer:
+  switch_key:
+    Caps_Lock: clear
+    Shift_L: commit_code
+    Shift_R: commit_text
 
 recognizer:
   import_preset: default
   patterns:
-    punct: '^/([0-9]0?|[A-Za-z]+)$'
-    reverse_lookup: "`[a-z]*'?$"
+    punct: "^/([0-9]0?|[a-z]+)$"
+    reverse_lookup: "`[a-z]*'?$|[a-z]*'$"
 
 __patch:
   # 使用八股文简化字模型
