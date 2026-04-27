@@ -74,25 +74,58 @@ def main():
         orig_freq = frequencies.get(orig_char, 0) if orig_char else 0
         best_char = orig_char
 
+        # 1-code 竞争逻辑：原字根 > 首码匹配 > 包含该码
+        # 优先级权重：首码匹配需要是原字根的 1.5 倍频；包含该码需要是当前最优(首码)的 3 倍频
+        best_char = orig_char
+        current_threshold = orig_freq * 1.5
+        
+        # 第一轮：寻找以该字母【开头】的候选字 (1.5倍频保护)
         for char in chars_by_freq:
-            # 如果字已经被其他字母用作一简，或者就是原字根本身，跳过
             if char in used_chars or char == orig_char:
                 continue
             
-            # 检查该字的任何一个全码是否以该字母【开头】且全码【长度不超过3】
-            valid_candidate = False
+            char_rank = chars_by_freq.index(char) + 1
+            is_start = False
             for code in char_codes[char]:
-                if code.startswith(letter) and len(code) <= 3:
-                    valid_candidate = True
-                    break
+                if code.startswith(letter):
+                    # 长度限制：非 Top 50 的字全码不能超过 3 码
+                    if len(code) <= 3 or char_rank <= 50:
+                        is_start = True
+                        break
             
-            if valid_candidate:
+            if is_start:
                 char_freq = frequencies.get(char, 0)
-                # 必须严格大于原字根频率的 1.5 倍才能篡位
-                if orig_char is None or char_freq > orig_freq * 1.5:
+                if char_freq > current_threshold:
                     best_char = char
-                # 因为 chars_by_freq 是按词频降序排列的，一旦找到最高频的有效候选者即可停止寻找
-                break 
+                    current_threshold = char_freq
+                # 找到该字母开头最高频的即可（因为 chars_by_freq 已排序）
+                break
+        
+        # 第二轮：如果用户允许，寻找【包含】该字母但不是开头的超高频字 (3倍频抢占)
+        # 只有当包含该字母的字频次 远大于 当前确定的 best_char 时才允许抢占
+        for char in chars_by_freq:
+            if char in used_chars or char == orig_char or char == best_char:
+                continue
+                
+            char_rank = chars_by_freq.index(char) + 1
+            if char_rank > 100: # 包含规则只允许 Top 100 的超级高频字竞选
+                break
+                
+            is_contained = False
+            for code in char_codes[char]:
+                if letter in code: # 包含即可
+                    if len(code) <= 3 or char_rank <= 50:
+                        is_contained = True
+                        break
+            
+            if is_contained:
+                char_freq = frequencies.get(char, 0)
+                # 必须是当前最优候选字频次的 3 倍以上才能“跨级抢位”
+                if char_freq > current_threshold * 3:
+                    best_char = char
+                    current_threshold = char_freq
+                # 找到最高的即可
+                break
         
         if best_char:
             one_codes[letter] = best_char
@@ -138,10 +171,10 @@ def main():
             for k, v in sorted(data_dict.items()):
                 f.write(f"{v}\t{k}\n")
 
-    write_txt("sicang5_z.txt", z_codes, "原字根兜底")
+    write_txt("sicang5_z.txt", z_codes, "原字根")
     write_txt("sicang5_1.txt", one_codes, "一简")
     write_txt("sicang5_2.txt", two_codes, "二简")
-    write_txt("sicang5_3.txt", three_codes, "三简 (Top 1000)")
+    write_txt("sicang5_3.txt", three_codes, "三简")
 
     # 7. 生成最终的 Rime dict 字典文件
     final_dict_path = args.output_dir / "sicang5.dict.yaml"
