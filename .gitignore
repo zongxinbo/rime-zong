@@ -1,2 +1,3 @@
-_tmp*
-_output*
+*_tmp*
+*_output*
+*_pycache_*

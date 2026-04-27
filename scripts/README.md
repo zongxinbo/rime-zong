@@ -2,12 +2,13 @@
 
 本目录放置维护和打包 Rime 方案用的 Python 脚本。以下命令默认在仓库根目录执行；在 `scripts` 目录下执行也可以，但路径参数要按当前位置调整。
 
-## 生成三码仓颉五代
+## 生成三码 / 四码仓颉五代
 
-从 `cangjie5/cangjie5.dict.yaml` 按三码规则取码生成 `sancang5/sancang5.dict.yaml`：
+从 `cangjie5/cangjie5.dict.yaml` 取码生成 `sancang5/sancang5.dict.yaml`（三码）或 `sicang5/sicang5.dict.yaml`（四码）：
 
 ```powershell
 python scripts\gen_sancang5.py
+python scripts\gen_sicang5.py
 ```
 
 常用选项：
@@ -20,10 +21,11 @@ python scripts\gen_sancang5.py --include-phrases --generated-phrase-min-weight 1
 
 说明：
 
-- 默认只生成单字，按 `sancang5/essay-zh-hans.txt` 的单字频率排序同码候选。
-- `--include-phrases` 会读取 `essay-zh-hans.txt` 中的多字词，逐字取三码并拼接成词语编码。
-- `--no-vocabulary` 不写入 Rime 的 `vocabulary`、`max_phrase_length`、`min_phrase_weight` 字段，适合生成更便携的码表。
+- `gen_sicang5.py` 生成纯单字四码字典。`gen_sancang5.py` 默认生成带 `vocabulary` 的字典，按 `sancang5/essay-zh-hans.txt` 的单字频率排序同码候选。
+- `--include-phrases` 会读取 `essay-zh-hans.txt` 中的多字词，逐字取码并拼接成词语编码。
+- `--no-vocabulary` 不写入 Rime 的 `vocabulary`、`max_phrase_length`、`min_phrase_weight` 字段，适合生成更便携的单字码表。
 - `--generated-phrase-min-weight` 只影响脚本实际生成的词语，不影响 YAML 头部的 `min_phrase_weight` 字段。
+- 核心提取逻辑均封装在 `cangjie_builder.py` 模块中。
 
 脚本写正式 dict 时会先写临时文件，再替换目标文件，不会先删除原文件。
 
