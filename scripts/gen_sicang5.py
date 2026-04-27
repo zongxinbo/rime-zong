@@ -79,19 +79,19 @@ def main():
             if char in used_chars or char == orig_char:
                 continue
             
-            # 检查该字的任何一个全码是否以该字母【开头】
-            starts_with_letter = False
+            # 检查该字的任何一个全码是否以该字母【开头】且全码【长度不超过3】
+            valid_candidate = False
             for code in char_codes[char]:
-                if code.startswith(letter):
-                    starts_with_letter = True
+                if code.startswith(letter) and len(code) <= 3:
+                    valid_candidate = True
                     break
             
-            if starts_with_letter:
+            if valid_candidate:
                 char_freq = frequencies.get(char, 0)
-                # 必须严格大于原字根频率的 3 倍才能篡位
-                if orig_char is None or char_freq > orig_freq * 3:
+                # 必须严格大于原字根频率的 1.5 倍才能篡位
+                if orig_char is None or char_freq > orig_freq * 1.5:
                     best_char = char
-                # 因为 chars_by_freq 是按词频降序排列的，一旦找到最高频的候选者即可停止寻找
+                # 因为 chars_by_freq 是按词频降序排列的，一旦找到最高频的有效候选者即可停止寻找
                 break 
         
         if best_char:
@@ -109,9 +109,10 @@ def main():
             if len(two_code) == 2 and two_code != sicang_full and two_code not in two_codes:
                 two_codes[two_code] = char
 
-    # 5. 三简 (首码 + 次码 + 末码) - 仅限字频前 3000 名
+    # 5. 三简 (首码 + 次码 + 末码) - 仅限字频前 1000 名
     three_codes = {}
-    for char in top_3000:
+    top_1000 = chars_by_freq[:1000]
+    for char in top_1000:
         for code in char_codes[char]:
             three_code = get_three_code(code)
             sicang_full = project_code(code, 4)
@@ -140,7 +141,7 @@ def main():
     write_txt("sicang5_z.txt", z_codes, "原字根兜底")
     write_txt("sicang5_1.txt", one_codes, "一简")
     write_txt("sicang5_2.txt", two_codes, "二简")
-    write_txt("sicang5_3.txt", three_codes, "三简 (Top 3000)")
+    write_txt("sicang5_3.txt", three_codes, "三简 (Top 1000)")
 
     # 7. 生成最终的 Rime dict 字典文件
     final_dict_path = args.output_dir / "sicang5.dict.yaml"
@@ -162,22 +163,22 @@ max_phrase_length: 1
     lines = []
     written_entries = set()
 
-    def add_entry(text, code, label):
+    def add_entry(text, code):
         item = (text, code)
         if item not in written_entries:
-            lines.append(f"{text}\t{code}\t# {label}")
+            lines.append(f"{text}\t{code}")
             written_entries.add(item)
 
     for k, v in sorted(z_codes.items()):
-        add_entry(v, k, "原字根兜底")
+        add_entry(v, k)
     for k, v in sorted(one_codes.items()):
-        add_entry(v, k, "一简")
+        add_entry(v, k)
     for k, v in sorted(two_codes.items()):
-        add_entry(v, k, "二简")
+        add_entry(v, k)
     for k, v in sorted(three_codes.items()):
-        add_entry(v, k, "三简")
+        add_entry(v, k)
     for text, code, _ in full_entries:
-        add_entry(text, code, "全码")
+        add_entry(text, code)
 
     with open(final_dict_path, "w", encoding="utf-8") as f:
         f.write(header + "\n")
