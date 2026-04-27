@@ -38,11 +38,11 @@ def main():
         print(f"找不到源文件：{args.source}", file=sys.stderr)
         return 2
 
-    # 1. Load entries and frequencies
+    # 1. 加载字典条目和词频
     raw_entries = parse_cangjie_dict(args.source)
     frequencies, _ = parse_frequency_file(args.frequency_file)
 
-    # Filter rules: must be pure han character, not starting with 'z'
+    # 过滤规则：必须是纯汉字，且不能以 'z' 开头（排除原有的标点符号等）
     filtered_entries = []
     for entry in raw_entries:
         if is_han_char(entry.text) and not entry.code.startswith('z'):
@@ -52,9 +52,10 @@ def main():
     for text, code in filtered_entries:
         char_codes[text].append(code)
 
+    # 将字符按照词频从高到低排序
     chars_by_freq = sorted(char_codes.keys(), key=lambda c: frequencies.get(c, 0), reverse=True)
 
-    # 2. Extract z-suffix roots (az-yz)
+    # 2. 提取原字根并使用 z 作为后缀兜底 (az-yz)
     ORIGINAL_RADICALS = {
         'a': '日', 'b': '月', 'c': '金', 'd': '木', 'e': '水', 'f': '火', 'g': '土',
         'h': '竹', 'i': '戈', 'j': '十', 'k': '大', 'l': '中', 'm': '一', 'n': '弓',
@@ -65,7 +66,7 @@ def main():
     for letter, char in ORIGINAL_RADICALS.items():
         z_codes[letter + "z"] = char
 
-    # 3. 1-codes (a-y) - 3x frequency protection rule
+    # 3. 一简 (a-y) - 首码限制与 3倍频保护机制
     one_codes = {}
     used_chars = set()
     for letter in "abcdefghijklmnopqrstuvwxy":
@@ -74,59 +75,60 @@ def main():
         best_char = orig_char
 
         for char in chars_by_freq:
+            # 如果字已经被其他字母用作一简，或者就是原字根本身，跳过
             if char in used_chars or char == orig_char:
                 continue
             
-            # Check if letter is in any of its original codes
-            has_letter = False
+            # 检查该字的任何一个全码是否以该字母【开头】
+            starts_with_letter = False
             for code in char_codes[char]:
-                if letter in code:
-                    has_letter = True
+                if code.startswith(letter):
+                    starts_with_letter = True
                     break
             
-            if has_letter:
+            if starts_with_letter:
                 char_freq = frequencies.get(char, 0)
-                # Must be strictly > 3x the original radical's frequency
+                # 必须严格大于原字根频率的 3 倍才能篡位
                 if orig_char is None or char_freq > orig_freq * 3:
                     best_char = char
-                break # Since chars_by_freq is sorted descending, we only look at the highest freq candidate
+                # 因为 chars_by_freq 是按词频降序排列的，一旦找到最高频的候选者即可停止寻找
+                break 
         
         if best_char:
             one_codes[letter] = best_char
             used_chars.add(best_char)
 
-    # 4. 2-codes (First + Last)
+    # 4. 二简 (首码 + 末码)
     two_codes = {}
-    top_3000 = chars_by_freq[:3000]
+    top_3000 = chars_by_freq[:3000] # 仅限字频前 3000 名的高频字竞选二简
     for char in top_3000:
         for code in char_codes[char]:
             two_code = get_two_code(code)
             sicang_full = project_code(code, 4)
-            # Skip if shortcut is identical to the full sicang5 code
+            # 如果提取出的二简和它最终的四码全码完全一样，则跳过（避免冗余）
             if len(two_code) == 2 and two_code != sicang_full and two_code not in two_codes:
                 two_codes[two_code] = char
 
-    # 5. 3-codes (First + Second + Last) for top 1000 chars
+    # 5. 三简 (首码 + 次码 + 末码) - 仅限字频前 3000 名
     three_codes = {}
-    top_1000 = chars_by_freq[:1000]
-    for char in top_1000:
+    for char in top_3000:
         for code in char_codes[char]:
             three_code = get_three_code(code)
             sicang_full = project_code(code, 4)
-            # Skip if shortcut is identical to the full sicang5 code
+            # 如果提取出的三简和全码完全一样，则跳过
             if len(three_code) == 3 and three_code != sicang_full and three_code not in three_codes:
                 three_codes[three_code] = char
 
-    # 6. Full codes (Sicang5: First + Second + Third + Last)
+    # 6. 四码全码 (Sicang5规则: 首 + 次 + 三 + 末)
     full_entries = []
     for text, code in filtered_entries:
         sicang_code = project_code(code, 4)
         full_entries.append((text, sicang_code, frequencies.get(text, 0)))
 
-    # Sort full entries naturally: alphabetically by code, then by freq desc
+    # 将全码按编码字母顺序升序排序，然后按字频降序排列
     full_entries.sort(key=lambda x: (x[1], -x[2]))
 
-    # Output to txt files
+    # 输出为单独的 txt 文本文件
     args.output_dir.mkdir(exist_ok=True)
     
     def write_txt(filename, data_dict, title):
@@ -138,16 +140,16 @@ def main():
     write_txt("sicang5_z.txt", z_codes, "原字根兜底")
     write_txt("sicang5_1.txt", one_codes, "一简")
     write_txt("sicang5_2.txt", two_codes, "二简")
-    write_txt("sicang5_3.txt", three_codes, "三简 (Top 1000)")
+    write_txt("sicang5_3.txt", three_codes, "三简 (Top 3000)")
 
-    # 7. Generate final dict
+    # 7. 生成最终的 Rime dict 字典文件
     final_dict_path = args.output_dir / "sicang5.dict.yaml"
     version = _dt.date.today().isoformat()
     header = f"""# encoding: utf-8
 #
 # 极速单字四码仓颉（sicang5）
 # 由 scripts/gen_sicang5.py 自动生成
-# 包含：原字母z引导、一简(包含字根)、二简(首末)、三简(首次末, 前1000字)、全码(一二三末)
+# 包含：原字母z引导、一简(同首码)、二简(首末)、三简(首次末, 前3000字)、全码(一二三末)
 # 排序：自然排序 (Natural Sorting)，依靠物理写入顺序保证简码绝对优先。
 #
 ---
