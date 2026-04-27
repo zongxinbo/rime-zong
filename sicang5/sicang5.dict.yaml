@@ -1,7 +1,6 @@
 #
 # 极速单字四码仓颉（sicang5）
 # 由 scripts/gen_sicang5.py 自动生成
-# 包含：原字根z引导、一简、二简、三简、全码
 ---
 name: sicang5
 version: '2026-04-27'
@@ -31,9 +30,10 @@ sort: by_weight
 山	uz
 女	vz
 田	wz
+难	xz
 卜	yz
 是	a
-月	b
+用	b
 小	c
 和	d
 没	e
@@ -43,19 +43,19 @@ sort: by_weight
 我	i
 都	j
 有	k
-第	l
+中	l
 一	m
 了	n
 人	o
 也	p
-年	q
+把	q
 说	r
 为	s
-章	t
+着	t
 就	u
 好	v
-要	w
-着	x
+里	w
+已	x
 上	y
 显	ac
 最	ae
@@ -1041,9 +1041,9 @@ sort: by_weight
 没	ehne
 最	asje
 要	mwv
-中	l
 与	ysm
 章	ytaj
+月	b
 这	yyk
 下	my
 大	k
