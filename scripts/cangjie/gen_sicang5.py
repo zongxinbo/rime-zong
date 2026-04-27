@@ -1,6 +1,6 @@
 import sys
-import argparse
 from pathlib import Path
+import argparse
 from collections import defaultdict
 import datetime as _dt
 from cangjie_builder import (
@@ -11,14 +11,17 @@ from cangjie_builder import (
 )
 
 def get_two_code(full_code):
+    """提取二简码（首末码）"""
     if len(full_code) < 2: return full_code
     return full_code[0] + full_code[-1]
 
 def get_three_code(full_code):
+    """提取三简码（首次末码）"""
     if len(full_code) < 3: return full_code
     return full_code[0] + full_code[1] + full_code[-1]
 
 def project_code(full_code, max_len):
+    """提取四码仓颉全码（一、二、三、末码）"""
     if len(full_code) <= max_len: return full_code
     return full_code[:max_len-1] + full_code[-1]
 

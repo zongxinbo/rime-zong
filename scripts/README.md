@@ -7,40 +7,53 @@
 从 `cangjie5/cangjie5.dict.yaml` 取码生成 `sancang5/sancang5.dict.yaml`（三码）或 `sicang5/sicang5.dict.yaml`（四码）：
 
 ```powershell
-python scripts\gen_sancang5.py
-python scripts\gen_sicang5.py
+python scripts\cangjie\gen_sancang5.py
+python scripts\cangjie\gen_sicang5.py
 ```
 
 常用选项：
 
 ```powershell
-python scripts\gen_sancang5.py --include-phrases
-python scripts\gen_sancang5.py --include-phrases --no-vocabulary
-python scripts\gen_sancang5.py --include-phrases --generated-phrase-min-weight 100
+python scripts\cangjie\gen_sancang5.py --include-phrases
+python scripts\cangjie\gen_sancang5.py --include-phrases --no-vocabulary
+python scripts\cangjie\gen_sancang5.py --include-phrases --generated-phrase-min-weight 100
 ```
 
 说明：
 
-- `gen_sicang5.py` 生成纯单字四码字典。`gen_sancang5.py` 默认生成带 `vocabulary` 的字典，按 `sancang5/essay-zh-hans.txt` 的单字频率排序同码候选。
-- `--include-phrases` 会读取 `essay-zh-hans.txt` 中的多字词，逐字取码并拼接成词语编码。
+- `gen_sicang5.py` 生成纯单字四码字典。`gen_sancang5.py` 默认生成带 `vocabulary` 的字典，按字频排序同码候选。
+- `--include-phrases` 会读取词频文件中的多字词，逐字取码并拼接成词语编码。
 - `--no-vocabulary` 不写入 Rime 的 `vocabulary`、`max_phrase_length`、`min_phrase_weight` 字段，适合生成更便携的单字码表。
 - `--generated-phrase-min-weight` 只影响脚本实际生成的词语，不影响 YAML 头部的 `min_phrase_weight` 字段。
-- 核心提取逻辑均封装在 `cangjie_builder.py` 模块中。
+- 核心提取逻辑均封装在 `scripts\cangjie\cangjie_builder.py` 模块中。
 
 脚本写正式 dict 时会先写临时文件，再替换目标文件，不会先删除原文件。
+
+## 字频处理工具
+
+处理和对比现代化语料库（知乎、北语大）的工具：
+
+```powershell
+# 转换原始 CSV/XLSX 为 Rime 兼容的 TXT
+python scripts\freq_utils\convert_frequencies.py
+# 对比不同语料库的高频词
+python scripts\freq_utils\compare_freqs.py
+```
+
+详见 `scripts\freq_utils\README.md`。
 
 ## 生成依赖清单
 
 扫描正式方案并生成仓库根目录的 `dependencies.yaml`：
 
 ```powershell
-python scripts\scheme_dependencies.py
+python scripts\scheme_tools\scheme_dependencies.py
 ```
 
 可指定输出路径：
 
 ```powershell
-python scripts\scheme_dependencies.py --output dependencies.yaml
+python scripts\scheme_tools\scheme_dependencies.py --output dependencies.yaml
 ```
 
 说明：
@@ -54,14 +67,14 @@ python scripts\scheme_dependencies.py --output dependencies.yaml
 把一个或多个方案及其依赖导出到输出目录：
 
 ```powershell
-python scripts\export_schemes.py sancang5
-python scripts\export_schemes.py sancang5 cangjie5_ice
+python scripts\scheme_tools\export_schemes.py sancang5
+python scripts\scheme_tools\export_schemes.py sancang5 cangjie5_ice
 ```
 
 默认输出到 `_output`。可指定目录并在导出前清空：
 
 ```powershell
-python scripts\export_schemes.py sancang5 --output _output_sancang5 --clean
+python scripts\scheme_tools\export_schemes.py sancang5 --output _output_sancang5 --clean
 ```
 
 说明：
