@@ -13,7 +13,7 @@
 - **Essay 语料 (`essay-zh-hans.txt`)**：传统 Rime 语料。
 
 ## 3. 自动化分析工具
-脚本位置：`scripts/cangjie/compare_one_codes.py`
+脚本位置：`scripts/cangjie/gen_sicang5_1.py`
 该脚本实现了“最终版（Final Version）”算法，逻辑如下：
 1. **口语优先**：默认采用 Dialogue 口语算法的结果作为基底。
 2. **多源加权**：按 `Dialogue(6):Subtlex(5):Zhihu(4):BLCU(2):Essay(1)` 计算加权得分，确保口语字频权重第一。

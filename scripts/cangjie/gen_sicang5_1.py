@@ -1,7 +1,7 @@
 """
-一简（One-Code）方案分析与生成工具
+Sicang5 一简（One-Code）方案设计脚本
 
-本脚本用于对比不同字频表下的一简分配方案，并生成建议。
+本脚本用于对比不同字频表下的一简分配方案，并生成建议稿 (sicang5_1.txt)。
 
 算法核心逻辑：
 1. get_one_codes (纯算法):
@@ -237,7 +237,7 @@ def main():
         f.write("1. **纯算法**：基于五份字频表各自独立计算。\n")
         f.write("2. **当前正式版**：当前使用的校准方案。\n")
         f.write("3. **最终版**：以最高权重的口语语料(Dialogue)为基底，当其他语料出现综合加权更高分的字时触发自动修正，支持换位策略。\n\n")
-        
+
         f.write("| 键位 | Dialogue (纯算法) | Subtlex (纯算法) | Zhihu (纯算法) | BLCU (纯算法) | Essay (纯算法) | 当前正式版 | **最终版** |\n")
         f.write("|---|---|---|---|---|---|---|---|\n")
         for letter in "abcdefghijklmnopqrstuvwxy":
@@ -249,8 +249,16 @@ def main():
             curr = current_codes.get(letter, "")
             elite = final_version.get(letter, "")
             f.write(f"| {letter} | {d} | {s} | {z} | {b} | {e} | {curr} | **{elite}** |\n")
-            
     print(f"对比结果已保存至: {output_path}")
 
+    # 同时更新实际的一简方案文件
+    sicang1_path = REPO_ROOT / "sicang5/sicang5_1.txt"
+    with open(sicang1_path, "w", encoding="utf-8") as f:
+        f.write("# 一简\n")
+        for letter in "abcdefghijklmnopqrstuvwxy":
+            elite = final_version.get(letter, "")
+            if elite:
+                f.write(f"{elite}\t{letter}\n")
+    print(f"一简方案已更新: {sicang1_path}")
 if __name__ == "__main__":
     main()
