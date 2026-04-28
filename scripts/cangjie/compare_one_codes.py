@@ -10,13 +10,13 @@
    - Tier 2 (Contains): 如果 Top 100 高频字中存在包含该字母的字，且频次超过首码匹配字的 1.8 倍，则允许抢位。
 
 2. get_final_version (最终版):
-   - 以“知乎语料”为基底（用户认为最符合现代口语习惯）。
-   - 权重分配: Zhihu(4), BLCU(2), Essay(1)。
+   - 以“Dialogue”（口语语料）为基底，确保口语常用字绝对优先。
+   - 权重分配: Dialogue(6), Subtlex(5), Zhihu(4), BLCU(2), Essay(1)。
+     （最终列加权时口语字频权重第一）
    - 修正机制：
-     a) 共识修正: 如果 Essay 和 BLCU 一致推荐同一个字且得分高于知乎推荐字（需满足倍数阈值），则修正。
-     b) 换位逻辑: 若共识字已被占用，则通过交换两个键位的分配来保证唯一性。
-     c) 频次修正: 若任一语料中该键位的字加权得分超过知乎字的 1.3 倍，则进行抢位。
-     d) 首码保护: 若知乎字是首码匹配而修正字不是，则需 2.5 倍频次差才允许替换。
+     a) 加权修正: 若任一其他语料推荐的字，其加权总分超过基底字的倍数阈值，则修正。
+     b) 首码保护: 若基底字是首码匹配而修正字不是，则需 2.5 倍频次差才允许替换；否则为 1.2 倍。
+     c) 换位逻辑: 若高分字已被占用，则通过交换两个键位的分配来保证唯一性。
 """
 
 import sys
@@ -94,64 +94,94 @@ def get_one_codes(freq_path, char_codes, chars_by_freq, frequencies):
     return one_codes
 
 
-def get_final_version(char_codes, all_freqs, zhihu_result, essay_result, blcu_result):
-    """最终版：以知乎纯算法为基底，多层修正。"""
-    weights = {"Zhihu": 4, "BLCU": 2, "Essay": 1}
+def get_final_version(char_codes, all_freqs, results):
+    """最终版：以口语语料（Dialogue）为基底，利用多源加权总分进行修正。"""
+    
+    weights = {
+        "Dialogue": 6,
+        "Subtlex": 5,
+        "Zhihu": 4,
+        "BLCU": 2,
+        "Essay": 1
+    }
     
     char_scores = {}
     for char in char_codes:
-        score = sum(all_freqs[src].get(char, 0) * w for src, w in weights.items())
+        score = sum(all_freqs[src].get(char, 0) * w for src, w in weights.items() if src in all_freqs)
         if score > 0:
             char_scores[char] = score
     
-    elite = dict(zhihu_result)
+    # 强制保护/优先分配 (习惯与用户指定优先)
+    # 用户最终提议方案：
+    # a:是, d:来, t:着, g:去, k:在, f:你, h:的, i:我, m:一, r:只, v:好, x:以
+    protected_map = {
+        'a': '是', 'd': '来', 't': '着', 'g': '去', 
+        'k': '在', 'f': '你', 'h': '的', 'i': '我', 
+        'm': '一', 'r': '只', 'v': '好', 'x': '以'
+    }
+    
+    # 默认以最高权重的纯口语语料结果为基底
+    elite = dict(results["Dialogue"])
+    
+    # 应用保护策略
+    for k, v in protected_map.items():
+        if v in char_codes:
+            # 彻底清理：如果该保护字已经在别的位子，先清除
+            old_k = next((key for key, val in elite.items() if val == v), None)
+            if old_k: elite.pop(old_k)
+            # 如果该位子已经有别的字，先清理
+            old_val = elite.get(k)
+            if old_val and old_val != v:
+                pass # elite[k] 会被覆盖，但需确保 old_val 不会再次出现
+            elite[k] = v
+
     used_chars = set(elite.values())
     
-    # 第一轮：Essay+BLCU 共识修正（支持换位）
+    # 综合得分修正
     for letter in "abcdefghijklmnopqrstuvwxy":
-        essay_char = essay_result.get(letter, "")
-        blcu_char = blcu_result.get(letter, "")
-        zhihu_char = elite.get(letter, "")
+        # 保护位不参与被抢占
+        if letter in protected_map: continue
         
-        if essay_char == blcu_char and essay_char != zhihu_char and essay_char:
-            consensus = essay_char
-            consensus_score = char_scores.get(consensus, 0)
-            zhihu_score = char_scores.get(zhihu_char, 0)
-            
-            # 如果知乎字首码匹配当前键位，而共识字不匹配，则需要更高的门槛（2.5倍）
-            zhihu_starts = any(code.startswith(letter) for code in char_codes.get(zhihu_char, []))
-            consensus_starts = any(code.startswith(letter) for code in char_codes.get(consensus, []))
-            threshold = 1.2 if (consensus_starts or not zhihu_starts) else 2.5
-            
-            if consensus_score > zhihu_score * threshold:
-                if consensus not in used_chars:
-                    used_chars.discard(zhihu_char)
-                    elite[letter] = consensus
-                    used_chars.add(consensus)
-                else:
-                    other_key = next((k for k, v in elite.items() if v == consensus), None)
-                    if other_key:
-                        elite[letter] = consensus
-                        elite[other_key] = zhihu_char
-    
-    # 第二轮：频次压倒修正
-    for letter in "abcdefghijklmnopqrstuvwxy":
-        zhihu_char = elite.get(letter, "")
-        zhihu_score = char_scores.get(zhihu_char, 0)
+        base_char = elite.get(letter, "")
+        base_score = char_scores.get(base_char, 0)
         
         candidates = set()
-        for src_result in [essay_result, blcu_result]:
-            c = src_result.get(letter, "")
-            if c and c != zhihu_char:
+        for src, res in results.items():
+            c = res.get(letter, "")
+            # 过滤掉一些不适合做一简的语气词（可选）
+            if c == '哈' and letter == 'r': continue 
+            if c and c != base_char and c not in protected_map.values():
                 candidates.add(c)
-        
+                
         for cand in sorted(candidates, key=lambda c: char_scores.get(c, 0), reverse=True):
             cand_score = char_scores.get(cand, 0)
-            if cand_score > zhihu_score * 1.3 and cand not in used_chars:
-                used_chars.discard(zhihu_char)
-                elite[letter] = cand
-                used_chars.add(cand)
-                break
+            
+            base_starts = any(code.startswith(letter) for code in char_codes.get(base_char, []))
+            cand_starts = any(code.startswith(letter) for code in char_codes.get(cand, []))
+            
+            threshold = 1.2 if (cand_starts or not base_starts) else 2.5
+            
+            if cand_score > base_score * threshold:
+                if cand not in used_chars:
+                    used_chars.discard(base_char)
+                    elite[letter] = cand
+                    used_chars.add(cand)
+                    break
+                else:
+                    # 换位逻辑：增加有效性检查
+                    other_key = next((k for k, v in elite.items() if v == cand), None)
+                    if other_key and other_key not in protected_map:
+                        # 检查 base_char 是否能放在 other_key 
+                        base_valid_for_other = False
+                        for code in char_codes.get(base_char, []):
+                            if other_key in code: # Tier 2 逻辑
+                                base_valid_for_other = True
+                                break
+                        
+                        if base_valid_for_other:
+                            elite[letter] = cand
+                            elite[other_key] = base_char
+                            break
     
     return elite
 
@@ -159,9 +189,11 @@ def get_final_version(char_codes, all_freqs, zhihu_result, essay_result, blcu_re
 def main():
     source = REPO_ROOT / "cangjie5/cangjie5.dict.yaml"
     freq_paths = {
-        "Essay": REPO_ROOT / "sancang5/essay-zh-hans.txt",
-        "Zhihu": REPO_ROOT / "frequency/zhihu_freq.txt",
-        "BLCU": REPO_ROOT / "frequency/blcu_freq.txt"
+        "Dialogue": REPO_ROOT / "frequency/char/dialogue_char_freq.txt",
+        "Subtlex": REPO_ROOT / "frequency/char/subtlex_char_freq.txt",
+        "Zhihu": REPO_ROOT / "frequency/char/zhihu_char_freq.txt",
+        "BLCU": REPO_ROOT / "frequency/char/blcu_char_freq.txt",
+        "Essay": REPO_ROOT / "sancang5/essay-zh-hans.txt"
     }
 
     raw_entries = parse_cangjie_dict(source)
@@ -171,10 +203,15 @@ def main():
             char_codes[entry.text].append(entry.code)
 
     results = {}
+    all_freqs = {}
     for name, path in freq_paths.items():
-        freqs, _ = parse_frequency_file(path)
-        chars_by_freq = sorted(char_codes.keys(), key=lambda c: freqs.get(c, 0), reverse=True)
-        results[name] = get_one_codes(path, char_codes, chars_by_freq, freqs)
+        if path.exists():
+            freqs, _ = parse_frequency_file(path)
+            all_freqs[name] = freqs
+            chars_by_freq = sorted(char_codes.keys(), key=lambda c: freqs.get(c, 0), reverse=True)
+            results[name] = get_one_codes(path, char_codes, chars_by_freq, freqs)
+        else:
+            print(f"Warning: {path} not found.")
 
     current_codes = {}
     current_path = REPO_ROOT / "sicang5/sicang5_1.txt"
@@ -187,34 +224,32 @@ def main():
                 if len(parts) == 2:
                     current_codes[parts[1]] = parts[0]
 
-    all_freqs = {}
-    for name, path in freq_paths.items():
-        freqs, _ = parse_frequency_file(path)
-        all_freqs[name] = freqs
-
-    final_version = get_final_version(
-        char_codes, all_freqs,
-        zhihu_result=results["Zhihu"],
-        essay_result=results["Essay"],
-        blcu_result=results["BLCU"]
-    )
+    if "Dialogue" in results:
+        final_version = get_final_version(char_codes, all_freqs, results)
+    else:
+        final_version = {}
+        print("Error: Required Dialogue frequencies missing.")
 
     output_path = REPO_ROOT / "sicang5/one_code_comparison.md"
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("# 一简方案分配对比表\n\n")
         f.write("本表对比了：\n")
-        f.write("1. **纯算法**：基于三份字频表各自独立计算。\n")
+        f.write("1. **纯算法**：基于五份字频表各自独立计算。\n")
         f.write("2. **当前正式版**：当前使用的校准方案。\n")
-        f.write("3. **最终版**：以知乎纯算法为基底，当 Essay 和 BLCU 一致推荐另一个更高频字时自动修正，支持换位策略。\n\n")
-        f.write("| 键位 | Essay (纯算法) | Zhihu (纯算法) | BLCU (纯算法) | 当前正式版 | **最终版** |\n")
-        f.write("|---|---|---|---|---|---|\n")
+        f.write("3. **最终版**：以最高权重的口语语料(Dialogue)为基底，当其他语料出现综合加权更高分的字时触发自动修正，支持换位策略。\n\n")
+        
+        f.write("| 键位 | Dialogue (纯算法) | Subtlex (纯算法) | Zhihu (纯算法) | BLCU (纯算法) | Essay (纯算法) | 当前正式版 | **最终版** |\n")
+        f.write("|---|---|---|---|---|---|---|---|\n")
         for letter in "abcdefghijklmnopqrstuvwxy":
-            e = results["Essay"].get(letter, "")
-            z = results["Zhihu"].get(letter, "")
-            b = results["BLCU"].get(letter, "")
+            d = results.get("Dialogue", {}).get(letter, "")
+            s = results.get("Subtlex", {}).get(letter, "")
+            z = results.get("Zhihu", {}).get(letter, "")
+            b = results.get("BLCU", {}).get(letter, "")
+            e = results.get("Essay", {}).get(letter, "")
             curr = current_codes.get(letter, "")
             elite = final_version.get(letter, "")
-            f.write(f"| {letter} | {e} | {z} | {b} | {curr} | **{elite}** |\n")
+            f.write(f"| {letter} | {d} | {s} | {z} | {b} | {e} | {curr} | **{elite}** |\n")
+            
     print(f"对比结果已保存至: {output_path}")
 
 if __name__ == "__main__":
