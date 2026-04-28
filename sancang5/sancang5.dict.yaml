@@ -8,7 +8,7 @@
 #
 ---
 name: sancang5
-version: '2026-04-24'
+version: '2026-04-28'
 sort: by_weight
 vocabulary: essay-zh-hans
 max_phrase_length: 7
