@@ -1,0 +1,141 @@
+# Rime schema settings
+# encoding: utf-8
+
+schema:
+  schema_id: wucang5
+  name: 五码仓颉·五代
+  version: "2026.04.29"
+  author:
+    - zongxinbo <https://github.com/zongxinbo>
+  description: |
+    码表来源：仓颉五代补完计划 https://github.com/Jackchows/Cangjie5
+    当前方案：https://github.com/zongxinbo/rime-zong
+    仓颉输入法发明人：朱邦复先生。
+
+    五码仓颉单字方案
+    特点：
+      只打单字，不造词，不学习；
+      最长五码，五码不自动上屏；
+      支持拼音反查、扩展字符和简繁转换。
+    操作：
+      空格：有候选时上屏，无匹配时清码；
+      Tab：清码；
+      回车：提交当前编码但不切英文；
+      Caps Lock：清码并切到英文模式；
+      左Shift：提交当前编码并切到英文模式；
+      右Shift：提交当前文字并切到英文模式。
+    反查：输入 ` 可拼音反查。
+  dependencies:
+    - pinyin_simp
+
+switches:
+  - name: ascii_mode
+    reset: 0
+    states: [ 中文, 西文 ]
+  - name: full_shape
+    states: [ 半角, 全角 ]
+  - name: extended_charset
+    states: [ 常用, 增廣 ]
+  - name: ascii_punct
+    states: [ 。，, ．， ]
+  - options: [ noop, traditionalization, simplification ]
+    reset: 0
+    states: [ 默认汉字, 繁體漢字, 简体汉字 ]
+
+engine:
+  processors:
+    - ascii_composer
+    - recognizer
+    - key_binder
+    - speller
+    - punctuator
+    - selector
+    - navigator
+    - express_editor
+  segmentors:
+    - ascii_segmentor
+    - matcher
+    - abc_segmentor
+    - punct_segmentor
+    - fallback_segmentor
+  translators:
+    - punct_translator
+    - reverse_lookup_translator
+    - table_translator
+  filters:
+    - simplifier
+    - simplifier@traditionalization
+    - uniquifier
+    - single_char_filter
+
+speller:
+  alphabet: zyxwvutsrqponmlkjihgfedcba
+  delimiter: " ;"
+  max_code_length: 5
+  auto_select: false
+  auto_select_unique_candidate: false
+
+translator:
+  dictionary: wucang5
+  enable_charset_filter: true
+  encode_commit_history: false
+  enable_encoder: false
+  enable_completion: true
+  enable_user_dict: false
+  enable_sentence: false
+  max_phrase_length: 1
+  preedit_format:
+    - 'xform/(?<![^x])x/#/'
+    - "xlit|abcdefghijklmnopqrstuvwxyz#|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜片重|"
+  comment_format:
+    - 'xform/(?<![^x])x/#/'
+    - "xlit|abcdefghijklmnopqrstuvwxyz#~|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜片重～|"
+
+abc_segmentor:
+  extra_tags:
+#    - reverse_lookup  # 與拼音（反查碼）混打
+
+reverse_lookup:
+  dictionary: pinyin_simp
+  prism: pinyin_simp
+  prefix: "`"
+  suffix: "'"
+  tips: 〔拼音〕
+  preedit_format:
+    - xform/([nl])v/$1ü/
+    - xform/([nl])ue/$1üe/
+    - xform/([jqxy])v/$1u/
+  comment_format:
+    - 'xform/(?<![^x])x/#/'
+    - "xlit|abcdefghijklmnopqrstuvwxyz#~|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜片重～|"
+
+simplifier:
+  tips: all  # 簡化字模式下提示對應的傳統漢字
+
+traditionalization:
+  opencc_config: s2t.json
+  option_name: traditionalization
+  tips: all
+
+punctuator:
+  import_preset: symbols
+
+key_binder:
+  import_preset: default
+  bindings:
+    - { when: has_menu, accept: space, send: space }
+    - { when: has_menu, accept: Tab, send: Escape }
+    - { when: composing, accept: space, send: Escape }
+    - { when: composing, accept: Tab, send: Escape }
+
+ascii_composer:
+  switch_key:
+    Caps_Lock: clear
+    Shift_L: commit_code
+    Shift_R: commit_text
+
+recognizer:
+  import_preset: default
+  patterns:
+    punct: "^/([0-9]0?|[a-z]+)$"
+    reverse_lookup: "`[a-z]*'?$|[a-z]*'$"

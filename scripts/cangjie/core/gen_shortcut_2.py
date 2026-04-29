@@ -21,11 +21,7 @@ from core.cangjie_builder import (
 
 import argparse
 
-def main():
-    parser = argparse.ArgumentParser(description="Sicang5 二简方案设计脚本")
-    parser.add_argument("--prefix", action="store_true", default=False, help="提取规则取前两码（而非首尾码）")
-    parser.add_argument("--count", type=int, default=150, help="输出的二简字数量限制（默认 150）")
-    args = parser.parse_args()
+def generate_shortcut_2(prefix: bool = False, count: int = 150):
 
     source_dict = REPO_ROOT / "cangjie5/cangjie5.dict.yaml"
     freq_file = REPO_ROOT / "frequency/word/essay-zh-hans.txt"
@@ -80,7 +76,7 @@ def main():
             if not curr_orig or score > curr_orig[1]:
                 candidates_by_code[full_code]["orig"] = (char, score)
         elif len(full_code) > 2:
-            code2 = full_code[:2] if args.prefix else full_code[0] + full_code[-1]
+            code2 = full_code[:2] if prefix else full_code[0] + full_code[-1]
             candidates_by_code[code2]["long"].append((char, score))
 
     # 4. 竞争判定
@@ -106,7 +102,7 @@ def main():
     # 5. 排序并取 Top N
     # 达到门槛后，统一按长码字的绝对频次(score)竞争 Top 名额
     valid_shortcuts.sort(key=lambda x: x[2], reverse=True)
-    top_n = valid_shortcuts[:args.count]
+    top_n = valid_shortcuts[:count]
     top_n.sort(key=lambda x: x[1])
 
     with open(output_path, "w", encoding="utf-8") as f:
@@ -115,6 +111,13 @@ def main():
             f.write(f"{char}\t{code}\n")
     
     print(f"二简设计稿已生成(优先绝对空位+合理竞争): {output_path} (数量: {len(top_n)})")
+
+def main():
+    parser = argparse.ArgumentParser(description="Sicang5 二简方案设计脚本")
+    parser.add_argument("--prefix", action="store_true", default=False, help="提取规则取前两码（而非首尾码）")
+    parser.add_argument("--count", type=int, default=150, help="输出的二简字数量限制（默认 150）")
+    args = parser.parse_args()
+    generate_shortcut_2(prefix=args.prefix, count=args.count)
 
 if __name__ == "__main__":
     main()

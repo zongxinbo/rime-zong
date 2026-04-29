@@ -23,11 +23,10 @@ def generate_dict(
 ):
     print(f"正在解析原始仓颉编码: {source_dict}...")
     raw_entries = parse_cangjie_dict(source_dict)
-    char_full_codes = {}
+    char_full_codes = defaultdict(list)
     for e in raw_entries:
         if (is_common_han_char(e.text) if exclude_extended else is_han_char(e.text)) and not (e.code.startswith('z') or e.code.startswith('x')):
-            if e.text not in char_full_codes or len(e.code) < len(char_full_codes[e.text]):
-                char_full_codes[e.text] = e.code
+            char_full_codes[e.text].append(e.code)
 
     final_table = [] 
     used_text_code = set()
@@ -52,11 +51,12 @@ def generate_dict(
     # 生成单字
     print("正在生成单字...")
     char_freqs, phrase_freq_list = parse_frequency_file(freq_file)
-    for char, full_code in char_full_codes.items():
-        code_proj = project_code(full_code, max_code_length)
-        if (char, code_proj) not in used_text_code:
-            final_table.append((char, code_proj, char_freqs.get(char, 0)))
-            used_text_code.add((char, code_proj))
+    for char, full_codes in char_full_codes.items():
+        for full_code in full_codes:
+            code_proj = project_code(full_code, max_code_length)
+            if (char, code_proj) not in used_text_code:
+                final_table.append((char, code_proj, char_freqs.get(char, 0)))
+                used_text_code.add((char, code_proj))
 
     # 生成词组
     if include_phrases:
