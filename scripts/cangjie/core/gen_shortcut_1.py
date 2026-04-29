@@ -24,11 +24,11 @@ from pathlib import Path
 from collections import defaultdict
 
 # Add common dir to path for imports
-sys.path.append(str(Path(__file__).resolve().parent))
-from cangjie_builder import (
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from core.cangjie_builder import (
     parse_cangjie_dict,
     parse_frequency_file,
-    is_common_han_char,
+    is_han_char,
     REPO_ROOT
 )
 
@@ -193,7 +193,7 @@ def main():
         "Subtlex": REPO_ROOT / "frequency/char/subtlex_char_freq.txt",
         "Zhihu": REPO_ROOT / "frequency/char/zhihu_char_freq.txt",
         "BLCU": REPO_ROOT / "frequency/char/blcu_char_freq.txt",
-        "Essay": REPO_ROOT / "sancang5/essay-zh-hans.txt"
+        "Essay": REPO_ROOT / "frequency/word/essay-zh-hans.txt"
     }
 
     raw_entries = parse_cangjie_dict(source)
@@ -214,7 +214,7 @@ def main():
             print(f"Warning: {path} not found.")
 
     current_codes = {}
-    current_path = REPO_ROOT / "sicang5/sicang5_1.txt"
+    current_path = REPO_ROOT / "scripts/cangjie/prototypes/one_code.txt"
     if current_path.exists():
         with open(current_path, "r", encoding="utf-8") as f:
             for line in f:
@@ -230,7 +230,7 @@ def main():
         final_version = {}
         print("Error: Required Dialogue frequencies missing.")
 
-    output_path = REPO_ROOT / "sicang5/one_code_comparison.md"
+    output_path = REPO_ROOT / "scripts/cangjie/prototypes/one_code_report.md"
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("# 一简方案分配对比表\n\n")
         f.write("本表对比了：\n")
@@ -252,7 +252,7 @@ def main():
     print(f"对比结果已保存至: {output_path}")
 
     # 同时更新实际的一简方案文件
-    sicang1_path = REPO_ROOT / "sicang5/sicang5_1.txt"
+    sicang1_path = REPO_ROOT / "scripts/cangjie/prototypes/one_code.txt"
     with open(sicang1_path, "w", encoding="utf-8") as f:
         f.write("# 一简\n")
         for letter in "abcdefghijklmnopqrstuvwxy":
