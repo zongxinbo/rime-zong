@@ -127,9 +127,9 @@ def generate_shortcut_3(prefix: bool = False, count: int = 0, auto_coverage: flo
 
 def main():
     parser = argparse.ArgumentParser(description="Sicang5 三简方案设计脚本")
-    parser.add_argument("--prefix", action="store_true", default=False, help="提取规则取前三码（而非前两码+末码）")
+    parser.add_argument("--prefix", action="store_true", default=True, help="提取规则取前三码（而非前两码+末码）")
     parser.add_argument("--count", type=int, default=0, help="固定输出数量。如果设置>0，则忽略 auto-coverage。")
-    parser.add_argument("--auto-coverage", type=float, default=0.99, help="按累计字频覆盖率自动决定数量(如0.99表示覆盖99%的高频字)。")
+    parser.add_argument("--auto-coverage", type=float, default=0.90, help="按累计字频覆盖率自动决定数量(如0.99表示覆盖99%的高频字)。")
     args = parser.parse_args()
     generate_shortcut_3(prefix=args.prefix, count=args.count, auto_coverage=args.auto_coverage)
 
