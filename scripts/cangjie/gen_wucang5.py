@@ -40,7 +40,10 @@ def main():
         },
         source_dict = REPO_ROOT / "cangjie5/cangjie5.dict.yaml",
         freq_file = REPO_ROOT / "frequency/word/essay-zh-hans.txt",
+        vocabulary = "essay-zh-hans",
         max_code_length = 5,
+        max_phrase_length = 7,
+        min_phrase_weight = 100,
         include_phrases = False,
         exclude_extended=args.exclude_extended
     )
