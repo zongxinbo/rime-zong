@@ -61,30 +61,23 @@ engine:
     - fallback_segmentor
   translators:
     - punct_translator
+    - script_translator
     - reverse_lookup_translator
-    - table_translator
   filters:
     - simplifier
     - simplifier@traditionalization
+    - charset_filter@
     - uniquifier
-    - single_char_filter
 
 speller:
   alphabet: zyxwvutsrqponmlkjihgfedcba
-  delimiter: " ;"
-  max_code_length: 4
-  auto_select: false
-  auto_select_unique_candidate: false
+  delimiter: " ;'"
 
 translator:
   dictionary: sicang5
-  enable_charset_filter: true
-  encode_commit_history: false
-  enable_encoder: false
-  enable_completion: true
-  enable_user_dict: false
-  enable_sentence: false
-  max_phrase_length: 1
+  prism: sicang5
+  disable_user_dict_for_patterns:
+    - "^z.*$"
   preedit_format:
     - 'xform/(?<![^x])x/#/'
     - "xlit|abcdefghijklmnopqrstuvwxyz#|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜片重|"
@@ -140,3 +133,7 @@ recognizer:
   patterns:
     punct: "^/([0-9]0?|[a-z]+)$"
     reverse_lookup: "`[a-z]*'?$|[a-z]*'$"
+
+__patch:
+  # 使用八股文简化字模型
+  - grammar:/hans?
