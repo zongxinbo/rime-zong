@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Sicang5 三简方案设计脚本 (混合双打版)
+Sicang5 三简方案设计脚本
 1. 提取规则：单字首次末码 (Aa + Ab + Az)。
 2. 竞争机制：允许长码字与“原主字”(全码=3)竞争首选位。若长码字频次 > 原主频次 * 1.2，则生成简码。
 3. 输出限制：仅输出长码字作为简码，原主字依赖全量词库自然存在。
@@ -19,7 +19,13 @@ from core.cangjie_builder import (
     REPO_ROOT
 )
 
+import argparse
+
 def main():
+    parser = argparse.ArgumentParser(description="Sicang5 三简方案设计脚本")
+    parser.add_argument("--prefix", action="store_true", default=False, help="提取规则取前三码（而非前两码+末码）")
+    args = parser.parse_args()
+
     source_dict = REPO_ROOT / "cangjie5/cangjie5.dict.yaml"
     freq_file = REPO_ROOT / "frequency/word/essay-zh-hans.txt"
     weights = {"Dialogue": 6, "Subtlex": 5, "Zhihu": 4, "BLCU": 2, "Essay": 1}
@@ -73,7 +79,7 @@ def main():
             if not curr_orig or score > curr_orig[1]:
                 candidates_by_code[full_code]["orig"] = (char, score)
         elif len(full_code) > 3:
-            code3 = full_code[0] + full_code[1] + full_code[-1]
+            code3 = full_code[:3] if args.prefix else full_code[0] + full_code[1] + full_code[-1]
             candidates_by_code[code3]["long"].append((char, score))
 
     # 4. 竞争判定

@@ -19,7 +19,13 @@ from core.cangjie_builder import (
     REPO_ROOT
 )
 
+import argparse
+
 def main():
+    parser = argparse.ArgumentParser(description="Sicang5 二简方案设计脚本")
+    parser.add_argument("--prefix", action="store_true", default=False, help="提取规则取前两码（而非首尾码）")
+    args = parser.parse_args()
+
     source_dict = REPO_ROOT / "cangjie5/cangjie5.dict.yaml"
     freq_file = REPO_ROOT / "frequency/word/essay-zh-hans.txt"
     weights = {"Dialogue": 6, "Subtlex": 5, "Zhihu": 4, "BLCU": 2, "Essay": 1}
@@ -73,7 +79,7 @@ def main():
             if not curr_orig or score > curr_orig[1]:
                 candidates_by_code[full_code]["orig"] = (char, score)
         elif len(full_code) > 2:
-            code2 = full_code[0] + full_code[-1]
+            code2 = full_code[:2] if args.prefix else full_code[0] + full_code[-1]
             candidates_by_code[code2]["long"].append((char, score))
 
     # 4. 竞争判定
@@ -97,7 +103,7 @@ def main():
             valid_shortcuts.append((long_char, code2, long_score, is_empty))
 
     # 5. 排序并取 Top 150
-    # 路线 B (混合双打)：达到门槛后，统一按长码字的绝对频次(score)竞争 Top 名额
+    # 达到门槛后，统一按长码字的绝对频次(score)竞争 Top 名额
     valid_shortcuts.sort(key=lambda x: x[2], reverse=True)
     top_n = valid_shortcuts[:150]
     top_n.sort(key=lambda x: x[1])
