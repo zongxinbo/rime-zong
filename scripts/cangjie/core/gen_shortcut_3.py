@@ -21,12 +21,7 @@ from core.cangjie_builder import (
 
 import argparse
 
-def main():
-    parser = argparse.ArgumentParser(description="Sicang5 三简方案设计脚本")
-    parser.add_argument("--prefix", action="store_true", default=False, help="提取规则取前三码（而非前两码+末码）")
-    parser.add_argument("--count", type=int, default=0, help="固定输出数量。如果设置>0，则忽略 auto-coverage。")
-    parser.add_argument("--auto-coverage", type=float, default=0.99, help="按累计字频覆盖率自动决定数量(如0.99表示覆盖99%的高频字)。")
-    args = parser.parse_args()
+def generate_shortcut_3(prefix: bool = False, count: int = 0, auto_coverage: float = 0.99):
 
     source_dict = REPO_ROOT / "cangjie5/cangjie5.dict.yaml"
     freq_file = REPO_ROOT / "frequency/word/essay-zh-hans.txt"
@@ -81,7 +76,7 @@ def main():
             if not curr_orig or score > curr_orig[1]:
                 candidates_by_code[full_code]["orig"] = (char, score)
         elif len(full_code) > 3:
-            code3 = full_code[:3] if args.prefix else full_code[0] + full_code[1] + full_code[-1]
+            code3 = full_code[:3] if prefix else full_code[0] + full_code[1] + full_code[-1]
             candidates_by_code[code3]["long"].append((char, score))
 
     # 4. 竞争判定
@@ -104,8 +99,8 @@ def main():
     # 5. 计算覆盖率阈值或使用固定数量
     valid_shortcuts.sort(key=lambda x: x[2], reverse=True)
     
-    if args.count > 0:
-        top_n = valid_shortcuts[:args.count]
+    if count > 0:
+        top_n = valid_shortcuts[:count]
     else:
         # 自动计算累计覆盖率阈值
         sorted_scores = sorted(char_scores.values(), reverse=True)
@@ -114,7 +109,7 @@ def main():
         threshold_score = 0
         for score in sorted_scores:
             cum_sum += score
-            if cum_sum >= total_score * args.auto_coverage:
+            if cum_sum >= total_score * auto_coverage:
                 threshold_score = score
                 break
         
@@ -129,6 +124,14 @@ def main():
             f.write(f"{char}\t{code}\n")
     
     print(f"三简设计稿已生成(允许合理重码竞争): {output_path} (数量: {len(top_n)})")
+
+def main():
+    parser = argparse.ArgumentParser(description="Sicang5 三简方案设计脚本")
+    parser.add_argument("--prefix", action="store_true", default=False, help="提取规则取前三码（而非前两码+末码）")
+    parser.add_argument("--count", type=int, default=0, help="固定输出数量。如果设置>0，则忽略 auto-coverage。")
+    parser.add_argument("--auto-coverage", type=float, default=0.99, help="按累计字频覆盖率自动决定数量(如0.99表示覆盖99%的高频字)。")
+    args = parser.parse_args()
+    generate_shortcut_3(prefix=args.prefix, count=args.count, auto_coverage=args.auto_coverage)
 
 if __name__ == "__main__":
     main()
