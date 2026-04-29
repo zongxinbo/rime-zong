@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Sicang5 生产构建脚本 (四码方案)
+Wucang5 生产构建脚本 (五码方案)
 利用 cangjie_builder 引擎，将简码与单字打包。
 """
 
@@ -9,12 +9,12 @@ from pathlib import Path
 from core.cangjie_builder import generate_dict, REPO_ROOT
 
 def main():
-    parser = argparse.ArgumentParser(description="Sicang5 生产构建脚本 (四码方案)")
+    parser = argparse.ArgumentParser(description="Wucang5 生产构建脚本 (五码方案)")
     parser.add_argument("--exclude-extended", action="store_true", default=False, help="过滤增广字集（Ext-B及以上）")
     args = parser.parse_args()
 
     generate_dict(
-        output_path = REPO_ROOT / "sicang5/sicang5.dict.yaml",
+        output_path = REPO_ROOT / "wucang5/wucang5.dict.yaml",
         shortcut_paths = {
             1: REPO_ROOT / "scripts/cangjie/prototypes/one_code.txt",
             2: REPO_ROOT / "scripts/cangjie/prototypes/two_code.txt",
@@ -23,7 +23,7 @@ def main():
         },
         source_dict = REPO_ROOT / "cangjie5/cangjie5.dict.yaml",
         freq_file = REPO_ROOT / "frequency/word/essay-zh-hans.txt",
-        max_code_length = 4,
+        max_code_length = 5,
         include_phrases = False,
         exclude_extended=args.exclude_extended
     )

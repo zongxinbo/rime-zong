@@ -11,8 +11,8 @@ from pathlib import Path
 from collections import defaultdict
 
 # 导入通用工具
-sys.path.append(str(Path(__file__).resolve().parent))
-from cangjie_builder import (
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from core.cangjie_builder import (
     parse_cangjie_dict,
     parse_frequency_file,
     is_han_char,
@@ -21,14 +21,14 @@ from cangjie_builder import (
 
 def main():
     source_dict = REPO_ROOT / "cangjie5/cangjie5.dict.yaml"
-    freq_file = REPO_ROOT / "sancang5/essay-zh-hans.txt"
+    freq_file = REPO_ROOT / "frequency/word/essay-zh-hans.txt"
     weights = {"Dialogue": 6, "Subtlex": 5, "Zhihu": 4, "BLCU": 2, "Essay": 1}
-    output_path = REPO_ROOT / "sicang5/sicang5_2.txt"
+    output_path = REPO_ROOT / "scripts/cangjie/prototypes/two_code.txt"
 
     # 1. 排除名单 (z 和 1)
     excluded_chars = set()
-    for f_name in ["sicang5_z.txt", "sicang5_1.txt"]:
-        p = REPO_ROOT / "sicang5" / f_name
+    for f_name in ["z_code.txt", "one_code.txt"]:
+        p = REPO_ROOT / "scripts/cangjie/prototypes" / f_name
         if p.exists():
             with open(p, "r", encoding="utf-8") as f:
                 for line in f:
@@ -42,7 +42,7 @@ def main():
         "Subtlex": REPO_ROOT / "frequency/char/subtlex_char_freq.txt",
         "Zhihu": REPO_ROOT / "frequency/char/zhihu_char_freq.txt",
         "BLCU": REPO_ROOT / "frequency/char/blcu_char_freq.txt",
-        "Essay": REPO_ROOT / "sancang5/essay-zh-hans.txt"
+        "Essay": REPO_ROOT / "frequency/word/essay-zh-hans.txt"
     }
     char_scores = defaultdict(int)
     for name, path in freq_paths.items():
@@ -54,7 +54,7 @@ def main():
     raw_entries = parse_cangjie_dict(source_dict)
     char_codes = {}
     for e in raw_entries:
-        if not is_common_han_char(e.text) or e.code.startswith('z') or e.code.startswith('x'): continue
+        if not is_han_char(e.text) or e.code.startswith('z') or e.code.startswith('x'): continue
         if e.text in excluded_chars: continue
         if e.text not in char_codes or len(e.code) < len(char_codes[e.text]):
             char_codes[e.text] = e.code
