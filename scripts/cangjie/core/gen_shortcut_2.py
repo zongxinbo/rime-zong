@@ -24,6 +24,7 @@ import argparse
 def main():
     parser = argparse.ArgumentParser(description="Sicang5 二简方案设计脚本")
     parser.add_argument("--prefix", action="store_true", default=False, help="提取规则取前两码（而非首尾码）")
+    parser.add_argument("--count", type=int, default=150, help="输出的二简字数量限制（默认 150）")
     args = parser.parse_args()
 
     source_dict = REPO_ROOT / "cangjie5/cangjie5.dict.yaml"
@@ -102,10 +103,10 @@ def main():
         if long_score > threshold:
             valid_shortcuts.append((long_char, code2, long_score, is_empty))
 
-    # 5. 排序并取 Top 150
+    # 5. 排序并取 Top N
     # 达到门槛后，统一按长码字的绝对频次(score)竞争 Top 名额
     valid_shortcuts.sort(key=lambda x: x[2], reverse=True)
-    top_n = valid_shortcuts[:150]
+    top_n = valid_shortcuts[:args.count]
     top_n.sort(key=lambda x: x[1])
 
     with open(output_path, "w", encoding="utf-8") as f:
