@@ -54,7 +54,7 @@ def main():
     raw_entries = parse_cangjie_dict(source_dict)
     char_codes = {}
     for e in raw_entries:
-        if not is_han_char(e.text) or e.code.startswith('z') or e.code.startswith('x'): continue
+        if not is_common_han_char(e.text) or e.code.startswith('z') or e.code.startswith('x'): continue
         if e.text in excluded_chars: continue
         if e.text not in char_codes or len(e.code) < len(char_codes[e.text]):
             char_codes[e.text] = e.code

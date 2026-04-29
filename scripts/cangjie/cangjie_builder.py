@@ -59,6 +59,13 @@ def is_han_char(text: str) -> bool:
     return any(start <= cp <= end for start, end in HAN_RANGES)
 
 
+def is_common_han_char(text: str) -> bool:
+    """判断是否为常用汉字（Rime 默认字符集，即基本多文种平面 BMP 内的汉字，排除 Ext-B 及以上的增广生僻字）"""
+    if not is_han_char(text):
+        return False
+    return ord(text) < 0x20000
+
+
 def is_han_text(text: str) -> bool:
     return bool(text) and all(is_han_char(char) for char in text)
 

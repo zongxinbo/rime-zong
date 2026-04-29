@@ -14,11 +14,17 @@ from cangjie_builder import (
     parse_cangjie_dict,
     parse_frequency_file,
     is_han_char,
+    is_common_han_char,
     project_code,
     REPO_ROOT
 )
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Sicang5 词库生产脚本")
+    parser.add_argument("--exclude-extended", action="store_true", default=False, help="过滤增广字集（Ext-B及以上）")
+    args = parser.parse_args()
+
     source_dict = REPO_ROOT / "cangjie5/cangjie5.dict.yaml"
     freq_file = REPO_ROOT / "sancang5/essay-zh-hans.txt"
     output_path = REPO_ROOT / "sicang5/sicang5.dict.yaml"
@@ -34,7 +40,12 @@ def main():
     raw_entries = parse_cangjie_dict(source_dict)
     char_full_codes = {}
     for e in raw_entries:
-        if is_han_char(e.text) and not (e.code.startswith('z') or e.code.startswith('x')):
+        if args.exclude_extended:
+            if not is_common_han_char(e.text): continue
+        else:
+            if not is_han_char(e.text): continue
+            
+        if not (e.code.startswith('z') or e.code.startswith('x')):
             if e.text not in char_full_codes or len(e.code) < len(char_full_codes[e.text]):
                 char_full_codes[e.text] = e.code
 

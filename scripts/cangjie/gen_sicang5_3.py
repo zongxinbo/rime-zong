@@ -15,7 +15,7 @@ sys.path.append(str(Path(__file__).resolve().parent))
 from cangjie_builder import (
     parse_cangjie_dict,
     parse_frequency_file,
-    is_han_char,
+    is_common_han_char,
     REPO_ROOT
 )
 
