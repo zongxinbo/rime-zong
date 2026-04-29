@@ -24,6 +24,8 @@ import argparse
 def main():
     parser = argparse.ArgumentParser(description="Sicang5 三简方案设计脚本")
     parser.add_argument("--prefix", action="store_true", default=False, help="提取规则取前三码（而非前两码+末码）")
+    parser.add_argument("--count", type=int, default=0, help="固定输出数量。如果设置>0，则忽略 auto-coverage。")
+    parser.add_argument("--auto-coverage", type=float, default=0.99, help="按累计字频覆盖率自动决定数量(如0.99表示覆盖99%的高频字)。")
     args = parser.parse_args()
 
     source_dict = REPO_ROOT / "cangjie5/cangjie5.dict.yaml"
@@ -99,9 +101,26 @@ def main():
         if long_score > threshold:
             valid_shortcuts.append((long_char, code3, long_score))
 
-    # 5. 排序并取 Top 500
+    # 5. 计算覆盖率阈值或使用固定数量
     valid_shortcuts.sort(key=lambda x: x[2], reverse=True)
-    top_n = valid_shortcuts[:500]
+    
+    if args.count > 0:
+        top_n = valid_shortcuts[:args.count]
+    else:
+        # 自动计算累计覆盖率阈值
+        sorted_scores = sorted(char_scores.values(), reverse=True)
+        total_score = sum(sorted_scores)
+        cum_sum = 0
+        threshold_score = 0
+        for score in sorted_scores:
+            cum_sum += score
+            if cum_sum >= total_score * args.auto_coverage:
+                threshold_score = score
+                break
+        
+        # 筛选大于阈值的简码
+        top_n = [item for item in valid_shortcuts if item[2] >= threshold_score]
+        
     top_n.sort(key=lambda x: x[1])
 
     with open(output_path, "w", encoding="utf-8") as f:
