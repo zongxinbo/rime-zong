@@ -2,20 +2,21 @@
 # encoding: utf-8
 
 schema:
-  schema_id: wucang5
-  name: 五码仓颉·五代
-  version: "2026.04.29"
+  schema_id: sicang5_fluency
+  name: 四码仓颉·五代·语句流
+  version: "2026.04.27"
   author:
     - zongxinbo <https://github.com/zongxinbo>
   description: |
+    四码仓颉五代，由仓颉五代码表按四码规则提取一二三末码取码生成。
     码表来源：仓颉五代补完计划 https://github.com/Jackchows/Cangjie5
     当前方案：https://github.com/zongxinbo/rime-zong
     仓颉输入法发明人：朱邦复先生。
 
-    五码仓颉单字方案
+    四码仓颉单字方案
     特点：
       只打单字，不造词，不学习；
-      最长五码，五码不自动上屏；
+      最长四码，四码不自动上屏；
       支持拼音反查、扩展字符和简繁转换。
     操作：
       空格：有候选时上屏，无匹配时清码；
@@ -60,30 +61,23 @@ engine:
     - fallback_segmentor
   translators:
     - punct_translator
+    - script_translator
     - reverse_lookup_translator
-    - table_translator
   filters:
     - simplifier
     - simplifier@traditionalization
+    - charset_filter@
     - uniquifier
-    - single_char_filter
 
 speller:
   alphabet: zyxwvutsrqponmlkjihgfedcba
-  delimiter: " ;"
-  max_code_length: 5
-  auto_select: false
-  auto_select_unique_candidate: false
+  delimiter: " ;'"
 
 translator:
-  dictionary: wucang5
-  enable_charset_filter: true
-  encode_commit_history: false
-  enable_encoder: false
-  enable_completion: true
-  enable_user_dict: false
-  enable_sentence: false
-  max_phrase_length: 1
+  dictionary: sicang5
+  prism: sicang5
+  disable_user_dict_for_patterns:
+    - "^z.*$"
   preedit_format:
     - 'xform/(?<![^x])x/#/'
     - "xlit|abcdefghijklmnopqrstuvwxyz#|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜片重|"
@@ -139,3 +133,7 @@ recognizer:
   patterns:
     punct: "^/([0-9]0?|[a-z]+)$"
     reverse_lookup: "`[a-z]*'?$|[a-z]*'$"
+
+__patch:
+  # 使用八股文简化字模型
+  - grammar:/hans?
