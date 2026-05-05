@@ -31,7 +31,7 @@ def is_gb2312(char: str) -> bool:
         return False
 
 
-def generate_shortcut_4():
+def generate_shortcut_4(gb_only: bool = False):
     source_dict = REPO_ROOT / "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
     output_path = REPO_ROOT / "scripts/cangjie/prototypes/four_code.txt"
 
@@ -55,7 +55,7 @@ def generate_shortcut_4():
             continue
         if e.text in excluded_chars:
             continue
-        if not is_gb2312(e.text):
+        if gb_only and not is_gb2312(e.text):
             continue
         if len(e.code) == 5:
             char_five_codes[e.text].append(e.code)
