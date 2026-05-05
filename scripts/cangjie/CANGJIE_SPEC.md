@@ -6,11 +6,11 @@
 优化仓颉系列方案（Sicang5/Wucang5）的简码分配方案，目标是利用现代语料库实现“高频优先”与“编码直觉”的平衡。
 
 ## 2. 核心数据源
-- **Dialogue 口语语料 (`frequency/char/dialogue_char_freq.txt`)**：核心口语字频（源自北语大语料库加工），确保高频对话词汇优先。
-- **Subtlex 影视字幕语料 (`frequency/char/subtlex_char_freq.txt`)**：基于影视字幕的日常频次，反映口语视听习惯，覆盖常用生活用语。
-- **知乎语料 (`frequency/char/zhihu_char_freq.txt`)**：现代网络常用语料，提供更具时代感的频次分布。
-- **北语大语料 (`frequency/char/blcu_char_freq.txt`)**：超大规模平衡语料库，提供基础字频基底。
-- **Essay 语料 (`frequency/word/essay-zh-hans.txt`)**：传统 Rime 基础语料库。
+- **Dialogue 口语语料 (`schemas/frequency/char/dialogue_char_freq.txt`)**：核心口语字频（源自北语大语料库加工），确保高频对话词汇优先。
+- **Subtlex 影视字幕语料 (`schemas/frequency/char/subtlex_char_freq.txt`)**：基于影视字幕的日常频次，反映口语视听习惯，覆盖常用生活用语。
+- **知乎语料 (`schemas/frequency/char/zhihu_char_freq.txt`)**：现代网络常用语料，提供更具时代感的频次分布。
+- **北语大语料 (`schemas/frequency/char/blcu_char_freq.txt`)**：超大规模平衡语料库，提供基础字频基底。
+- **Essay 语料 (`schemas/frequency/word/essay-zh-hans.txt`)**：传统 Rime 基础语料库。
 
 ## 3. 自动化分析工具
 | 脚本名称 | 职能 | 位置 |

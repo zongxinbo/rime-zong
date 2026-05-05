@@ -4,7 +4,7 @@
 
 ## 生成三码 / 四码仓颉五代
 
-从 `cangjie5/cangjie5.dict.yaml` 取码生成 `sancang5/sancang5.dict.yaml`（三码）或 `sicang5/sicang5.dict.yaml`（四码）：
+从 `schemas/cangjie/cangjie5/cangjie5.dict.yaml` 取码生成 `schemas/cangjie/sancang5/sancang5.dict.yaml`（三码）或 `schemas/cangjie/sicang5/sicang5.dict.yaml`（四码）：
 
 ```powershell
 python scripts\cangjie\gen_sancang5.py
@@ -44,7 +44,7 @@ python scripts\freq_utils\compare_freqs.py
 
 ## 生成依赖清单
 
-扫描正式方案并生成仓库根目录的 `dependencies.yaml`：
+扫描正式方案并生成仓库根目录的 `schemas/common/dependencies.yaml`：
 
 ```powershell
 python scripts\scheme_tools\scheme_dependencies.py
@@ -53,7 +53,7 @@ python scripts\scheme_tools\scheme_dependencies.py
 可指定输出路径：
 
 ```powershell
-python scripts\scheme_tools\scheme_dependencies.py --output dependencies.yaml
+python scripts\scheme_tools\scheme_dependencies.py --output schemas/common/dependencies.yaml
 ```
 
 说明：

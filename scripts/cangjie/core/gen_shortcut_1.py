@@ -187,13 +187,13 @@ def get_final_version(char_codes, all_freqs, results):
 
 
 def main():
-    source = REPO_ROOT / "cangjie5/cangjie5.dict.yaml"
+    source = REPO_ROOT / "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
     freq_paths = {
-        "Dialogue": REPO_ROOT / "frequency/char/dialogue_char_freq.txt",
-        "Subtlex": REPO_ROOT / "frequency/char/subtlex_char_freq.txt",
-        "Zhihu": REPO_ROOT / "frequency/char/zhihu_char_freq.txt",
-        "BLCU": REPO_ROOT / "frequency/char/blcu_char_freq.txt",
-        "Essay": REPO_ROOT / "frequency/word/essay-zh-hans.txt"
+        "Dialogue": REPO_ROOT / "schemas/frequency/char/dialogue_char_freq.txt",
+        "Subtlex": REPO_ROOT / "schemas/frequency/char/subtlex_char_freq.txt",
+        "Zhihu": REPO_ROOT / "schemas/frequency/char/zhihu_char_freq.txt",
+        "BLCU": REPO_ROOT / "schemas/frequency/char/blcu_char_freq.txt",
+        "Essay": REPO_ROOT / "schemas/common/essay-zh-hans.txt"
     }
 
     raw_entries = parse_cangjie_dict(source)

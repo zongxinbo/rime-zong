@@ -400,7 +400,7 @@ def run_generator(
     parser.add_argument(
         "--source",
         type=Path,
-        default=REPO_ROOT / "cangjie5/cangjie5.dict.yaml",
+        default=REPO_ROOT / "schemas/cangjie/cangjie5/cangjie5.dict.yaml",
         help="源仓颉五代码表",
     )
     parser.add_argument(
