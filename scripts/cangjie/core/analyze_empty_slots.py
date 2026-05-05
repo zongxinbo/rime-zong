@@ -16,7 +16,7 @@ from cangjie_builder import (
 )
 
 def main():
-    source_dict = REPO_ROOT / "cangjie5/cangjie5.dict.yaml"
+    source_dict = REPO_ROOT / "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
     
     print("正在解析原始仓颉编码...")
     entries = parse_cangjie_dict(source_dict)

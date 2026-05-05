@@ -31,6 +31,6 @@ def convert_blcu(xlsx_path, output_path):
                 f_out.write(f"{char}\t{int(count)}\n")
 
 if __name__ == "__main__":
-    convert_zhihu(REPO_ROOT / 'frequency/_original/6亿知乎语料通规汉字字频表.csv', REPO_ROOT / 'frequency/char/zhihu_char_freq.txt')
-    convert_blcu(REPO_ROOT / 'frequency/_original/北京语言大学25亿字语料汉字字频表.xlsx', REPO_ROOT / 'frequency/char/blcu_char_freq.txt')
+    convert_zhihu(REPO_ROOT / 'schemas/frequency/_original/6亿知乎语料通规汉字字频表.csv', REPO_ROOT / 'schemas/frequency/char/zhihu_char_freq.txt')
+    convert_blcu(REPO_ROOT / 'schemas/frequency/_original/北京语言大学25亿字语料汉字字频表.xlsx', REPO_ROOT / 'schemas/frequency/char/blcu_char_freq.txt')
     print("Done.")

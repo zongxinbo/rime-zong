@@ -23,8 +23,8 @@ import argparse
 
 def generate_shortcut_3(prefix: bool = False, count: int = 0, auto_coverage: float = 0.99):
 
-    source_dict = REPO_ROOT / "cangjie5/cangjie5.dict.yaml"
-    freq_file = REPO_ROOT / "frequency/word/essay-zh-hans.txt"
+    source_dict = REPO_ROOT / "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
+    freq_file = REPO_ROOT / "schemas/common/essay-zh-hans.txt"
     weights = {"Dialogue": 6, "Subtlex": 5, "Zhihu": 4, "BLCU": 2, "Essay": 1}
     output_path = REPO_ROOT / "scripts/cangjie/prototypes/three_code.txt"
 
@@ -41,11 +41,11 @@ def generate_shortcut_3(prefix: bool = False, count: int = 0, auto_coverage: flo
 
     # 2. 计算得分
     freq_paths = {
-        "Dialogue": REPO_ROOT / "frequency/char/dialogue_char_freq.txt",
-        "Subtlex": REPO_ROOT / "frequency/char/subtlex_char_freq.txt",
-        "Zhihu": REPO_ROOT / "frequency/char/zhihu_char_freq.txt",
-        "BLCU": REPO_ROOT / "frequency/char/blcu_char_freq.txt",
-        "Essay": REPO_ROOT / "frequency/word/essay-zh-hans.txt"
+        "Dialogue": REPO_ROOT / "schemas/frequency/char/dialogue_char_freq.txt",
+        "Subtlex": REPO_ROOT / "schemas/frequency/char/subtlex_char_freq.txt",
+        "Zhihu": REPO_ROOT / "schemas/frequency/char/zhihu_char_freq.txt",
+        "BLCU": REPO_ROOT / "schemas/frequency/char/blcu_char_freq.txt",
+        "Essay": REPO_ROOT / "schemas/common/essay-zh-hans.txt"
     }
     char_scores = defaultdict(int)
     for name, path in freq_paths.items():

@@ -1,14 +1,14 @@
 # encoding: utf-8
 #
 # 由 scripts/gen_sancang5.py 生成
-# 来源：cangjie5/cangjie5.dict.yaml
-# 词频排序：sancang5/essay-zh-hans.txt
+# 来源：schemas/cangjie/cangjie5/cangjie5.dict.yaml
+# 词频排序：schemas/common/essay-zh-hans.txt
 # 规则：1 至 3 码保留原码；4 码及以上取首码、次码、末码
 # 排序：先按三码编码分组；同码内按单字词频降序排列
 #
 ---
 name: sancang5
-version: '2026-04-28'
+version: '2026-05-05'
 sort: by_weight
 vocabulary: essay-zh-hans
 max_phrase_length: 7

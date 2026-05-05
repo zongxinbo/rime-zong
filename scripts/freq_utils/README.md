@@ -6,8 +6,8 @@
 
 ### 1. `convert_frequencies.py`
 将不同格式的原始字频表转换为 Rime 兼容的 `字符\t频次` 格式。
-- **Zhihu CSV**: 从 `frequency/6亿知乎语料通规汉字字频表.csv` 提取汉字和频次。
-- **BLCU XLSX**: 从 `frequency/北京语言大学25亿字语料汉字字频表.xlsx` 提取汉字和频次（Token）。
+- **Zhihu CSV**: 从 `schemas/frequency/6亿知乎语料通规汉字字频表.csv` 提取汉字和频次。
+- **BLCU XLSX**: 从 `schemas/frequency/北京语言大学25亿字语料汉字字频表.xlsx` 提取汉字和频次（Token）。
 
 ### 2. `compare_freqs.py`
 对比三个主要语料库（Essay, Zhihu, BLCU）的前 25 名高频单字，用于分析简码分配的合理性。

@@ -31,15 +31,15 @@ def main():
     generate_shortcut_3(prefix=args.s3_prefix, count=args.s3_count, auto_coverage=args.s3_coverage)
 
     generate_dict(
-        output_path = REPO_ROOT / "wucang5/wucang5.dict.yaml",
+        output_path = REPO_ROOT / "schemas/cangjie/wucang5/wucang5.dict.yaml",
         shortcut_paths = {
             1: REPO_ROOT / "scripts/cangjie/prototypes/one_code.txt",
             2: REPO_ROOT / "scripts/cangjie/prototypes/two_code.txt",
             3: REPO_ROOT / "scripts/cangjie/prototypes/three_code.txt",
             'z': REPO_ROOT / "scripts/cangjie/prototypes/z_code.txt"
         },
-        source_dict = REPO_ROOT / "cangjie5/cangjie5.dict.yaml",
-        freq_file = REPO_ROOT / "frequency/word/essay-zh-hans.txt",
+        source_dict = REPO_ROOT / "schemas/cangjie/cangjie5/cangjie5.dict.yaml",
+        freq_file = REPO_ROOT / "schemas/common/essay-zh-hans.txt",
         vocabulary = "essay-zh-hans",
         max_code_length = 5,
         max_phrase_length = 7,

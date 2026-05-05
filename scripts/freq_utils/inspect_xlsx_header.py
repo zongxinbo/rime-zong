@@ -8,4 +8,4 @@ def inspect_xlsx(filename):
         print(f"Row {i}: {row}")
 
 if __name__ == "__main__":
-    inspect_xlsx('frequency/北京语言大学25亿字语料汉字字频表.xlsx')
+    inspect_xlsx('schemas/frequency/北京语言大学25亿字语料汉字字频表.xlsx')

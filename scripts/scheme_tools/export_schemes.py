@@ -17,8 +17,12 @@ DEFAULT_OUTPUT = REPO_ROOT / "_output"
 def deploy_path(source: Path) -> Path:
     """转换为导出目录中的目标相对路径。"""
     relative = source.resolve().relative_to(REPO_ROOT)
-    if relative.parts and relative.parts[0] in {"lua", "opencc"}:
-        return Path(*relative.parts)
+    if "lua" in relative.parts:
+        idx = relative.parts.index("lua")
+        return Path(*relative.parts[idx:])
+    if "opencc" in relative.parts:
+        idx = relative.parts.index("opencc")
+        return Path(*relative.parts[idx:])
     return Path(source.name)
 
 

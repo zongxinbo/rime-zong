@@ -20,7 +20,7 @@ from typing import Any, Iterable
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent.parent
-DEFAULT_OUTPUT = REPO_ROOT / "dependencies.yaml"
+DEFAULT_OUTPUT = REPO_ROOT / "schemas" / "common" / "dependencies.yaml"
 
 
 SCALAR_RE_CACHE: dict[str, re.Pattern[str]] = {}
@@ -451,6 +451,8 @@ class DependencyScanner:
         grammar_languages = set(info.grammar_languages)
         if grammar_sections:
             grammar_file = info.path.with_name("grammar.yaml")
+            if not grammar_file.exists():
+                grammar_file = REPO_ROOT / "schemas" / "common" / "grammar.yaml"
             if grammar_file.exists():
                 closure.grammar_files.add(grammar_file)
                 grammar_languages.update(self._grammar_languages(grammar_file, grammar_sections))

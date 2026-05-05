@@ -1,0 +1,427 @@
+version: 1
+generated_by: "scripts/scheme_dependencies.py"
+schemes:
+  cangjie5:
+    name: "倉頡五代"
+    schema_dependencies:
+      - "pinyin_simp"
+    groups:
+      schema:
+        - "schemas/cangjie/cangjie5/cangjie5.schema.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.schema.yaml"
+      custom:
+        - "schemas/cangjie/cangjie5/cangjie5.custom.yaml"
+      dict:
+        - "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.dict.yaml"
+      vocabulary: []
+      grammar: []
+      opencc:
+        - "schemas/common/opencc/STCharacters.ocd2"
+        - "schemas/common/opencc/STPhrases.ocd2"
+        - "schemas/common/opencc/s2t.json"
+      lua: []
+      preset:
+        - "schemas/common/symbols.yaml"
+    external:
+      preset:
+        - "default"
+      vocabulary:
+        - "essay"
+    missing: []
+  cangjie5_ice:
+    name: "倉頡五代·雾凇"
+    schema_dependencies:
+      - "pinyin_ice"
+    groups:
+      schema:
+        - "schemas/cangjie/cangjie5/cangjie5.schema.yaml"
+        - "schemas/cangjie/cangjie5/cangjie5_ice.schema.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.schema.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.schema.yaml"
+      custom:
+        - "schemas/cangjie/cangjie5/cangjie5.custom.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.custom.yaml"
+      dict:
+        - "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.41448.dict.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.8105.dict.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.base.dict.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.dict.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.ext.dict.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.others.dict.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.tencent.dict.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.dict.yaml"
+      vocabulary: []
+      grammar: []
+      opencc:
+        - "schemas/common/opencc/STCharacters.ocd2"
+        - "schemas/common/opencc/STPhrases.ocd2"
+        - "schemas/common/opencc/s2t.json"
+      lua: []
+      preset:
+        - "schemas/common/symbols.yaml"
+    external:
+      preset:
+        - "default"
+      vocabulary:
+        - "essay"
+    missing: []
+  cangjie5_pinyin:
+    name: "倉頡五代·拼音"
+    schema_dependencies:
+      - "pinyin_simp"
+    groups:
+      schema:
+        - "schemas/cangjie/cangjie5/cangjie5.schema.yaml"
+        - "schemas/cangjie/cangjie5/cangjie5_pinyin.schema.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.schema.yaml"
+      custom:
+        - "schemas/cangjie/cangjie5/cangjie5.custom.yaml"
+      dict:
+        - "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.dict.yaml"
+      vocabulary: []
+      grammar: []
+      opencc:
+        - "schemas/common/opencc/STCharacters.ocd2"
+        - "schemas/common/opencc/STPhrases.ocd2"
+        - "schemas/common/opencc/s2t.json"
+      lua: []
+      preset:
+        - "schemas/common/symbols.yaml"
+    external:
+      preset:
+        - "default"
+      vocabulary:
+        - "essay"
+    missing: []
+  jaroomaji:
+    name: "日本語"
+    schema_dependencies:
+      - "cangjie5"
+      - "pinyin_simp"
+    groups:
+      schema:
+        - "schemas/cangjie/cangjie5/cangjie5.schema.yaml"
+        - "schemas/jaroomaji/jaroomaji.schema.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.schema.yaml"
+      custom:
+        - "schemas/cangjie/cangjie5/cangjie5.custom.yaml"
+      dict:
+        - "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
+        - "schemas/jaroomaji/jaroomaji.dict.yaml"
+        - "schemas/jaroomaji/jaroomaji.jmdict.dict.yaml"
+        - "schemas/jaroomaji/jaroomaji.kana_kigou.dict.yaml"
+        - "schemas/jaroomaji/jaroomaji.kanjidic2.dict.yaml"
+        - "schemas/jaroomaji/jaroomaji.mozc.dict.yaml"
+        - "schemas/jaroomaji/jaroomaji.mozcemoji.dict.yaml"
+        - "schemas/jaroomaji/jaroomaji.user.dict.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.dict.yaml"
+      vocabulary: []
+      grammar: []
+      opencc:
+        - "schemas/common/opencc/STCharacters.ocd2"
+        - "schemas/common/opencc/STPhrases.ocd2"
+        - "schemas/common/opencc/s2t.json"
+      lua: []
+      preset:
+        - "schemas/common/symbols.yaml"
+    external:
+      preset:
+        - "default"
+      vocabulary:
+        - "essay"
+    missing: []
+  lyzm:
+    name: "龙渊郑码"
+    schema_dependencies:
+      - "pinyin_simp"
+    groups:
+      schema:
+        - "schemas/cangjie/cangjie5/cangjie5.schema.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.schema.yaml"
+        - "schemas/zhengma/lyzm/lyzm.schema.yaml"
+      custom:
+        - "schemas/cangjie/cangjie5/cangjie5.custom.yaml"
+        - "schemas/zhengma/lyzm/lyzm.custom.yaml"
+      dict:
+        - "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.dict.yaml"
+        - "schemas/zhengma/lyzm/lyzm.dict.yaml"
+      vocabulary: []
+      grammar: []
+      opencc:
+        - "schemas/common/opencc/STCharacters.ocd2"
+        - "schemas/common/opencc/STPhrases.ocd2"
+        - "schemas/common/opencc/s2t.json"
+      lua: []
+      preset:
+        - "schemas/common/symbols.yaml"
+    external:
+      preset:
+        - "default"
+      vocabulary:
+        - "essay"
+    missing: []
+  pinyin_ice:
+    name: "雾凇拼音"
+    schema_dependencies:
+      - "cangjie5"
+    groups:
+      schema:
+        - "schemas/cangjie/cangjie5/cangjie5.schema.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.schema.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.schema.yaml"
+      custom:
+        - "schemas/cangjie/cangjie5/cangjie5.custom.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.custom.yaml"
+      dict:
+        - "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.41448.dict.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.8105.dict.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.base.dict.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.dict.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.ext.dict.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.others.dict.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.tencent.dict.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.dict.yaml"
+      vocabulary: []
+      grammar: []
+      opencc:
+        - "schemas/common/opencc/STCharacters.ocd2"
+        - "schemas/common/opencc/STPhrases.ocd2"
+        - "schemas/common/opencc/s2t.json"
+      lua: []
+      preset:
+        - "schemas/common/symbols.yaml"
+    external:
+      preset:
+        - "default"
+      vocabulary:
+        - "essay"
+    missing: []
+  pinyin_ice_cangjie5:
+    name: "雾凇拼音·倉頡"
+    schema_dependencies:
+      - "cangjie5"
+    groups:
+      schema:
+        - "schemas/cangjie/cangjie5/cangjie5.schema.yaml"
+        - "schemas/pinyin_ice/pinyin_ice_cangjie5.schema.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.schema.yaml"
+      custom:
+        - "schemas/cangjie/cangjie5/cangjie5.custom.yaml"
+      dict:
+        - "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.41448.dict.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.8105.dict.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.base.dict.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.dict.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.ext.dict.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.others.dict.yaml"
+        - "schemas/pinyin_ice/pinyin_ice.tencent.dict.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.dict.yaml"
+      vocabulary: []
+      grammar: []
+      opencc:
+        - "schemas/common/opencc/STCharacters.ocd2"
+        - "schemas/common/opencc/STPhrases.ocd2"
+        - "schemas/common/opencc/s2t.json"
+      lua:
+        - "schemas/common/lua/aux_code_filter.lua"
+      preset:
+        - "schemas/common/symbols.yaml"
+    external:
+      preset:
+        - "default"
+      vocabulary:
+        - "essay"
+    missing: []
+  pinyin_simp:
+    name: "拼音"
+    schema_dependencies:
+      - "cangjie5"
+    groups:
+      schema:
+        - "schemas/cangjie/cangjie5/cangjie5.schema.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.schema.yaml"
+      custom:
+        - "schemas/cangjie/cangjie5/cangjie5.custom.yaml"
+      dict:
+        - "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.dict.yaml"
+      vocabulary: []
+      grammar: []
+      opencc:
+        - "schemas/common/opencc/STCharacters.ocd2"
+        - "schemas/common/opencc/STPhrases.ocd2"
+        - "schemas/common/opencc/s2t.json"
+      lua: []
+      preset:
+        - "schemas/common/symbols.yaml"
+    external:
+      preset:
+        - "default"
+      vocabulary:
+        - "essay"
+    missing: []
+  sancang5:
+    name: "三码仓颉·五代"
+    schema_dependencies:
+      - "pinyin_simp"
+    groups:
+      schema:
+        - "schemas/cangjie/cangjie5/cangjie5.schema.yaml"
+        - "schemas/cangjie/sancang5/sancang5.schema.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.schema.yaml"
+      custom:
+        - "schemas/cangjie/cangjie5/cangjie5.custom.yaml"
+      dict:
+        - "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
+        - "schemas/cangjie/sancang5/sancang5.dict.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.dict.yaml"
+      vocabulary:
+        - "schemas/common/essay-zh-hans.txt"
+      grammar:
+        - "schemas/common/grammar.yaml"
+        - "schemas/common/zh-hans-t-essay-bgw.gram"
+      opencc:
+        - "schemas/common/opencc/STCharacters.ocd2"
+        - "schemas/common/opencc/STPhrases.ocd2"
+        - "schemas/common/opencc/s2t.json"
+      lua: []
+      preset:
+        - "schemas/common/symbols.yaml"
+    external:
+      preset:
+        - "default"
+      vocabulary:
+        - "essay"
+    missing: []
+  sicang5:
+    name: "四码仓颉·五代"
+    schema_dependencies:
+      - "pinyin_simp"
+    groups:
+      schema:
+        - "schemas/cangjie/cangjie5/cangjie5.schema.yaml"
+        - "schemas/cangjie/sicang5/sicang5.schema.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.schema.yaml"
+      custom:
+        - "schemas/cangjie/cangjie5/cangjie5.custom.yaml"
+      dict:
+        - "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
+        - "schemas/cangjie/sicang5/sicang5.dict.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.dict.yaml"
+      vocabulary:
+        - "schemas/common/essay-zh-hans.txt"
+      grammar:
+        - "schemas/common/grammar.yaml"
+        - "schemas/common/zh-hans-t-essay-bgw.gram"
+      opencc:
+        - "schemas/common/opencc/STCharacters.ocd2"
+        - "schemas/common/opencc/STPhrases.ocd2"
+        - "schemas/common/opencc/s2t.json"
+      lua: []
+      preset:
+        - "schemas/common/symbols.yaml"
+    external:
+      preset:
+        - "default"
+      vocabulary:
+        - "essay"
+    missing: []
+  sijiao:
+    name: "四角号码"
+    schema_dependencies:
+      - "pinyin_simp"
+    groups:
+      schema:
+        - "schemas/cangjie/cangjie5/cangjie5.schema.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.schema.yaml"
+        - "schemas/sijiao/sijiao.schema.yaml"
+      custom:
+        - "schemas/cangjie/cangjie5/cangjie5.custom.yaml"
+      dict:
+        - "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.dict.yaml"
+        - "schemas/sijiao/sijiao.dict.yaml"
+      vocabulary: []
+      grammar: []
+      opencc:
+        - "schemas/common/opencc/STCharacters.ocd2"
+        - "schemas/common/opencc/STPhrases.ocd2"
+        - "schemas/common/opencc/s2t.json"
+      lua: []
+      preset:
+        - "schemas/common/symbols.yaml"
+    external:
+      preset:
+        - "default"
+      vocabulary:
+        - "essay"
+    missing: []
+  wucang5:
+    name: "五码仓颉·五代"
+    schema_dependencies:
+      - "pinyin_simp"
+    groups:
+      schema:
+        - "schemas/cangjie/cangjie5/cangjie5.schema.yaml"
+        - "schemas/cangjie/wucang5/wucang5.schema.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.schema.yaml"
+      custom:
+        - "schemas/cangjie/cangjie5/cangjie5.custom.yaml"
+      dict:
+        - "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
+        - "schemas/cangjie/wucang5/wucang5.dict.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.dict.yaml"
+      vocabulary:
+        - "schemas/common/essay-zh-hans.txt"
+      grammar:
+        - "schemas/common/grammar.yaml"
+        - "schemas/common/zh-hans-t-essay-bgw.gram"
+      opencc:
+        - "schemas/common/opencc/STCharacters.ocd2"
+        - "schemas/common/opencc/STPhrases.ocd2"
+        - "schemas/common/opencc/s2t.json"
+      lua: []
+      preset:
+        - "schemas/common/symbols.yaml"
+    external:
+      preset:
+        - "default"
+      vocabulary:
+        - "essay"
+    missing: []
+  zmcdzc:
+    name: "郑码"
+    schema_dependencies:
+      - "pinyin_simp"
+    groups:
+      schema:
+        - "schemas/cangjie/cangjie5/cangjie5.schema.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.schema.yaml"
+        - "schemas/zhengma/zmcdzc/zmcdzc.schema.yaml"
+      custom:
+        - "schemas/cangjie/cangjie5/cangjie5.custom.yaml"
+      dict:
+        - "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.dict.yaml"
+        - "schemas/zhengma/zmcdzc/zmcdzc.dict.yaml"
+      vocabulary: []
+      grammar: []
+      opencc:
+        - "schemas/common/opencc/STCharacters.ocd2"
+        - "schemas/common/opencc/STPhrases.ocd2"
+        - "schemas/common/opencc/s2t.json"
+      lua: []
+      preset:
+        - "schemas/common/symbols.yaml"
+    external:
+      preset:
+        - "default"
+      vocabulary:
+        - "essay"
+    missing: []
