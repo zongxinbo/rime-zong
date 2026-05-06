@@ -104,7 +104,50 @@ def generate_dict(
 
     all_entries.sort()
 
-    # ── 第四步：写入文件 ──
+    # ── 第四步：后缀消重（z=第二候选, x=第三候选）──
+    # 对于重码组，给第2选生成 code+z，第3选生成 code+x
+    # 跳过加后缀后超过 max_code_length 的情况
+    code_groups = defaultdict(list)
+    for entry in all_entries:
+        code_groups[entry[0]].append(entry)
+
+    suffix_entries = []
+    suffix_count = 0
+    for code, entries in code_groups.items():
+        if len(code) >= max_code_length:
+            continue  # 加后缀会超长，跳过
+
+        # 取去重后的候选顺序（按排序后的先后）
+        seen = []
+        for _, _, _, char in entries:
+            if char not in seen:
+                seen.append(char)
+
+        # 第2选 → code+z（跳过已有条目，如 z_code 字根字）
+        if len(seen) >= 2:
+            char2 = seen[1]
+            new_code_z = code + 'z'
+            if (char2, new_code_z) not in used_text_code:
+                freq2 = char_freqs.get(char2, 0)
+                suffix_entries.append((new_code_z, 1, -freq2, char2))
+                used_text_code.add((char2, new_code_z))
+                suffix_count += 1
+
+        # 第3选 → code+x
+        if len(seen) >= 3:
+            char3 = seen[2]
+            new_code_x = code + 'x'
+            if (char3, new_code_x) not in used_text_code:
+                freq3 = char_freqs.get(char3, 0)
+                suffix_entries.append((new_code_x, 1, -freq3, char3))
+                used_text_code.add((char3, new_code_x))
+                suffix_count += 1
+
+    all_entries.extend(suffix_entries)
+    all_entries.sort()
+    print(f"后缀消重：生成 {suffix_count} 个 z/x 后缀条目")
+
+    # ── 第五步：写入文件 ──
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w", encoding="utf-8", newline="\n") as f:
         dict_name = output_path.name.split('.')[0]
@@ -133,6 +176,7 @@ def generate_dict(
     dm_count = sum(1 for _, _, _, d in fullcode_entries if d)
     print(
         f"完成：简码={sc_count} 全码={fc_count} 退避={dm_count}"
+        f" 后缀消重={suffix_count}"
         f" 总计={len(all_entries)} 输出={output_path}"
     )
 
