@@ -8,14 +8,17 @@ def load_equiv_table(path):
         content = json.load(f)
         return content.get("data", content)
 
-def get_actual_codes(dict_path, max_length=4):
+def get_actual_codes(dict_path, max_length=4, _preloaded_entries=None):
     """
     回归到第 18 轮的纯粹逻辑：
     1. 完全基于物理行号顺序。
     2. pos 1 补空格，pos > 1 加数字。
     3. 简码选取字典中该字出现的【最后一个】编码。
     """
-    _, entries = parse_rime_dict(dict_path)
+    if _preloaded_entries is not None:
+        entries = _preloaded_entries
+    else:
+        _, entries = parse_rime_dict(dict_path)
     
     code_counts = defaultdict(int)
     code_char_positions = defaultdict(dict)
@@ -46,8 +49,12 @@ def get_actual_codes(dict_path, max_length=4):
             
     return char_to_final_codes
 
-def analyze_speed_equivalent(dict_path, freq_data, equiv_table_path, charset_filter=is_gb2312, mode='all', max_length=4):
-    char_all_codes = get_actual_codes(dict_path, max_length=max_length)
+def analyze_speed_equivalent(dict_path, freq_data, equiv_table_path, charset_filter=is_gb2312, mode='all', max_length=4, _preloaded_entries=None, _preloaded_actual_codes=None):
+    if _preloaded_actual_codes is not None:
+        char_all_codes = _preloaded_actual_codes
+    else:
+        char_all_codes = get_actual_codes(dict_path, max_length=max_length, _preloaded_entries=_preloaded_entries)
+
     equiv_data = load_equiv_table(equiv_table_path)
     
     target_map = {}

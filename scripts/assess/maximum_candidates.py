@@ -2,9 +2,12 @@ import argparse
 from collections import defaultdict
 from utils import parse_rime_dict, is_gb2312
 
-def analyze_max_candidates(dict_path, charset_filter=is_gb2312):
+def analyze_max_candidates(dict_path, charset_filter=is_gb2312, _preloaded_entries=None):
     """分析编码对应的候选项个数"""
-    _, entries = parse_rime_dict(dict_path)
+    if _preloaded_entries is not None:
+        entries = _preloaded_entries
+    else:
+        _, entries = parse_rime_dict(dict_path)
     
     code_map = defaultdict(list)
     char_seen = set()

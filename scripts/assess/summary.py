@@ -50,6 +50,17 @@ def main():
     args = parser.parse_args()
 
     dict_path = args.dict
+    
+    import time
+    start_time = time.time()
+    print(f"正在单次加载字典以提速: {dict_path} ...")
+    _, entries = parse_rime_dict(dict_path)
+    
+    import speed_equivalent as se
+    import short_code_efficiency as sce
+    se_actual_codes = se.get_actual_codes(dict_path, max_length=4, _preloaded_entries=entries)
+    sce_actual_codes = sce.get_actual_codes(dict_path, max_length=4, _preloaded_entries=entries)
+
     print("正在加载字频数据...")
     freq_sources = {
         "知乎简体": "schemas/frequency/char/sc/zhihu_char_freq.txt",
@@ -86,8 +97,8 @@ def main():
     print("-" * get_display_width(header))
     for cs_key, cs_label in charsets:
         cs_filter = get_charset_filter(cs_key)
-        res_long = analyze_duplicates(dict_path, "", charset_filter=cs_filter, mode='longest', _preloaded_freq={})
-        res_short = analyze_duplicates(dict_path, "", charset_filter=cs_filter, mode='shortest', _preloaded_freq={})
+        res_long = analyze_duplicates(dict_path, "", charset_filter=cs_filter, mode='longest', _preloaded_freq={}, _preloaded_entries=entries)
+        res_short = analyze_duplicates(dict_path, "", charset_filter=cs_filter, mode='shortest', _preloaded_freq={}, _preloaded_entries=entries)
         print(f"{pad_wide(cs_label, 12)} | {pad_wide(res_long['dup_groups'], 10)} | {pad_wide(res_long['dup_chars'], 10)} | {pad_wide(res_short['dup_groups'], 10)} | {pad_wide(res_short['dup_chars'], 10)}")
 
     # --- [表格 2] 动态选重率分析 ---
@@ -102,10 +113,10 @@ def main():
     for freq_name, norm in freq_data.items():
         cs_name = source_to_charset.get(freq_name, "GB2312")
         cs_filter = get_charset_filter(cs_name)
-        rate_lf = analyze_duplicates(dict_path, "", charset_filter=cs_filter, mode='longest', sort_method='frequency', _preloaded_freq=norm)['dynamic_rate']
-        rate_sf = analyze_duplicates(dict_path, "", charset_filter=cs_filter, mode='shortest', sort_method='frequency', _preloaded_freq=norm)['dynamic_rate']
-        rate_lo = analyze_duplicates(dict_path, "", charset_filter=cs_filter, mode='longest', sort_method='original', _preloaded_freq=norm)['dynamic_rate']
-        rate_so = analyze_duplicates(dict_path, "", charset_filter=cs_filter, mode='shortest', sort_method='original', _preloaded_freq=norm)['dynamic_rate']
+        rate_lf = analyze_duplicates(dict_path, "", charset_filter=cs_filter, mode='longest', sort_method='frequency', _preloaded_freq=norm, _preloaded_entries=entries)['dynamic_rate']
+        rate_sf = analyze_duplicates(dict_path, "", charset_filter=cs_filter, mode='shortest', sort_method='frequency', _preloaded_freq=norm, _preloaded_entries=entries)['dynamic_rate']
+        rate_lo = analyze_duplicates(dict_path, "", charset_filter=cs_filter, mode='longest', sort_method='original', _preloaded_freq=norm, _preloaded_entries=entries)['dynamic_rate']
+        rate_so = analyze_duplicates(dict_path, "", charset_filter=cs_filter, mode='shortest', sort_method='original', _preloaded_freq=norm, _preloaded_entries=entries)['dynamic_rate']
         
         def fmt_cell(val):
             num_str = f"{val*10000:7.2f}"
@@ -119,7 +130,7 @@ def main():
     print("-" * get_display_width(header))
     for cs_key, cs_label in charsets:
         cs_filter = get_charset_filter(cs_key)
-        mc = analyze_max_candidates(dict_path, charset_filter=cs_filter)
+        mc = analyze_max_candidates(dict_path, charset_filter=cs_filter, _preloaded_entries=entries)
         if mc:
             print(f"{pad_wide(cs_label, 12)} | {pad_wide(mc['max_candidates'], 12)} | {pad_wide(f'{mc['avg_candidates']:.2f}', 12)}")
 
@@ -133,10 +144,10 @@ def main():
     for name, norm in freq_data.items():
         cs_name = source_to_charset.get(name, "GB2312")
         cs_filter = get_charset_filter(cs_name)
-        eq_full = analyze_speed_equivalent(dict_path, norm, args.equiv, charset_filter=cs_filter, mode='full')
-        eq_s1 = analyze_speed_equivalent(dict_path, norm, args.equiv, charset_filter=cs_filter, mode='s1')
-        eq_s2 = analyze_speed_equivalent(dict_path, norm, args.equiv, charset_filter=cs_filter, mode='s2')
-        eq_all = analyze_speed_equivalent(dict_path, norm, args.equiv, charset_filter=cs_filter, mode='all')
+        eq_full = analyze_speed_equivalent(dict_path, norm, args.equiv, charset_filter=cs_filter, mode='full', _preloaded_actual_codes=se_actual_codes)
+        eq_s1 = analyze_speed_equivalent(dict_path, norm, args.equiv, charset_filter=cs_filter, mode='s1', _preloaded_actual_codes=se_actual_codes)
+        eq_s2 = analyze_speed_equivalent(dict_path, norm, args.equiv, charset_filter=cs_filter, mode='s2', _preloaded_actual_codes=se_actual_codes)
+        eq_all = analyze_speed_equivalent(dict_path, norm, args.equiv, charset_filter=cs_filter, mode='all', _preloaded_actual_codes=se_actual_codes)
         row = [pad_wide(name+"字频", 15), pad_wide(f"{eq_full:.4f}", 10), pad_wide(f"{eq_s1:.4f}", 10), pad_wide(f"{eq_s2:.4f}", 10), pad_wide(f"{eq_all:.4f}", 10)]
         print(" | ".join(row))
 
@@ -154,7 +165,7 @@ def main():
             if name not in freq_data: continue
             cs_name = source_to_charset.get(name, "GB2312")
             cs_filter = get_charset_filter(cs_name)
-            val = analyze_top_n_efficiency(dict_path, freq_data[name], n, charset_filter=cs_filter)
+            val = analyze_top_n_efficiency(dict_path, freq_data[name], n, charset_filter=cs_filter, _preloaded_actual_codes=sce_actual_codes)
             row.append(pad_wide(f"{val:.4f}", 12))
         print(" | ".join(row))
 
@@ -162,7 +173,7 @@ def main():
     print("\n" + "="*30 + " [6] 键盘热力与负载分析 " + "="*30)
     # 严格对齐 yuhao-assess：默认使用 北语简体 (BLCU)
     blcu_norm = freq_data.get("北语简体", {})
-    hm = analyze_heatmap(dict_path, "", _preloaded_freq=blcu_norm)
+    hm = analyze_heatmap(dict_path, "", _preloaded_freq=blcu_norm, _preloaded_entries=entries)
     if hm:
         print(f"  [左右手平衡 (相对比)]")
         l_p, r_p = hm['hand_balance']['left'], hm['hand_balance']['right']
@@ -181,7 +192,9 @@ def main():
             val = hm['row_load'].get(row_name, 0.0)
             print(f"  {pad_wide(row_name, 10)}: {render_bar(val, 25)}")
 
-    print("\n评估完成。")
+    import time
+    elapsed = time.time() - start_time
+    print(f"\n评估完成，总耗时: {elapsed:.2f}s")
 
 if __name__ == "__main__":
     main()
