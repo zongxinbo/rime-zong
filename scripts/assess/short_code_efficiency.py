@@ -2,11 +2,14 @@ import argparse
 from collections import defaultdict
 from utils import parse_rime_dict, is_gb2312, load_freq
 
-def get_actual_codes(dict_path, max_length=4):
+def get_actual_codes(dict_path, max_length=4, _preloaded_entries=None):
     """
     严格还原 yuhao-assess 的 codeTableService.ts 逻辑
     """
-    _, entries = parse_rime_dict(dict_path)
+    if _preloaded_entries is not None:
+        entries = _preloaded_entries
+    else:
+        _, entries = parse_rime_dict(dict_path)
     
     # yuhao-assess 逻辑：按文件顺序处理
     full_map = {}   # char -> code
@@ -55,8 +58,11 @@ def get_actual_codes(dict_path, max_length=4):
     
     return char_to_final_short, char_to_final_full
 
-def analyze_top_n_efficiency(dict_path, freq_data, top_n, charset_filter=is_gb2312, max_length=4):
-    char_to_short, char_to_full = get_actual_codes(dict_path, max_length=max_length)
+def analyze_top_n_efficiency(dict_path, freq_data, top_n, charset_filter=is_gb2312, max_length=4, _preloaded_entries=None, _preloaded_actual_codes=None):
+    if _preloaded_actual_codes is not None:
+        char_to_short, char_to_full = _preloaded_actual_codes
+    else:
+        char_to_short, char_to_full = get_actual_codes(dict_path, max_length=max_length, _preloaded_entries=_preloaded_entries)
     
     processed = []
     for char, freq in freq_data.items():
@@ -85,8 +91,8 @@ def analyze_top_n_efficiency(dict_path, freq_data, top_n, charset_filter=is_gb23
         
     return tw / tf if tf > 0 else 0.0
 
-def analyze_efficiency(dict_path, freq_data, charset_filter=is_gb2312, max_length=4):
-    char_to_short, char_to_full = get_actual_codes(dict_path, max_length=max_length)
+def analyze_efficiency(dict_path, freq_data, charset_filter=is_gb2312, max_length=4, _preloaded_entries=None):
+    char_to_short, char_to_full = get_actual_codes(dict_path, max_length=max_length, _preloaded_entries=_preloaded_entries)
     valid_chars = [c for c in char_to_full.keys() if c in freq_data and charset_filter(c)]
     
     res = {}

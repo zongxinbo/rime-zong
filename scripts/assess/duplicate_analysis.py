@@ -2,9 +2,12 @@ import argparse
 from collections import defaultdict
 from utils import parse_rime_dict, is_gb2312, load_freq
 
-def analyze_duplicates(dict_path, freq_path, charset_filter=is_gb2312, mode='all', sort_method='frequency', _preloaded_freq=None):
+def analyze_duplicates(dict_path, freq_path, charset_filter=is_gb2312, mode='all', sort_method='frequency', _preloaded_freq=None, _preloaded_entries=None):
     """分析重码情况 (支持上下文感知的原始码表模拟)"""
-    header, entries = parse_rime_dict(dict_path)
+    if _preloaded_entries is not None:
+        entries = _preloaded_entries
+    else:
+        header, entries = parse_rime_dict(dict_path)
     if _preloaded_freq is not None:
         freqs = _preloaded_freq
     else:
