@@ -22,8 +22,8 @@ def get_top(freqs, n=25):
     return sorted(chars, key=lambda x: freqs[x], reverse=True)[:n]
 
 essay_freqs = load_freq(REPO_ROOT / 'schemas/common/essay-zh-hans.txt')
-zhihu_char_freqs = load_freq(REPO_ROOT / 'schemas/frequency/char/zhihu_char_freq.txt')
-blcu_char_freqs = load_freq(REPO_ROOT / 'schemas/frequency/char/blcu_char_freq.txt')
+zhihu_char_freqs = load_freq(REPO_ROOT / 'schemas/common/frequency/char/zhihu_char_freq.txt')
+blcu_char_freqs = load_freq(REPO_ROOT / 'schemas/common/frequency/char/blcu_char_freq.txt')
 
 print("Top 25 comparison:")
 print(f"{'Rank':<5} | {'Essay':<5} | {'Zhihu':<5} | {'BLCU':<5}")

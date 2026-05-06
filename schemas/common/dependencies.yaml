@@ -314,8 +314,37 @@ schemes:
         - "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
         - "schemas/cangjie/sicang5/sicang5.dict.yaml"
         - "schemas/pinyin_simp/pinyin_simp.dict.yaml"
+      vocabulary: []
+      grammar: []
+      opencc:
+        - "schemas/common/opencc/STCharacters.ocd2"
+        - "schemas/common/opencc/STPhrases.ocd2"
+        - "schemas/common/opencc/s2t.json"
+      lua: []
+      preset:
+        - "schemas/common/symbols.yaml"
+    external:
+      preset:
+        - "default"
       vocabulary:
-        - "schemas/common/essay-zh-hans.txt"
+        - "essay"
+    missing: []
+  sicang5_fluency:
+    name: "四码仓颉·五代·语句流"
+    schema_dependencies:
+      - "pinyin_simp"
+    groups:
+      schema:
+        - "schemas/cangjie/cangjie5/cangjie5.schema.yaml"
+        - "schemas/cangjie/sicang5/sicang5_fluency.schema.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.schema.yaml"
+      custom:
+        - "schemas/cangjie/cangjie5/cangjie5.custom.yaml"
+      dict:
+        - "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
+        - "schemas/cangjie/sicang5/sicang5.dict.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.dict.yaml"
+      vocabulary: []
       grammar:
         - "schemas/common/grammar.yaml"
         - "schemas/common/zh-hans-t-essay-bgw.gram"
@@ -377,8 +406,37 @@ schemes:
         - "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
         - "schemas/cangjie/wucang5/wucang5.dict.yaml"
         - "schemas/pinyin_simp/pinyin_simp.dict.yaml"
+      vocabulary: []
+      grammar: []
+      opencc:
+        - "schemas/common/opencc/STCharacters.ocd2"
+        - "schemas/common/opencc/STPhrases.ocd2"
+        - "schemas/common/opencc/s2t.json"
+      lua: []
+      preset:
+        - "schemas/common/symbols.yaml"
+    external:
+      preset:
+        - "default"
       vocabulary:
-        - "schemas/common/essay-zh-hans.txt"
+        - "essay"
+    missing: []
+  wucang5_fluency:
+    name: "五码仓颉·五代·语句流"
+    schema_dependencies:
+      - "pinyin_simp"
+    groups:
+      schema:
+        - "schemas/cangjie/cangjie5/cangjie5.schema.yaml"
+        - "schemas/cangjie/wucang5/wucang5_fluency.schema.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.schema.yaml"
+      custom:
+        - "schemas/cangjie/cangjie5/cangjie5.custom.yaml"
+      dict:
+        - "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
+        - "schemas/cangjie/wucang5/wucang5.dict.yaml"
+        - "schemas/pinyin_simp/pinyin_simp.dict.yaml"
+      vocabulary: []
       grammar:
         - "schemas/common/grammar.yaml"
         - "schemas/common/zh-hans-t-essay-bgw.gram"

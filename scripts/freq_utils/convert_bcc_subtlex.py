@@ -39,32 +39,32 @@ def convert_subtlex(input_path, output_path, is_word=False):
 if __name__ == "__main__":
     # BCC Dialogue
     convert_bcc(
-        REPO_ROOT / 'schemas/frequency/_original/dialogue_char_freq.txt',
-        REPO_ROOT / 'schemas/frequency/char/dialogue_char_freq.txt'
+        REPO_ROOT / 'schemas/common/frequency/_original/dialogue_char_freq.txt',
+        REPO_ROOT / 'schemas/common/frequency/char/dialogue_char_freq.txt'
     )
     convert_bcc(
-        REPO_ROOT / 'schemas/frequency/_original/dialogue_word_freq.txt',
-        REPO_ROOT / 'schemas/frequency/word/dialogue_word_freq.txt'
+        REPO_ROOT / 'schemas/common/frequency/_original/dialogue_word_freq.txt',
+        REPO_ROOT / 'schemas/common/frequency/word/dialogue_word_freq.txt'
     )
     
     # BCC Multi-domain
     convert_bcc(
-        REPO_ROOT / 'schemas/frequency/_original/multi_domain_total_char_freq.txt',
-        REPO_ROOT / 'schemas/frequency/char/multi_domain_char_freq.txt'
+        REPO_ROOT / 'schemas/common/frequency/_original/multi_domain_total_char_freq.txt',
+        REPO_ROOT / 'schemas/common/frequency/char/multi_domain_char_freq.txt'
     )
     convert_bcc(
-        REPO_ROOT / 'schemas/frequency/_original/multi_domain_total_word_freq.txt',
-        REPO_ROOT / 'schemas/frequency/word/multi_domain_word_freq.txt'
+        REPO_ROOT / 'schemas/common/frequency/_original/multi_domain_total_word_freq.txt',
+        REPO_ROOT / 'schemas/common/frequency/word/multi_domain_word_freq.txt'
     )
     
     # SUBTLEX
     convert_subtlex(
-        REPO_ROOT / 'schemas/frequency/_original/SUBTLEX-CH-CHR',
-        REPO_ROOT / 'schemas/frequency/char/subtlex_char_freq.txt'
+        REPO_ROOT / 'schemas/common/frequency/_original/SUBTLEX-CH-CHR',
+        REPO_ROOT / 'schemas/common/frequency/char/subtlex_char_freq.txt'
     )
     convert_subtlex(
-        REPO_ROOT / 'schemas/frequency/_original/SUBTLEX-CH-WF',
-        REPO_ROOT / 'schemas/frequency/word/subtlex_word_freq.txt'
+        REPO_ROOT / 'schemas/common/frequency/_original/SUBTLEX-CH-WF',
+        REPO_ROOT / 'schemas/common/frequency/word/subtlex_word_freq.txt'
     )
     
     print("All conversions completed.")

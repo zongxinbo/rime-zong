@@ -90,7 +90,7 @@ if __name__ == "__main__":
         sys.stdout.reconfigure(encoding='utf-8')
     parser = argparse.ArgumentParser()
     parser.add_argument("--dict", required=True)
-    parser.add_argument("--freq", default="schemas/frequency/char/sc/zhihu_char_freq.txt")
+    parser.add_argument("--freq", default="schemas/common/frequency/char/sc/zhihu_char_freq.txt")
     parser.add_argument("--mode", choices=['shortest', 'longest', 'all'], default='all')
     parser.add_argument("--sort", choices=['frequency', 'original'], default='frequency')
     args = parser.parse_args()

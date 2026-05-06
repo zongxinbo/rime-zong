@@ -63,10 +63,10 @@ def main():
 
     print("正在加载字频数据...")
     freq_sources = {
-        "知乎简体": "schemas/frequency/char/sc/zhihu_char_freq.txt",
-        "北语简体": "schemas/frequency/char/sc/blcu_char_freq.txt",
-        "台标繁体": "schemas/frequency/char/tc/taiwan_char_freq.txt",
-        "古籍繁体": "schemas/frequency/char/tc/guji_char_freq.txt"
+        "知乎简体": "schemas/common/frequency/char/sc/zhihu_char_freq.txt",
+        "北语简体": "schemas/common/frequency/char/sc/blcu_char_freq.txt",
+        "台标繁体": "schemas/common/frequency/char/tc/taiwan_char_freq.txt",
+        "古籍繁体": "schemas/common/frequency/char/tc/guji_char_freq.txt"
     }
     
     freq_data = {}
