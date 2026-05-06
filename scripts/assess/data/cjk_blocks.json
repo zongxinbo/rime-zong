@@ -1,0 +1,91 @@
+{
+  "version": "17.0.0",
+  "description": "CJK 統一漢字區塊定義，包含 Unicode 範圍和相關信息",
+  "lastUpdated": "2025-09-08",
+  "blocks": {
+    "cjk_basic": {
+      "name": "CJK基本區",
+      "description": "CJK統一漢字基本區",
+      "start": "0x4E00",
+      "end": "0x9FFF",
+      "comment": "CJK基本區：U+4E00-U+9FFF"
+    },
+    "cjk_a": {
+      "name": "CJK擴展A區",
+      "description": "CJK統一漢字擴展A區",
+      "start": "0x3400",
+      "end": "0x4DBF",
+      "comment": "CJK擴展A：U+3400-U+4DBF"
+    },
+    "cjk_b": {
+      "name": "CJK擴展B區",
+      "description": "CJK統一漢字擴展B區",
+      "start": "0x20000",
+      "end": "0x2A6DF",
+      "comment": "CJK擴展B：U+20000-U+2A6DF"
+    },
+    "cjk_c": {
+      "name": "CJK擴展C區",
+      "description": "CJK統一漢字擴展C區",
+      "start": "0x2A700",
+      "end": "0x2B73F",
+      "comment": "CJK擴展C：U+2A700-U+2B73F",
+      "note": "注意：CJK擴展C區實際填充到 U+2B739 (Unicode 16.0)，完全填滿 (Unicode 17.0)"
+    },
+    "cjk_d": {
+      "name": "CJK擴展D區",
+      "description": "CJK統一漢字擴展D區",
+      "start": "0x2B740",
+      "end": "0x2B81D",
+      "comment": "CJK擴展D：U+2B740-U+2B81D",
+      "note": "注意：CJK擴展D區實際填充到 U+2B81D"
+    },
+    "cjk_e": {
+      "name": "CJK擴展E區",
+      "description": "CJK統一漢字擴展E區",
+      "start": "0x2B820",
+      "end": "0x2CEAD",
+      "comment": "CJK擴展E：U+2B820-U+2CEAD",
+      "note": "注意：CJK擴展E區實際填充到 U+2CEA1 (Unicode 16.0)，到 U+2CEAD (Unicode 17.0)"
+    },
+    "cjk_f": {
+      "name": "CJK擴展F區",
+      "description": "CJK統一漢字擴展F區",
+      "start": "0x2CEB0",
+      "end": "0x2EBE0",
+      "comment": "CJK擴展F：U+2CEB0-U+2EBE0",
+      "note": "注意：CJK擴展F區實際填充到 U+2EBE0"
+    },
+    "cjk_g": {
+      "name": "CJK擴展G區",
+      "description": "CJK統一漢字擴展G區",
+      "start": "0x30000",
+      "end": "0x3134A",
+      "comment": "CJK擴展G：U+30000-U+3134A",
+      "note": "注意：CJK擴展G區實際填充到 U+3134A"
+    },
+    "cjk_h": {
+      "name": "CJK擴展H區",
+      "description": "CJK統一漢字擴展H區",
+      "start": "0x31350",
+      "end": "0x323AF",
+      "comment": "CJK擴展H：U+31350-U+323AF"
+    },
+    "cjk_i": {
+      "name": "CJK擴展I區",
+      "description": "CJK統一漢字擴展I區",
+      "start": "0x2EBF0",
+      "end": "0x2EE5D",
+      "comment": "CJK擴展I：U+2EBF0-U+2EE5D",
+      "note": "注意：CJK擴展I區實際填充到 U+2EE5D"
+    },
+    "cjk_j": {
+      "name": "CJK擴展J區",
+      "description": "CJK統一漢字擴展J區",
+      "start": "0x323B0",
+      "end": "0x33479",
+      "comment": "CJK擴展J：U+323B0-U+3247F",
+      "note": "注意：CJK擴展J區實際填充到 U+33479 (Unicode 17.0)"
+    }
+  }
+}
