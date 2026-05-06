@@ -15,6 +15,7 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 from core.cangjie_builder import (
     parse_cangjie_dict,
     parse_frequency_file,
+    get_weighted_frequencies,
     is_han_char,
     REPO_ROOT
 )
@@ -29,7 +30,7 @@ def is_gb2312(char: str) -> bool:
     except UnicodeEncodeError:
         return False
 
-def generate_shortcut_2(gb_only: bool = False, prefix: bool = True, count: int = 0, auto_coverage: float = 0.90):
+def generate_shortcut_2(gb_only: bool = False, prefix: bool = True, count: int = 0, auto_coverage: float = 0.90, char_scores: dict[str, int] = None):
     source_dict = REPO_ROOT / "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
     output_path = REPO_ROOT / "scripts/cangjie/prototypes/two_code.txt"
 
@@ -44,21 +45,9 @@ def generate_shortcut_2(gb_only: bool = False, prefix: bool = True, count: int =
                     if len(parts) >= 1 and parts[0] and not parts[0].startswith("#"):
                         excluded_chars.add(parts[0])
 
-    # 2. 计算加权得分
-    weights = {"Dialogue": 6, "Subtlex": 5, "Zhihu": 4, "BLCU": 2, "Essay": 1}
-    freq_paths = {
-        "Dialogue": REPO_ROOT / "schemas/common/frequency/char/sc/dialogue_char_freq.txt",
-        "Subtlex": REPO_ROOT / "schemas/common/frequency/char/sc/subtlex_char_freq.txt",
-        "Zhihu": REPO_ROOT / "schemas/common/frequency/char/sc/zhihu_char_freq.txt",
-        "BLCU": REPO_ROOT / "schemas/common/frequency/char/sc/blcu_char_freq.txt",
-        "Essay": REPO_ROOT / "schemas/common/essay-zh-hans.txt"
-    }
-    char_scores = defaultdict(int)
-    for name, path in freq_paths.items():
-        if path.exists():
-            freqs, _ = parse_frequency_file(path)
-            for char, val in freqs.items():
-                char_scores[char] += val * weights[name]
+    # 2. 获取加权得分
+    if char_scores is None:
+        char_scores = get_weighted_frequencies()
 
     raw_entries = parse_cangjie_dict(source_dict)
     char_codes = {}

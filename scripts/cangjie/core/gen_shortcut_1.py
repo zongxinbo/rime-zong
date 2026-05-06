@@ -29,7 +29,9 @@ from core.cangjie_builder import (
     parse_cangjie_dict,
     parse_frequency_file,
     is_han_char,
-    REPO_ROOT
+    REPO_ROOT,
+    FREQ_PATHS,
+    FREQ_WEIGHTS
 )
 
 ORIGINAL_RADICALS = {
@@ -97,13 +99,7 @@ def get_one_codes(freq_path, char_codes, chars_by_freq, frequencies):
 def get_final_version(char_codes, all_freqs, results):
     """最终版：以口语语料（Dialogue）为基底，利用多源加权总分进行修正。"""
     
-    weights = {
-        "Dialogue": 6,
-        "Subtlex": 5,
-        "Zhihu": 4,
-        "BLCU": 2,
-        "Essay": 1
-    }
+    weights = FREQ_WEIGHTS
     
     char_scores = {}
     for char in char_codes:
@@ -188,13 +184,7 @@ def get_final_version(char_codes, all_freqs, results):
 
 def main():
     source = REPO_ROOT / "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
-    freq_paths = {
-        "Dialogue": REPO_ROOT / "schemas/common/frequency/char/sc/dialogue_char_freq.txt",
-        "Subtlex": REPO_ROOT / "schemas/common/frequency/char/sc/subtlex_char_freq.txt",
-        "Zhihu": REPO_ROOT / "schemas/common/frequency/char/sc/zhihu_char_freq.txt",
-        "BLCU": REPO_ROOT / "schemas/common/frequency/char/sc/blcu_char_freq.txt",
-        "Essay": REPO_ROOT / "schemas/common/essay-zh-hans.txt"
-    }
+    freq_paths = FREQ_PATHS
 
     raw_entries = parse_cangjie_dict(source)
     char_codes = defaultdict(list)

@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent))
 
-from core.cangjie_builder import generate_dict, REPO_ROOT
+from core.cangjie_builder import generate_dict, REPO_ROOT, get_weighted_frequencies
 from core.gen_shortcut_2 import generate_shortcut_2
 from core.gen_shortcut_3 import generate_shortcut_3
 from core.gen_shortcut_4 import generate_shortcut_4
@@ -34,6 +34,9 @@ def main():
     parser.add_argument("--only-first-full-code", action=argparse.BooleanOptionalAction, default=False, help="仅取第一个全码（用于去重）")
     args = parser.parse_args()
 
+    # 0. 预加载加权字频（统一语料库得分）
+    char_scores = get_weighted_frequencies()
+
     # 按依赖顺序生成简码：S2 → S3 → S4
     print("=" * 50)
     print("正在生成二简原型...")
@@ -41,7 +44,8 @@ def main():
         gb_only=args.gb_only,
         prefix=args.s2_prefix,
         count=args.s2_count,
-        auto_coverage=args.s2_coverage
+        auto_coverage=args.s2_coverage,
+        char_scores=char_scores
     )
 
     print("正在生成三简原型...")
@@ -49,7 +53,8 @@ def main():
         gb_only=args.gb_only,
         prefix=args.s3_prefix,
         count=args.s3_count,
-        auto_coverage=args.s3_coverage
+        auto_coverage=args.s3_coverage,
+        char_scores=char_scores
     )
 
     # 只有显式开启 --s4，或者在 --gb-only 模式下，才生成并包含四简
@@ -75,7 +80,7 @@ def main():
         output_path=REPO_ROOT / "schemas/cangjie/wucang5/wucang5.dict.yaml",
         shortcut_paths=shortcut_paths,
         source_dict=REPO_ROOT / "schemas/cangjie/cangjie5/cangjie5.dict.yaml",
-        freq_file=REPO_ROOT / "schemas/common/essay-zh-hans.txt",
+        char_freqs=char_scores,
         max_code_length=5,
         exclude_extended=args.exclude_extended,
         only_first_full_code=args.only_first_full_code,
