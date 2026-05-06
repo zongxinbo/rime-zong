@@ -129,30 +129,41 @@ def generate_dict(
             continue  # 加后缀会超长，跳过
 
         # 取去重后的候选顺序（按排序后的先后）
-        seen = []
-        for _, _, _, char in entries:
-            if char not in seen:
-                seen.append(char)
+        # 每个 entry 格式: (code, tier, -freq, char)
+        seen_entries = []
+        seen_chars = set()
+        for entry in entries:
+            char = entry[3]
+            if char not in seen_chars:
+                seen_entries.append(entry)
+                seen_chars.add(char)
 
-        # 第2选 → code+z（跳过已有条目，如 z_code 字根字）
-        if len(seen) >= 2:
-            char2 = seen[1]
-            new_code_z = code + 'z'
-            if (char2, new_code_z) not in used_text_code:
-                freq2 = char_freqs.get(char2, 0)
-                suffix_entries.append((new_code_z, 1, -freq2, char2))
-                used_text_code.add((char2, new_code_z))
-                suffix_count += 1
+        # 第2选 → code+z
+        if len(seen_entries) >= 2:
+            entry2 = seen_entries[1]
+            char2 = entry2[3]
+            tier2 = entry2[1]
+            # 如果该字是因为已有更短简码而被降权的（tier >= 6），则不生成后缀码
+            if tier2 < 6:
+                new_code_z = code + 'z'
+                if (char2, new_code_z) not in used_text_code:
+                    freq2 = char_freqs.get(char2, 0)
+                    suffix_entries.append((new_code_z, 1, -freq2, char2))
+                    used_text_code.add((char2, new_code_z))
+                    suffix_count += 1
 
         # 第3选 → code+x
-        if len(seen) >= 3:
-            char3 = seen[2]
-            new_code_x = code + 'x'
-            if (char3, new_code_x) not in used_text_code:
-                freq3 = char_freqs.get(char3, 0)
-                suffix_entries.append((new_code_x, 1, -freq3, char3))
-                used_text_code.add((char3, new_code_x))
-                suffix_count += 1
+        if len(seen_entries) >= 3:
+            entry3 = seen_entries[2]
+            char3 = entry3[3]
+            tier3 = entry3[1]
+            if tier3 < 6:
+                new_code_x = code + 'x'
+                if (char3, new_code_x) not in used_text_code:
+                    freq3 = char_freqs.get(char3, 0)
+                    suffix_entries.append((new_code_x, 1, -freq3, char3))
+                    used_text_code.add((char3, new_code_x))
+                    suffix_count += 1
 
     all_entries.extend(suffix_entries)
     all_entries.sort()

@@ -103,7 +103,7 @@ def main():
 
     # --- [表格 2] 动态选重率分析 ---
     print("\n" + "="*30 + " [2] 动态选重率分析 " + "="*30)
-    header_row = [pad_wide('字频来源', 15), pad_wide('频率降序-全码', 14), pad_wide('频率降序-简码', 14), pad_wide('原始码表-全码', 14), pad_wide('原始码表-简码', 14)]
+    header_row = [pad_wide('字频来源', 15), pad_wide('频率降序-全码', 14), pad_wide('频率降序-简码', 14), pad_wide('原始码表-全码', 14), pad_wide('原始码表-简码', 14), pad_wide('简全联用-实际', 14)]
     header = " | ".join(header_row)
     print(header)
     print("-" * get_display_width(header))
@@ -117,11 +117,12 @@ def main():
         rate_sf = analyze_duplicates(dict_path, "", charset_filter=cs_filter, mode='shortest', sort_method='frequency', _preloaded_freq=norm, _preloaded_entries=entries)['dynamic_rate']
         rate_lo = analyze_duplicates(dict_path, "", charset_filter=cs_filter, mode='longest', sort_method='original', _preloaded_freq=norm, _preloaded_entries=entries)['dynamic_rate']
         rate_so = analyze_duplicates(dict_path, "", charset_filter=cs_filter, mode='shortest', sort_method='original', _preloaded_freq=norm, _preloaded_entries=entries)['dynamic_rate']
+        rate_mixed = analyze_duplicates(dict_path, "", charset_filter=cs_filter, mode='mixed', _preloaded_freq=norm, _preloaded_entries=entries)['dynamic_rate']
         
         def fmt_cell(val):
             num_str = f"{val*10000:7.2f}"
             return pad_wide(f"  {num_str}‱", 14)
-        print(f"{pad_wide(freq_name, 15)} | {fmt_cell(rate_lf)} | {fmt_cell(rate_sf)} | {fmt_cell(rate_lo)} | {fmt_cell(rate_so)}")
+        print(f"{pad_wide(freq_name, 15)} | {fmt_cell(rate_lf)} | {fmt_cell(rate_sf)} | {fmt_cell(rate_lo)} | {fmt_cell(rate_so)} | {fmt_cell(rate_mixed)}")
 
     # --- [表格 3] 候选数分析 ---
     print("\n" + "="*30 + " [3] 候选数分析 " + "="*30)

@@ -28,8 +28,30 @@ def analyze_duplicates(dict_path, freq_path, charset_filter=is_gb2312, mode='all
         if charset_filter(char):
             char_to_codes[char].append(code)
             
-    # 3. 根据模式 (shortest/longest/all) 筛选评估点
+    # 3. 根据模式 (shortest/longest/all/mixed) 筛选评估点
     eval_points = [] # list of (char, code)
+    if mode == 'mixed':
+        # 混合输入模式：评估的是“字”而非“条目”
+        # 只要该字在任意一个编码下是第一候选，则视为“可盲打”
+        char_is_first_anywhere = {}
+        for char in char_to_codes:
+            is_first = False
+            for code in char_to_codes[char]:
+                if global_context[code] and global_context[code][0] == char:
+                    is_first = True
+                    break
+            char_is_first_anywhere[char] = is_first
+            
+        total_eval_freq = sum(freqs.get(char, 0) for char in char_to_codes)
+        total_dup_freq = sum(freqs.get(char, 0) for char, is_first in char_is_first_anywhere.items() if not is_first)
+        
+        return {
+            "total_chars": len(char_to_codes),
+            "dup_groups": sum(1 for is_first in char_is_first_anywhere.values() if not is_first), # 这里的“组”定义为无法首选的字数
+            "dup_chars": sum(1 for is_first in char_is_first_anywhere.values() if not is_first),
+            "dynamic_rate": total_dup_freq / total_eval_freq if total_eval_freq > 0 else 0
+        }
+
     for char, codes in char_to_codes.items():
         if mode == 'shortest':
             eval_points.append((char, min(codes, key=len)))
@@ -91,8 +113,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--dict", required=True)
     parser.add_argument("--freq", default="schemas/common/frequency/char/sc/zhihu_char_freq.txt")
-    parser.add_argument("--mode", choices=['shortest', 'longest', 'all'], default='all')
+    parser.add_argument("--mode", choices=['shortest', 'longest', 'all', 'mixed'], default='all')
     parser.add_argument("--sort", choices=['frequency', 'original'], default='frequency')
+    parser.add_argument("--all-chars", action="store_true", help="Analyze all characters, not just GB2312")
     args = parser.parse_args()
-    res = analyze_duplicates(args.dict, args.freq, mode=args.mode, sort_method=args.sort)
+    
+    charset_filter = lambda x: True if args.all_chars else is_gb2312
+    res = analyze_duplicates(args.dict, args.freq, charset_filter=charset_filter, mode=args.mode, sort_method=args.sort)
+    print(f"评估条目数: {res['total_chars']}")
+    print(f"重码组数: {res['dup_groups']}")
+    print(f"重码字数: {res['dup_chars']}")
     print(f"动态选重率: {res['dynamic_rate']*10000:.2f}‱")
