@@ -257,6 +257,30 @@ def is_common_han_char(text: str) -> bool:
     return ord(text) < 0x20000
 
 
+def gb2312_level(text: str) -> int | None:
+    """返回 GB2312 汉字级别：1=一级字，2=二级字，None=非 GB2312 汉字。"""
+    if len(text) != 1 or not ('\u4e00' <= text <= '\u9fa5'):
+        return None
+    try:
+        encoded = text.encode("gb2312")
+    except UnicodeEncodeError:
+        return None
+    if len(encoded) != 2:
+        return None
+
+    row = encoded[0] - 0xA0
+    if 16 <= row <= 55:
+        return 1
+    if 56 <= row <= 87:
+        return 2
+    return None
+
+
+def is_gb2312(text: str) -> bool:
+    """判断是否为 GB2312 汉字区内的汉字。"""
+    return gb2312_level(text) is not None
+
+
 def is_han_text(text: str) -> bool:
     return bool(text) and all(is_han_char(char) for char in text)
 
