@@ -47,10 +47,10 @@ def generate_shortcut_2(gb_only: bool = False, prefix: bool = True, count: int =
     # 2. 计算加权得分
     weights = {"Dialogue": 6, "Subtlex": 5, "Zhihu": 4, "BLCU": 2, "Essay": 1}
     freq_paths = {
-        "Dialogue": REPO_ROOT / "schemas/frequency/char/dialogue_char_freq.txt",
-        "Subtlex": REPO_ROOT / "schemas/frequency/char/subtlex_char_freq.txt",
-        "Zhihu": REPO_ROOT / "schemas/frequency/char/zhihu_char_freq.txt",
-        "BLCU": REPO_ROOT / "schemas/frequency/char/blcu_char_freq.txt",
+        "Dialogue": REPO_ROOT / "schemas/common/frequency/char/sc/dialogue_char_freq.txt",
+        "Subtlex": REPO_ROOT / "schemas/common/frequency/char/sc/subtlex_char_freq.txt",
+        "Zhihu": REPO_ROOT / "schemas/common/frequency/char/sc/zhihu_char_freq.txt",
+        "BLCU": REPO_ROOT / "schemas/common/frequency/char/sc/blcu_char_freq.txt",
         "Essay": REPO_ROOT / "schemas/common/essay-zh-hans.txt"
     }
     char_scores = defaultdict(int)
