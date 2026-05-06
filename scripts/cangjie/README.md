@@ -2,8 +2,10 @@
 
 本目录用于管理 Sicang5/Wucang5 方案的生成与简码设计。
 
-# 1. 设计简码 (在 prototypes/ 生成建议稿)
-使用核心脚本分析语料并生成简码原型文件。
+## 1. 设计简码原型
+
+核心脚本会读取仓颉五码源表与加权字频，生成 `prototypes/` 下的简码原型文件。
+
 ```powershell
 python scripts/cangjie/core/gen_shortcut_1.py
 python scripts/cangjie/core/gen_shortcut_2.py
@@ -11,25 +13,57 @@ python scripts/cangjie/core/gen_shortcut_3.py
 python scripts/cangjie/core/gen_shortcut_4.py
 ```
 
-# 2. 生成最终码表 (Wucang5)
+## 2. 生成 Wucang5
 
-## 模式 A：全字符竞争模式 (Default)
-此模式平衡了各字符集的简码分布，允许长码字抢占低频原主位。默认不生成四简。
+默认构建参数：
+
+- 二简：固定 `200` 个
+- 三简：固定 `400` 个
+- 四简：默认关闭，可用 `--s4` 开启 `balanced` 模式，给 GB2312 五码字生成四简
+- 四简数量：启用后默认上限 `1000` 个；GB2312 二级字需达到综合字频 `1000` 才可进入
+- 简码总量：builder 口径含 `z_code` 字根码 25 个和一简 25 个，默认合计 `650` 个
+
 ```powershell
 python scripts/cangjie/gen_wucang5.py
 ```
 
-## 模式 B：GB2312 绝对保护模式
-此模式强制所有 GB2312 字符码长 ≤ 4，并保护 GB2312 原生位置。默认自动生成四简。
+常用参数：
+
 ```powershell
-python scripts/cangjie/gen_wucang5.py --gb-only --s2-coverage 1.0 --s3-coverage 1.0
+# 开启四简
+python scripts/cangjie/gen_wucang5.py --s4
+
+# 指定四简模式
+python scripts/cangjie/gen_wucang5.py --s4 --s4-mode safe
+python scripts/cangjie/gen_wucang5.py --s4 --s4-mode balanced
+python scripts/cangjie/gen_wucang5.py --s4 --s4-mode aggressive
+
+# 固定四简数量
+python scripts/cangjie/gen_wucang5.py --s4 --s4-count 1000
+
+# 调整 GB2312 二级字进入四简的门槛；0 表示不过滤二级字
+python scripts/cangjie/gen_wucang5.py --s4 --s4-level2-min-score 1000
+
+# 改用覆盖率决定二简/三简数量
+python scripts/cangjie/gen_wucang5.py --s2-count 0 --s2-coverage 0.85 --s3-count 0 --s3-coverage 0.90
 ```
 
-# 3. 生成最终码表 (Sicang5)
-Sicang5 现在支持与 Wucang5 相同的二简/三简参数化配置（不包含四简）。
+四简模式说明：
+
+- `safe`：不压原生四码位，只给没有原生四码冲突的 GB 五码字发四简。
+- `balanced`：启用四简时的默认模式。可压低频原生四码位，但候选五码字需要明显高频，或原主已有更短简码。
+- `aggressive`：GB 五码字全量截四码，保留更多覆盖，但更容易制造候选压力。
+
+四简启用时只让 GB2312 一级字直接进入；GB2312 二级字需要达到 `--s4-level2-min-score` 门槛，避免大量冷僻二级字挤入四简层。
+
+## 3. 生成 Sicang5
+
+Sicang5 支持与 Wucang5 相同的二简/三简参数化配置，但不包含四简层。
+
 ```powershell
 python scripts/cangjie/gen_sicang5.py
 ```
 
-## 技术规范
+## 4. 技术规范
+
 详见 [CANGJIE_SPEC.md](CANGJIE_SPEC.md) 了解详细的设计算法与取码规则。

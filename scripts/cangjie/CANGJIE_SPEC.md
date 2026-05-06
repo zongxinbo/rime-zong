@@ -1,136 +1,242 @@
-# 仓颉方案技术规范 (CANGJIE_SPEC)
+# 仓颉方案技术规范
 
-本文档记录了仓颉系列方案的设计逻辑、自动化调优算法以及核心架构原则。
+本文档记录 Sicang5/Wucang5 的生成逻辑、简码分层策略与当前默认参数。
 
 ## 1. 任务背景
-优化仓颉系列方案（Sicang5/Wucang5）的简码分配方案，目标是利用现代语料库实现"高频优先"与"编码直觉"的平衡。
+
+仓颉系列方案的目标是在保留仓颉五代取码直觉的前提下，用现代语料做高频优先排序与简码分配。Wucang5 是五码单字流方案；Sicang5 是四码单字流方案。
 
 ## 2. 核心数据源
-- **Dialogue 口语语料 (`schemas/common/frequency/char/sc/dialogue_char_freq.txt`)**：核心口语字频（权重: 6）。
-- **Subtlex 影视字幕语料 (`schemas/common/frequency/char/sc/subtlex_char_freq.txt`)**：日常频次（权重: 5）。
-- **知乎语料 (`schemas/common/frequency/char/sc/zhihu_char_freq.txt`)**：现代网络常用语料（权重: 4）。
-- **北语大语料 (`schemas/common/frequency/char/sc/blcu_char_freq.txt`)**：基础字频基底（权重: 2）。
-- **Essay 语料 (`schemas/common/essay-zh-hans.txt`)**：传统 Rime 基础语料（权重: 1）。
 
-所有构建脚本通过 `cangjie_builder.get_weighted_frequencies()` 共享同一套加权算法，确保简码分配与最终字典排序的逻辑一致性。
+- **Dialogue 口语语料**：`schemas/common/frequency/char/sc/dialogue_char_freq.txt`，权重 6
+- **Subtlex 字幕语料**：`schemas/common/frequency/char/sc/subtlex_char_freq.txt`，权重 5
+- **知乎语料**：`schemas/common/frequency/char/sc/zhihu_char_freq.txt`，权重 4
+- **北语大语料**：`schemas/common/frequency/char/sc/blcu_char_freq.txt`，权重 2
+- **Essay 语料**：`schemas/common/essay-zh-hans.txt`，权重 1
 
-## 3. 自动化分析工具
-| 脚本名称 | 职能 | 位置 |
-| :--- | :--- | :--- |
-| **gen_shortcut_1.py** | 一简方案分析与生成 | `scripts/cangjie/core/` |
-| **gen_shortcut_2.py** | 二简方案生成（支持竞争与 GB2312 保护两种模式） | `scripts/cangjie/core/` |
-| **gen_shortcut_3.py** | 三简方案生成（支持竞争与 GB2312 保护两种模式） | `scripts/cangjie/core/` |
-| **gen_shortcut_4.py** | 强制四简生成（GB2312 五码字截断） | `scripts/cangjie/core/` |
-| **cangjie_builder.py** | 核心构建引擎（位置降权排序） | `scripts/cangjie/core/` |
+所有构建脚本通过 `cangjie_builder.get_weighted_frequencies()` 共享同一套加权字频，保证简码选择与最终字典排序使用同一份综合分。
 
-## 4. 简码设计稿位置
-- **一简**：`scripts/cangjie/prototypes/one_code.txt`
-- **二简**：`scripts/cangjie/prototypes/two_code.txt`
-- **三简**：`scripts/cangjie/prototypes/three_code.txt`
-- **四简**：`scripts/cangjie/prototypes/four_code.txt`
-- **z 补丁**：`scripts/cangjie/prototypes/z_code.txt`
+## 3. 核心脚本
 
-## 5. 词组取码动态配额规则 (Dynamic Quota Logic)
-Sicang5 采用动态配额算法，根据单字码长动态分配 4 码位。
-
-| 词长 | 结构配额 | 取码明细 | 典型示例 |
-| :--- | :--- | :--- | :--- |
-| **二字词** | 2 + 2 | A首+A尾 + B首+B尾 | 实际 (pkhm + nlf) -> pmnf |
-| | 1 + 3 | A首 + B首+B次+B尾 | 中国 (l + wirm) -> lwim |
-| | 2 + 1 | A首+A尾 + B首 | 某个 (mow + g) -> mwg |
-| **三字词** | 2 + 1 + 1 | A首+A尾 + B首 + C尾 | 实际上 (pkhm + nlf + ym) -> pmnm |
-| | 1 + 2 + 1 | A首 + B首+B尾 + C尾 | 输入法 (jokon + oh + eiy) -> johy |
-| | 1 + 1 + 2 | A首 + B首 + C首+C尾 | 这种人 (ypt + hdyj + o) -> yhoo |
-| **四字词+** | 1+1+1+1 | A首 + B首 + C首 + Z首 | 社会保障 (if+omr+ord+fylj) -> ioof |
-
-*原则：遵循仓颉5顺位，动态消除同字内冗余码，首字不超过2码（不反自身）。*
-
-## 6. Wucang5 简码分层策略
-
-### 6.1 生成策略双模说明
-
-Wucang5 支持两种简码生成策略，可通过参数切换：
-
-#### 策略 A：全字符竞争模式 (Default)
-- **运行命令**：`python scripts/cangjie/gen_wucang5.py`
-- **逻辑**：允许所有汉字参与简码分配。长码字可以与“原主字”（全码长度=N的字）竞争。
-- **竞争规则**：长码字频次需超过原主频次一定倍数（二简 1.5x，三简 1.2x）才能抢占位置。
-- **默认结果**：二简 ≈ 275 字，三简 ≈ 324 字。默认不生成四简。
-- **四简控制**：如需在此模式下开启四简，请添加 `--s4` 参数。
-
-#### 策略 B：GB2312 绝对保护模式
-- **运行命令**：`python scripts/cangjie/gen_wucang5.py --gb-only --s2-coverage 1.0 --s3-coverage 1.0`
-- **逻辑**：只有 GB2312 汉字有资格获得简码。
-- **保护规则**：任何 GB2312 原主位置绝对禁止被抢占（即便对方频次极高）。简码仅占据“空槽”（无 GB2312 原主的编码）。
-- **设计目标**：强制所有 GB2312 汉字最短编码 ≤ 4 码。
-- **优化结果**：二简 ≈ 286 字，三简 ≈ 2,376 字，四简 ≈ 1,332 字。默认自动开启四简。
-
-### 6.2 核心算法原则 (GB2312 模式)
-- **顺位前缀**：所有简码必须是全码的绝对前缀（`code[:N]`）
-- **资格门槛**：仅 GB2312 汉字参与
-- **繁体字透传**：非 GB2312 字保持原始仓颉五代编码
-- **层级排他**：已在短简码层分配的字不参与长简码竞争
-
-### 6.3 后缀消重与候选分配 (Suffix Disambiguation)
-Wucang5 引入了自动后缀逻辑来解决高频重码组的选重问题，充分利用空闲的 `z` 和 `x` 键：
-
-1. **第一候选**：保持原码，作为默认首选。
-2. **第二候选**：自动生成 `原码 + z`。
-3. **第三候选**：自动生成 `原码 + x`。
-
-**规则约束**：
-- 仅当添加后缀后的总码长不超过 5 码时生效。
-- 若 `原码 + z/x` 已被简码字（如 z_code 字根）占用，则跳过该后缀。
-- 该逻辑在 `cangjie_builder.py` 的构建末尾动态执行。
-
-**优化成果**：
-- **GB2312 全码冲突**：从原始 425 组下降至 **25 组**。
-- **动态选重率 (全码模式)**：降至 **5.05‱** (Zhihu 语料)，实现了接近“盲打”的全码体验。
-
-### 6.4 位置降权 (Positional Demotion)
-字典文件使用纯 `字\t码` 格式（无 weight 列），通过文件内条目排列顺序实现"降权退避"。
-
-同一编码下的候选排序规则：
-1. **简码条目**（该编码是某字的简码）→ 排最前，按 Z > S1 > S2 > S3 > S4 优先级
-2. **原生全码**（该编码是某字的全码，且该字无更短简码）→ 排中间，按字频降序
-3. **退避条目**（该编码是某字的全码，但该字已有更短简码）→ 排最后，按字频降序
-
-### 6.5 GB2312 码长分布 (优化后)
-
-| 最短编码长度 | 字数 |
+| 脚本 | 职能 |
 | :--- | :--- |
-| 1 码 | 51 字 |
-| 2 码 | 608 字 |
-| 3 码 | 3,550 字 |
-| 4 码 | 2,554 字 |
-| **合计** | **6,763 字** |
+| `core/gen_shortcut_1.py` | 一简方案分析与生成 |
+| `core/gen_shortcut_2.py` | 二简生成，支持固定数量、覆盖率、GB2312 保护 |
+| `core/gen_shortcut_3.py` | 三简生成，支持固定数量、覆盖率、GB2312 保护 |
+| `core/gen_shortcut_4.py` | 四简生成，支持 `safe` / `balanced` / `aggressive` |
+| `core/cangjie_builder.py` | 最终字典构建、排序、退避与后缀消重 |
+| `gen_wucang5.py` | Wucang5 一键构建入口 |
+| `gen_sicang5.py` | Sicang5 一键构建入口 |
 
-所有 GB2312 汉字最短编码 ≤ 4 码（已验证）。
+## 4. 简码原型文件
 
-### 6.6 动态重码率
-- 原版仓颉五代：0.3051%
-- 优化后 Wucang5：0.5685%（+0.26%）
+- 一简：`scripts/cangjie/prototypes/one_code.txt`
+- 二简：`scripts/cangjie/prototypes/two_code.txt`
+- 三简：`scripts/cangjie/prototypes/three_code.txt`
+- 四简：`scripts/cangjie/prototypes/four_code.txt`（启用 `--s4` 时生成）
+- z 补丁：`scripts/cangjie/prototypes/z_code.txt`
 
-动态重码率仅增加 0.26 个百分点，代价极小。绝大多数新增重码发生在低频字上。
+## 5. Wucang5 默认构建
 
-## 7. Schema 文件说明
-- `wucang5.schema.yaml`：纯单字流方案（推荐）
-- `wucang5_fluency.schema.yaml`：语句流方案（使用八股文模型）
-- `sicang5.schema.yaml`：四码单字流方案
-- `sicang5_fluency.schema.yaml`：四码语句流方案
+默认命令：
 
-## 8. 性能指标 (Performance Metrics)
-基于 2026-05-06 构建版本 (Suffix z/x Enable) 的动态选重率测试结果：
+```powershell
+python scripts/cangjie/gen_wucang5.py
+```
 
-| 语料来源 | 频率降序-全码 | 频率降序-简码 | 原始码表-全码 | 原始码表-简码 |
-| :--- | :--- | :--- | :--- | :--- |
-| **知乎简体** | **5.05‱** | 535.24‱ | 738.58‱ | 683.85‱ |
-| **北语简体** | **3.22‱** | 583.13‱ | 748.23‱ | 746.56‱ |
-| **繁简联合** | **7.15‱** | 508.08‱ | 686.22‱ | 1073.67‱ |
+当前默认参数：
 
-*注：简码模式下的高选重率是由于简码密度极大（常用字大量挤占 1-3 码空间）导致的预期现象。全码模式下的选重率已通过 z/x 后缀逻辑得到本质改善。*
+- `--s2-count 200`
+- `--s3-count 400`
+- `--s2-coverage 0`
+- `--s3-coverage 0`
+- `--no-s4`（默认关闭；可用 `--s4` 开启）
+- `--s4-mode balanced`
+- `--s4-count 1000`
+- `--s4-level2-min-score 1000`
 
-## 9. 环境与路径
-- **项目根目录**：所有脚本需在项目根目录运行以正确识别 `REPO_ROOT`。
-- **核心引擎**：[cangjie_builder.py](file:///c:/dev/repos/github/IME/rime-zong/scripts/cangjie/core/cangjie_builder.py)
-- **数据路径**：字频文件位于 `schemas/common/frequency/char/sc/`。
+含义：
+
+- 二简、三简默认按固定数量生成；只有当 `--s2-count 0` 或 `--s3-count 0` 时，对应覆盖率参数才参与控量。
+- 二简默认取全码前两码，三简默认取全码前三码。
+- 四简默认关闭；需要实验四简时显式传入 `--s4`。
+- 四简启用时只处理 GB2312 一级字和达到频率门槛的 GB2312 二级字，不把全 CJK 字集压入四码层。
+- 四简启用时默认上限 1000 个；`--s4-count 0` 表示不做数量截断，由四简模式自身过滤规则决定数量。
+- GB2312 二级字启用四简时默认需要综合字频达到 1000；`--s4-level2-min-score 0` 表示不过滤二级字。
+
+常用命令：
+
+```powershell
+# 开启四简
+python scripts/cangjie/gen_wucang5.py --s4
+
+# 四简安全版
+python scripts/cangjie/gen_wucang5.py --s4 --s4-mode safe
+
+# 四简平衡版，启用四简时默认
+python scripts/cangjie/gen_wucang5.py --s4 --s4-mode balanced
+
+# 四简激进版
+python scripts/cangjie/gen_wucang5.py --s4 --s4-mode aggressive
+
+# 固定四简数量
+python scripts/cangjie/gen_wucang5.py --s4 --s4-count 1000
+
+# 调整 GB2312 二级字进入四简的门槛
+python scripts/cangjie/gen_wucang5.py --s4 --s4-level2-min-score 1000
+
+# 覆盖率控量
+python scripts/cangjie/gen_wucang5.py --s2-count 0 --s2-coverage 0.85 --s3-count 0 --s3-coverage 0.90
+```
+
+## 6. 简码分层策略
+
+### 6.1 一简与 z 补丁
+
+一简和 z 补丁由原型文件直接提供，构建时作为最高优先级简码层参与排序。
+
+### 6.2 二简
+
+二简候选来自全码长度大于 2 的字：
+
+- 默认取码：`full_code[:2]`
+- 可选取码：首尾码
+- 普通模式：长码字允许与原生二码字竞争，长码字频次需超过原主 `1.5x`
+- `--gb-only` 模式：仅 GB2312 字有资格，且 GB2312 原生二码位绝对保护
+
+### 6.3 三简
+
+三简候选来自全码长度大于 3、且未获得更短简码的字：
+
+- 默认取码：`full_code[:3]`
+- 可选取码：前两码 + 末码
+- 普通模式：长码字允许与原生三码字竞争，长码字频次需超过原主 `1.2x`
+- `--gb-only` 模式：仅 GB2312 字有资格，且 GB2312 原生三码位绝对保护
+
+### 6.4 四简
+
+四简候选来自 GB2312、五码、且未获得 z/一简/二简/三简的字：
+
+- 取码：`full_code[:4]`
+- 启用后默认模式：`balanced`
+- 默认关闭；开启方式：`--s4`
+- 字集门槛：GB2312 一级字直接参与；GB2312 二级字需达到 `--s4-level2-min-score`
+
+四简模式：
+
+- `safe`：不压原生四码位，只接受没有原生四码冲突的候选。
+- `balanced`：默认模式。若冲突原主已经有更短简码则放行；否则候选综合频次需超过活跃原主 `3.0x`。
+- `aggressive`：GB 五码字全量截四码，保留内部重复，覆盖最大但候选压力也最大。
+
+在 `safe` 与 `balanced` 下，四简会做码位去重与同字去重：每个四码位只保留一个最高价值字，同一个字也只保留一个四简。
+
+## 7. 字典排序与退避
+
+最终字典使用纯 `字\t码` 格式，不写 weight。候选优先级依赖文件内排序：
+
+1. 简码条目：`z` / 一简 / 二简 / 三简 / 四简（启用时）
+2. 原生全码：该编码是某字全码，且该字没有更短简码
+3. 退避全码：该编码是某字全码，但该字已有更短简码
+4. 后缀消重条目：自动追加的 `z` / `x` 后缀码
+
+这个排序保证简码在自身码位上拥有绝对首选，同时保留全码回退路径。
+
+## 8. 后缀消重
+
+`cangjie_builder.py` 会在构建末尾为非首选候选生成 `z` / `x` 后缀退路：
+
+- 第二候选：`原码 + z`
+- 第三候选：`原码 + x`
+- 总码长不超过当前方案最大码长时才生成
+- 若后缀码已被简码占用则跳过
+
+这层逻辑主要降低全码模式下的选重压力，不改变简码优先级。
+
+## 9. 当前默认构建样例
+
+基于 2026-05-08 当前默认命令：
+
+```powershell
+python scripts/cangjie/gen_wucang5.py
+```
+
+生成日志样例：
+
+| 项目 | 数量 |
+| :--- | ---: |
+| z 字根码 | 25 |
+| 一简 | 25 |
+| 二简 | 200 |
+| 三简 | 400 |
+| 四简 | 0 |
+| 最终简码条目 | 650 |
+| 最终全码条目 | 107263 |
+| 退避条目 | 696 |
+| 后缀消重条目 | 14807 |
+| 总条目 | 122720 |
+
+`最终简码条目` 使用 builder 口径，包含 `z_code` 字根码、一简、二简、三简：`25 + 25 + 200 + 400 = 650`。
+
+当前 `summary.py` 摘要：
+
+| 语料 | 频率降序-全码 | 频率降序-简码 | 原始码表-全码 | 原始码表-简码 | 简全联用-实际 |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| 知乎简体 | 18.09‱ | 447.67‱ | 3532.53‱ | 472.38‱ | 2.32‱ |
+| 北语简体 | 9.94‱ | 508.83‱ | 3434.59‱ | 545.09‱ | 0.65‱ |
+| 台标繁体 | 10.86‱ | 352.68‱ | 2035.44‱ | 654.13‱ | 13.44‱ |
+| 古籍繁体 | 13.34‱ | 398.22‱ | 1557.47‱ | 1044.39‱ | 21.18‱ |
+| 繁简联合 | 29.96‱ | 452.27‱ | 2569.88‱ | 524.30‱ | 9.59‱ |
+
+注意：`原始码表-全码` 会因简码绝对优先而偏高，这是设计结果；真实打字体验优先看 `简全联用-实际`。
+
+## 10. Sicang5
+
+Sicang5 使用与 Wucang5 相同的二简/三简生成参数，但不包含四简层：
+
+```powershell
+python scripts/cangjie/gen_sicang5.py
+```
+
+当前默认日志样例：
+
+| 项目 | 数量 |
+| :--- | ---: |
+| 最终简码条目 | 650 |
+| 最终全码条目 | 106214 |
+| 退避条目 | 692 |
+| 后缀消重条目 | 4438 |
+| 总条目 | 111302 |
+
+当前 `summary.py` 实际选重率：
+
+| 语料 | 简全联用-实际 |
+| :--- | ---: |
+| 知乎简体 | 10.29‱ |
+| 北语简体 | 12.41‱ |
+| 台标繁体 | 159.02‱ |
+| 古籍繁体 | 195.64‱ |
+| 繁简联合 | 114.63‱ |
+
+## 11. 词组取码动态配额
+
+Sicang5 语句流采用动态配额算法，根据单字码长分配 4 码位。
+
+| 词长 | 结构配额 | 取码明细 | 示例 |
+| :--- | :--- | :--- | :--- |
+| 二字词 | 2 + 2 | A首+A尾 + B首+B尾 | 实际 -> pmnf |
+| 二字词 | 1 + 3 | A首 + B首+B次+B尾 | 中国 -> lwim |
+| 二字词 | 2 + 1 | A首+A尾 + B首 | 某个 -> mwg |
+| 三字词 | 2 + 1 + 1 | A首+A尾 + B首 + C尾 | 实际上 -> pmnm |
+| 三字词 | 1 + 2 + 1 | A首 + B首+B尾 + C尾 | 输入法 -> johy |
+| 三字词 | 1 + 1 + 2 | A首 + B首 + C首+C尾 | 这种人 -> yhoo |
+| 四字词+ | 1 + 1 + 1 + 1 | A首 + B首 + C首 + Z首 | 社会保障 -> ioof |
+
+原则：遵循仓颉五代顺位，动态消除同字内冗余码，首字不超过 2 码。
+
+## 12. 评估命令
+
+```powershell
+python scripts/assess/summary.py --dict schemas/cangjie/wucang5/wucang5.dict.yaml
+```
+
+项目根目录运行脚本，确保 `REPO_ROOT` 能正确定位源表、原型文件与频率数据。

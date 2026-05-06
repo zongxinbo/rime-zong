@@ -16,19 +16,10 @@ from core.cangjie_builder import (
     parse_cangjie_dict,
     parse_frequency_file,
     get_weighted_frequencies,
+    is_gb2312,
     is_han_char,
     REPO_ROOT
 )
-
-def is_gb2312(char: str) -> bool:
-    """判断是否为 GB2312 范围内的汉字。"""
-    if len(char) != 1 or not ('\u4e00' <= char <= '\u9fa5'):
-        return False
-    try:
-        char.encode('gb2312')
-        return True
-    except UnicodeEncodeError:
-        return False
 
 def generate_shortcut_3(gb_only: bool = False, prefix: bool = True, count: int = 0, auto_coverage: float = 0.90, char_scores: dict[str, int] = None):
     source_dict = REPO_ROOT / "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
