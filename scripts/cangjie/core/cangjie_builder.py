@@ -9,20 +9,28 @@ import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
-
-# ... (keep existing definitions: HAN_RANGES, Entry, etc.)
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+FREQ_PATHS = {
+    "Dialogue": REPO_ROOT / "schemas/common/frequency/char/sc/dialogue_char_freq.txt",
+    "Subtlex": REPO_ROOT / "schemas/common/frequency/char/sc/subtlex_char_freq.txt",
+    "Zhihu": REPO_ROOT / "schemas/common/frequency/char/sc/zhihu_char_freq.txt",
+    "BLCU": REPO_ROOT / "schemas/common/frequency/char/sc/blcu_char_freq.txt",
+    "Essay": REPO_ROOT / "schemas/common/essay-zh-hans.txt"
+}
+FREQ_WEIGHTS = {"Dialogue": 6, "Subtlex": 5, "Zhihu": 4, "BLCU": 2, "Essay": 1}
 
 def generate_dict(
     output_path: Path,
     shortcut_paths: dict,
     source_dict: Path,
-    freq_file: Path,
+    freq_file: Path = None,
     max_code_length: int = 5,
     exclude_extended: bool = False,
     vocabulary: str = None,
     max_phrase_length: int = None,
     min_phrase_weight: int = None,
     only_first_full_code: bool = False,
+    char_freqs: dict[str, int] = None,
 ):
     """生成最终字典。
 
@@ -67,7 +75,10 @@ def generate_dict(
 
     # ── 第二步：生成全码条目 ──
     print("正在生成单字...")
-    char_freqs, _ = parse_frequency_file(freq_file)
+    if char_freqs is None:
+        char_freqs, _ = parse_frequency_file(freq_file)
+    else:
+        print("使用预加载的加权字频数据进行排序...")
 
     used_text_code = set()
     for char, code, _ in shortcut_entries:
@@ -182,7 +193,6 @@ def generate_dict(
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = SCRIPT_DIR.parent.parent.parent
 
 
 HAN_RANGES: tuple[tuple[int, int], ...] = (
@@ -311,6 +321,20 @@ def parse_frequency_file(path: Path) -> tuple[dict[str, int], list[FrequencyEntr
         for text, weight in phrase_frequencies.items()
     ]
     return char_frequencies, phrases
+
+
+def get_weighted_frequencies() -> dict[str, int]:
+    """计算多份语料库的加权得分并返回合并后的字典。"""
+    char_scores = defaultdict(int)
+    for name, path in FREQ_PATHS.items():
+        if path.exists():
+            weight = FREQ_WEIGHTS.get(name, 1)
+            freqs, _ = parse_frequency_file(path)
+            for char, val in freqs.items():
+                char_scores[char] += val * weight
+        else:
+            print(f"Warning: Frequency file not found: {path}", file=sys.stderr)
+    return char_scores
 
 
 def normalize_prefixes(prefixes: list[str]) -> tuple[str, ...]:
