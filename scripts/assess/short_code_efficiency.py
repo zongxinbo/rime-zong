@@ -77,8 +77,10 @@ def analyze_top_n_efficiency(dict_path, freq_data, top_n, charset_filter=is_gb23
             'gain_product': freq * (fl - sl)
         })
 
-    # yuhao-assess: 筛选 sl < fl 且 sl < max_length
-    shortcuts = [p for p in processed if p['sl'] < p['fl'] and p['sl'] < max_length]
+    # 只要实际首选短码比全码短，就纳入 Top-N 收益排序。
+    # Wucang5 的三简/四简会在计入选择键后达到 4 码；如果再限制 sl < max_length，
+    # 表格会在 500 档附近提前饱和，看不到 1000+ 简码层的收益曲线。
+    shortcuts = [p for p in processed if p['sl'] < p['fl']]
     sorted_by_gain = sorted(shortcuts, key=lambda x: x['gain_product'], reverse=True)
     
     top_chars = set(p['char'] for p in sorted_by_gain[:top_n])

@@ -159,7 +159,7 @@ def main():
     print(header)
     print("-" * get_display_width(header))
     
-    top_n_list = [0, 25, 50, 100, 200, 500]
+    top_n_list = [0, 25, 50, 100, 200, 500, 1000, 2000, 3000]
     for n in top_n_list:
         row = [pad_wide(str(n), 10)]
         for name in ["知乎简体", "北语简体", "台标繁体", "古籍繁体", "繁简联合"]:
