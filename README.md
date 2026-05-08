@@ -23,8 +23,8 @@ Rime 方案集合，包含拼音、仓颉、郑码、四角号码和日语罗马
 | [`pinyin_ice_cangjie5`](schemas/pinyin_ice/pinyin_ice_cangjie5.schema.yaml) | 雾凇拼音·倉頡 | `cangjie5` | 默认启用。雾凇拼音主输入，仓颉五代作辅助码。拼音后输入 `;` 或 `,` 接仓颉辅码过滤候选，例如 `ni;ab`；单字取仓颉首尾码，词语取首字首码 + 末字首码；输入 `` `仓颉码 `` 使用完整仓颉反查。 |
 | [`cangjie5`](schemas/cangjie/cangjie5/cangjie5.schema.yaml) | 倉頡五代 | `pinyin_simp` | [倉頡五代](https://github.com/Jackchows/Cangjie5) 单字方案，简化字优先。不造词、不学习，五码不自动上屏；空格有候选时上屏、无匹配时清码；`Tab` 清码；输入 `` `拼音 `` 可拼音反查。 |
 | [`sancang5`](schemas/cangjie/sancang5/sancang5.schema.yaml) | 三码仓颉·五代 | `pinyin_simp` | 默认启用。参考 [三码仓颉](https://github.com/lotem/rime-sancang) 思路，由仓颉五代码表按三码规则取码生成。单字一至三码保留原码，四码及以上取首码、次码、末码；支持整句连打（语句流）、拼音反查、扩展字符集、简繁转换和八股文简化字语法模型；输入 `` `拼音 `` 可拼音反查。 |
-| [`sicang5`](schemas/cangjie/sicang5/sicang5.schema.yaml) | 四码仓颉·五代 | `pinyin_simp` | 纯单字四码仓颉，由仓颉五代码表按四码规则（一二三末码）提取生成，默认 `200` 个二简、`400` 个三简；最长四码不自动上屏，不支持整句连打；支持 `z/x` 后缀选重、拼音反查、扩展字符集和简繁转换。 |
-| [`wucang5`](schemas/cangjie/wucang5/wucang5.schema.yaml) | 五码仓颉·五代 | `pinyin_simp` | 默认启用。基于仓颉五代码表生成的纯单字五码方案，默认 `200` 个二简、`400` 个三简，不启用四简；支持 `z/x` 后缀选重、拼音反查、扩展字符集和简繁转换。五码不自动上屏；输入 `` `拼音 `` 可拼音反查。 |
+| [`sicang5`](schemas/cangjie/sicang5/sicang5.schema.yaml) | 四码仓颉·五代 | `pinyin_simp` | 纯单字四码仓颉，由仓颉五代码表按四码规则（一二三末码）提取生成，默认 `200` 个二简、`400` 个三简；最长四码不自动上屏，不支持整句连打；支持 `z` 后缀选重、拼音反查、扩展字符集和简繁转换。 |
+| [`wucang5`](schemas/cangjie/wucang5/wucang5.schema.yaml) | 五码仓颉·五代 | `pinyin_simp` | 默认启用。基于仓颉五代码表生成的纯单字五码方案，默认 `200` 个二简、`400` 个三简，不启用四简；支持 `z` 后缀选重、拼音反查、扩展字符集和简繁转换。五码不自动上屏；输入 `` `拼音 `` 可拼音反查。 |
 | [`cangjie5_pinyin`](schemas/cangjie/cangjie5/cangjie5_pinyin.schema.yaml) | 倉頡五代·拼音 | `pinyin_simp` | 仓颉五代 + 袖珍简化字拼音混合输入。仓颉候选保持单字，拼音候选可出词；输入 `` `拼音 `` 可拼音反查。 |
 | [`cangjie5_ice`](schemas/cangjie/cangjie5/cangjie5_ice.schema.yaml) | 倉頡五代·雾凇 | `pinyin_ice` | 默认启用。仓颉五代 + 雾凇拼音混合输入。仓颉码和雾凇拼音都可参与候选，适合以仓颉为主、雾凇拼音补词；输入 `` `拼音 `` 使用雾凇拼音反查。 |
 | [`jaroomaji`](schemas/jaroomaji/jaroomaji.schema.yaml) | 日本語 | `cangjie5`, `pinyin_simp` | 默认启用。[日本語罗马字](https://github.com/lazyfoxchan/rime-jaroomaji) 输入，支持平假名、片假名、日文符号。`-`、`l`、`L` 输入长音符号「ー」；按住 `Shift` 输出片假名；输入 `` `仓颉码 `` 可仓颉反查，输入 `` `P拼音 `` 可拼音反查。 |

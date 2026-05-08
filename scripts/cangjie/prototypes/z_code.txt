@@ -1,5 +1,6 @@
 # 原字根
 日	az
+曰	azz
 月	bz
 金	cz
 木	dz
@@ -7,12 +8,17 @@
 火	fz
 土	gz
 竹	hz
+丿	hzz
 戈	iz
+丶	izz
 十	jz
 大	kz
+乂	kzz
 中	lz
+丨	lzz
 一	mz
 弓	nz
+亅	nzz
 人	oz
 心	pz
 手	qz
