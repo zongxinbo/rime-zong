@@ -50,6 +50,7 @@ def generate_dict(
     # ── 第一步：加载各层级简码 ──
     print("正在加载简码规则...")
     shortcut_entries = []  # (char, code, priority)
+    z_single_code_chars = set()
     chars_with_shortcut = {}  # char -> 最短简码长度
 
     def load_shortcut(path, priority):
@@ -61,6 +62,8 @@ def generate_dict(
                 if len(parts) == 2 and not parts[0].startswith("#"):
                     char, code = parts[0], parts[1]
                     shortcut_entries.append((char, code, priority))
+                    if priority == 0 and code.endswith("zz"):
+                        z_single_code_chars.add(char)
                     # 记录该字获得的最短简码长度
                     cur = chars_with_shortcut.get(char, 999)
                     if len(code) < cur:
@@ -86,6 +89,8 @@ def generate_dict(
 
     fullcode_entries = []  # (char, code, freq, is_demoted)
     for char, full_codes in char_full_codes.items():
+        if char in z_single_code_chars:
+            full_codes = [code for code in full_codes if len(code) == 1]
         freq = char_freqs.get(char, 0)
         shortcut_len = chars_with_shortcut.get(char, 999)
         for full_code in full_codes:
@@ -115,8 +120,8 @@ def generate_dict(
 
     all_entries.sort()
 
-    # ── 第四步：后缀消重（z=第二候选, x=第三候选）──
-    # 对于重码组，给第2选生成 code+z，第3选生成 code+x
+    # ── 第四步：后缀消重（z=第二候选）──
+    # 对于重码组，给第2选生成 code+z
     # 跳过加后缀后超过 max_code_length 的情况
     code_groups = defaultdict(list)
     for entry in all_entries:
@@ -125,6 +130,8 @@ def generate_dict(
     suffix_entries = []
     suffix_count = 0
     for code, entries in code_groups.items():
+        if code.startswith('z'):
+            continue
         if len(code) >= max_code_length:
             continue  # 加后缀会超长，跳过
 
@@ -152,22 +159,9 @@ def generate_dict(
                     used_text_code.add((char2, new_code_z))
                     suffix_count += 1
 
-        # 第3选 → code+x
-        if len(seen_entries) >= 3:
-            entry3 = seen_entries[2]
-            char3 = entry3[3]
-            tier3 = entry3[1]
-            if tier3 < 6:
-                new_code_x = code + 'x'
-                if (char3, new_code_x) not in used_text_code:
-                    freq3 = char_freqs.get(char3, 0)
-                    suffix_entries.append((new_code_x, 1, -freq3, char3))
-                    used_text_code.add((char3, new_code_x))
-                    suffix_count += 1
-
     all_entries.extend(suffix_entries)
     all_entries.sort()
-    print(f"后缀消重：生成 {suffix_count} 个 z/x 后缀条目")
+    print(f"后缀消重：生成 {suffix_count} 个 z 后缀条目")
 
     # ── 第五步：写入文件 ──
     output_path.parent.mkdir(parents=True, exist_ok=True)

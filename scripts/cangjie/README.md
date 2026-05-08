@@ -21,7 +21,7 @@ python scripts/cangjie/core/gen_shortcut_4.py
 - 三简：固定 `400` 个
 - 四简：默认关闭，可用 `--s4` 开启 `balanced` 模式，给 GB2312 五码字生成四简
 - 四简数量：启用后默认上限 `1000` 个；GB2312 二级字需达到综合字频 `1000` 才可进入
-- 简码总量：builder 口径含 `z_code` 字根码 25 个和一简 25 个，默认合计 `650` 个
+- 简码总量：builder 口径含 `z_code` 字根码 31 个和一简 25 个，默认合计 `656` 个
 
 ```powershell
 python scripts/cangjie/gen_wucang5.py
