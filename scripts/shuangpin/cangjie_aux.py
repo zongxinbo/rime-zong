@@ -2,10 +2,11 @@ import os
 from collections import defaultdict
 
 def get_cangjie_mapping(cangjie_path='../../schemas/cangjie/cangjie5/cangjie5.dict.yaml'):
-    """
-    Reads the Cangjie5 dictionary and returns a mapping from character to its 
-    list of first+last codes (prioritizing codes that do not start with z or x).
-    Returns: { char: [code1, code2, ...] }
+    """读取仓颉五代码表，生成“字 -> 首尾辅助码列表”的映射。
+
+    同一个字可能有多个仓颉码。为了贴近日常输入，普通仓颉码的
+    首尾码排在前面；`z`、`x` 开头的兼容码排在后面作为补充。
+    返回格式：{字: [辅助码1, 辅助码2, ...]}。
     """
     char_raw_codes = defaultdict(list)
     with open(cangjie_path, 'r', encoding='utf-8') as f:

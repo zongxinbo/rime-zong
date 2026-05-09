@@ -2,8 +2,8 @@
 
 # flypyify.py -- 把拼音（字符串）轉換成小鶴雙拼（字符串）
 #
-# Copyright (c) 2023  ksqsf
-# License: MIT License
+# 版權所有 (c) 2023  ksqsf
+# 授權協議：MIT 許可證
 
 '''
 把拼音（字符串）轉換成小鶴雙拼（字符串）。
@@ -111,5 +111,3 @@ def unflypyify1(sp: str):
 
 def unflypyify(sps: str):
     return ' '.join(unflypyify1(sp) for sp in sps.split())
-
-
