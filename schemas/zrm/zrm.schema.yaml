@@ -1,0 +1,116 @@
+# Rime schema settings
+# encoding: utf-8
+# AUTO-GENERATED. DO NOT EDIT.
+
+schema:
+  schema_id: zrm
+  name: 自然码双拼音形
+  version: "2026-05-09"
+  author:
+    - rime-zong
+  description: |
+    自然码双拼音形
+    单字：双拼两码 + 仓颉五代首尾辅助码，共四码。
+    词语：按固定规则生成六码词码。
+    仓颉：输入 o + 仓颉五代码，候选降权到最后。
+  dependencies:
+    - pinyin_simp
+
+switches:
+  - name: ascii_mode
+    reset: 0
+    states: [ 中文, 西文 ]
+  - name: full_shape
+    states: [ 半角, 全角 ]
+  - name: extended_charset
+    states: [ 常用, 增廣 ]
+  - name: ascii_punct
+    states: [ 。，, ．， ]
+  - options: [ noop, traditionalization, simplification ]
+    reset: 0
+    states: [ 默认汉字, 繁體漢字, 简体汉字 ]
+
+engine:
+  processors:
+    - ascii_composer
+    - recognizer
+    - key_binder
+    - speller
+    - punctuator
+    - selector
+    - navigator
+    - express_editor
+  segmentors:
+    - ascii_segmentor
+    - matcher
+    - abc_segmentor
+    - punct_segmentor
+    - fallback_segmentor
+  translators:
+    - punct_translator
+    - reverse_lookup_translator
+    - table_translator
+  filters:
+    - simplifier
+    - simplifier@traditionalization
+    - uniquifier
+
+speller:
+  alphabet: zyxwvutsrqponmlkjihgfedcba
+  max_code_length: 6
+  auto_select: false
+  auto_select_unique_candidate: false
+
+translator:
+  dictionary: zrm
+  enable_charset_filter: true
+  encode_commit_history: false
+  enable_encoder: false
+  enable_completion: false
+  enable_user_dict: false
+  enable_sentence: false
+
+abc_segmentor:
+  extra_tags:
+
+reverse_lookup:
+  dictionary: pinyin_simp
+  prism: pinyin_simp
+  prefix: "`"
+  suffix: "'"
+  tips: 〔拼音〕
+  preedit_format:
+    - xform/([nl])v/$1ü/
+    - xform/([nl])ue/$1üe/
+    - xform/([jqxy])v/$1u/
+
+simplifier:
+  tips: all
+
+traditionalization:
+  opencc_config: s2t.json
+  option_name: traditionalization
+  tips: all
+
+punctuator:
+  import_preset: symbols
+
+key_binder:
+  import_preset: default
+  bindings:
+    - { when: has_menu, accept: space, send: space }
+    - { when: has_menu, accept: Tab, send: Escape }
+    - { when: composing, accept: space, send: Escape }
+    - { when: composing, accept: Tab, send: Escape }
+
+ascii_composer:
+  switch_key:
+    Caps_Lock: clear
+    Shift_L: commit_code
+    Shift_R: commit_text
+
+recognizer:
+  import_preset: default
+  patterns:
+    punct: "^/([0-9]0?|[a-z]+)$"
+    reverse_lookup: "`[a-z]*'?$|[a-z]*'$"
