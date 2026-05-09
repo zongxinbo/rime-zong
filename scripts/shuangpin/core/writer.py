@@ -81,11 +81,16 @@ def merge_entries(
     for entry in cangjie_entries:
         put(entry)
 
+    # 最终码表不写词频列，候选顺序完全由文件顺序决定。同码候选先看
+    # 源码表权重：单字权重来自单字原型，词语权重来自 pinyin_ice.base；
+    # 这能保住“支付宝”这类现代高权重词。外部字词频率作为补充信号，
+    # 主要用于源表权重相近或为 0 的条目。
     return sorted(
         merged.values(),
         key=lambda e: (
             e.source == "cangjie",
             e.code,
+            -max(e.weight, 0),
             -frequencies.score_entry(e),
             -e.weight,
             e.tier,
