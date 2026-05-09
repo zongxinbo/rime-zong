@@ -3,10 +3,10 @@ from __future__ import annotations
 from pathlib import Path
 
 from .cangjie import load_aux_lists
-from .paths import CHARS_SOURCE, PROTOTYPES_DIR
+from .paths import CHARS_SOURCE, SHUANGPIN_SCHEMAS_DIR
 
 
-SHOUXIN_AUX_PATH = PROTOTYPES_DIR / "cangjie_aux.txt"
+SHOUXIN_AUX_PATH = SHUANGPIN_SCHEMAS_DIR / "cangjie_aux.txt"
 
 
 def load_source_chars(chars_path: Path = CHARS_SOURCE) -> set[str]:

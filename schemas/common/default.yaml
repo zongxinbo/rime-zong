@@ -6,8 +6,9 @@ config_version: '0.50'
 schema_list:
   - schema: wucang5
   - schema: sancang5
-  - schema: pinyin_ice_cangjie5
   - schema: cangjie5_ice
+  - schema: pinyin_ice_cangjie5
+  - schema: zrm
   - schema: jaroomaji
 
 switcher:

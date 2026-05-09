@@ -10,6 +10,7 @@ REPO_ROOT = SCRIPTS_DIR.parent
 
 PROTOTYPES_DIR = SHUANGPIN_DIR / "prototypes"
 SCHEMAS_DIR = REPO_ROOT / "schemas"
+SHUANGPIN_SCHEMAS_DIR = SCHEMAS_DIR / "shuangpin"
 FREQUENCY_DIR = SCHEMAS_DIR / "common" / "frequency"
 
 CHARS_SOURCE = PROTOTYPES_DIR / "chars.txt"

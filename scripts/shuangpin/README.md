@@ -22,7 +22,6 @@ scripts/shuangpin/
   prototypes/
     chars.txt             # 原始字音、繁简频率
     chars.dict.yaml       # 偏旁部首原型
-    cangjie_aux.txt       # 手心输入法挂接用辅助码，格式为 字=辅码
     zrm/
       zrm.chars.txt
       zrm.words.txt
@@ -51,12 +50,12 @@ python scripts/shuangpin/gen_chars.py --schema flypy
 
 ```text
 scripts/shuangpin/prototypes/zrm/zrm.chars.txt
-scripts/shuangpin/prototypes/cangjie_aux.txt
 scripts/shuangpin/prototypes/zrm/zrm.words.txt
 scripts/shuangpin/prototypes/zrm/zrm.cangjie.txt
 scripts/shuangpin/prototypes/zrm/zrm.report.md
-schemas/zrm/zrm.dict.yaml
-schemas/zrm/zrm.schema.yaml
+schemas/shuangpin/cangjie_aux.txt
+schemas/shuangpin/zrm/zrm.dict.yaml
+schemas/shuangpin/zrm/zrm.schema.yaml
 ```
 
 ## 词码规则
