@@ -4,15 +4,67 @@ import datetime as dt
 from collections import Counter, defaultdict
 from pathlib import Path
 
+from .frequency import FrequencyScores, load_default_frequency_scores
 from .models import CharEntry, DictEntry, WordEntry
+
+
+def iter_char_dict_entries(entry: CharEntry, primary_weights: dict[str, int]) -> list[DictEntry]:
+    """把单字原型展开成最终码表中的显式多编码条目。
+
+    最终码表需要迁移到其他平台，所以不能依赖 Rime 的前缀补全。
+    主读音单字会展开为一、二、三、四码；异读只保留四码全码，
+    避免“她 j”这类异读短码污染高频短码空间。
+    """
+
+    tier = 10 if entry.source == "radicals" else 20
+    if entry.source == "radicals":
+        return [DictEntry(entry.text, entry.code, entry.weight, tier, entry.source)]
+
+    is_primary = entry.weight > 0 and entry.weight == primary_weights.get(entry.text, 0)
+    codes = [entry.code]
+    if is_primary:
+        codes = [
+            entry.sp[:1],
+            entry.sp,
+            entry.sp + entry.aux[:1],
+            entry.code,
+        ]
+    return [
+        DictEntry(entry.text, code, entry.weight, tier, entry.source)
+        for code in dict.fromkeys(codes)
+        if code
+    ]
+
+
+def iter_word_dict_entries(entry: WordEntry) -> list[DictEntry]:
+    """把词语六码原型展开成 0/1/2 位辅助码三档词码。"""
+
+    codes = [entry.code]
+    if len(entry.code) == 6:
+        codes = [
+            entry.code[:4],
+            entry.code[:5],
+            entry.code,
+        ]
+    return [
+        DictEntry(entry.text, code, entry.weight, 30, "words")
+        for code in dict.fromkeys(codes)
+        if code
+    ]
 
 
 def merge_entries(
     char_entries: list[CharEntry],
     word_entries: list[WordEntry],
     cangjie_entries: list[DictEntry],
+    frequency_scores: FrequencyScores | None = None,
 ) -> list[DictEntry]:
+    frequencies = frequency_scores or load_default_frequency_scores()
     merged: dict[tuple[str, str], DictEntry] = {}
+    primary_weights: dict[str, int] = {}
+    for entry in char_entries:
+        if entry.source == "chars":
+            primary_weights[entry.text] = max(primary_weights.get(entry.text, 0), entry.weight)
 
     def put(entry: DictEntry) -> None:
         key = (entry.text, entry.code)
@@ -21,20 +73,31 @@ def merge_entries(
             merged[key] = entry
 
     for entry in char_entries:
-        tier = 10 if entry.source == "radicals" else 20
-        put(DictEntry(entry.text, entry.code, entry.weight, tier, entry.source))
+        for dict_entry in iter_char_dict_entries(entry, primary_weights):
+            put(dict_entry)
     for entry in word_entries:
-        put(DictEntry(entry.text, entry.code, entry.weight, 30, "words"))
+        for dict_entry in iter_word_dict_entries(entry):
+            put(dict_entry)
     for entry in cangjie_entries:
         put(entry)
 
-    return sorted(merged.values(), key=lambda e: (e.tier, e.code, -e.weight, e.text))
+    return sorted(
+        merged.values(),
+        key=lambda e: (
+            e.source == "cangjie",
+            e.code,
+            -frequencies.score_entry(e),
+            -e.weight,
+            e.tier,
+            e.text,
+        ),
+    )
 
 
 def write_cangjie_prototype(entries: list[DictEntry], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="\n") as f:
-        f.write("# text\tcode\tweight\tsource\n")
+        f.write("# 字符\t编码\t权重\t来源\n")
         for entry in sorted(entries, key=lambda e: (e.code, e.text)):
             f.write(f"{entry.text}\t{entry.code}\t{entry.weight}\t{entry.source}\n")
 
@@ -43,29 +106,29 @@ def write_dict(schema: str, entries: list[DictEntry], output_path: Path) -> None
     output_path.parent.mkdir(parents=True, exist_ok=True)
     today = dt.date.today().strftime("%Y%m%d")
     with output_path.open("w", encoding="utf-8", newline="\n") as f:
-        f.write("# Rime dictionary\n")
-        f.write("# encoding: utf-8\n")
-        f.write("# AUTO-GENERATED. DO NOT EDIT.\n\n")
+        f.write("# Rime 词典\n")
+        f.write("# 编码：UTF-8\n")
+        f.write("# 自动生成，请勿手动修改。\n\n")
         f.write("---\n")
         f.write(f"name: {schema}\n")
         f.write(f'version: "{today}"\n')
-        f.write("sort: by_weight\n")
+        f.write("sort: original\n")
         f.write("use_preset_vocabulary: false\n")
         f.write("...\n\n")
         for entry in entries:
-            f.write(f"{entry.text}\t{entry.code}\t{entry.weight}\n")
+            f.write(f"{entry.text}\t{entry.code}\n")
 
 
 def write_schema(schema: str, output_path: Path) -> None:
-    names = {"zrm": "自然码双拼音形", "flypy": "小鹤双拼音形"}
+    names = {"zrm": "自然码·仓颉", "flypy": "小鹤·仓颉"}
     name = names.get(schema, schema)
     today = dt.date.today().isoformat()
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", encoding="utf-8", newline="\n") as f:
         f.write(
-            f"""# Rime schema settings
-# encoding: utf-8
-# AUTO-GENERATED. DO NOT EDIT.
+            f"""# Rime 方案配置
+# 编码：UTF-8
+# 自动生成，请勿手动修改。
 
 schema:
   schema_id: {schema}
@@ -75,9 +138,9 @@ schema:
     - rime-zong
   description: |
     {name}
-    单字：双拼两码 + 仓颉五代首尾辅助码，共四码。
-    词语：按固定规则生成六码词码。
-    仓颉：输入 o + 仓颉五代码，候选降权到最后。
+    单字：显式生成双拼首码、双拼全码、双拼加一位辅码、双拼加两位辅码。
+    词语：显式生成无辅码、一位辅码、两位辅码词码。
+    仓颉：输入 o + 仓颉五代码，候选排在普通条目之后。
   dependencies:
     - pinyin_simp
 
@@ -122,6 +185,7 @@ engine:
 
 speller:
   alphabet: zyxwvutsrqponmlkjihgfedcba
+  delimiter: " ;"
   max_code_length: 6
   auto_select: false
   auto_select_unique_candidate: false
@@ -134,6 +198,7 @@ translator:
   enable_completion: false
   enable_user_dict: false
   enable_sentence: false
+  max_phrase_length: 8
 
 abc_segmentor:
   extra_tags:
@@ -202,19 +267,18 @@ def write_report(
 
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="\n") as f:
-        f.write(f"# {schema} build report\n\n")
-        f.write(f"- total entries: {len(entries)}\n")
-        f.write(f"- char prototype entries: {char_count}\n")
-        f.write(f"- word prototype entries: {word_count}\n")
-        f.write(f"- prefixed cangjie entries: {cangjie_count}\n")
-        f.write(f"- dropped chars: {dropped_chars}\n")
-        f.write(f"- dropped words: {dropped_words}\n")
-        f.write(f"- collision codes: {len(collisions)}\n\n")
-        f.write("## Source counts\n\n")
+        f.write(f"# {schema} 构建报告\n\n")
+        f.write(f"- 最终条目数：{len(entries)}\n")
+        f.write(f"- 单字原型条目数：{char_count}\n")
+        f.write(f"- 词语原型条目数：{word_count}\n")
+        f.write(f"- o 前缀仓颉条目数：{cangjie_count}\n")
+        f.write(f"- 丢弃单字数：{dropped_chars}\n")
+        f.write(f"- 丢弃词语数：{dropped_words}\n")
+        f.write(f"- 有重码的编码数：{len(collisions)}\n\n")
+        f.write("## 来源统计\n\n")
         for source, count in sorted(source_counts.items()):
             f.write(f"- {source}: {count}\n")
-        f.write("\n## Largest collision groups\n\n")
+        f.write("\n## 最大重码组\n\n")
         for code, group in largest:
             sample = " ".join(entry.text for entry in group[:20])
-            f.write(f"- {code}: {len(group)} candidates; {sample}\n")
-
+            f.write(f"- {code}: {len(group)} 个候选；{sample}\n")

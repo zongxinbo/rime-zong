@@ -1,18 +1,18 @@
-# Rime schema settings
-# encoding: utf-8
-# AUTO-GENERATED. DO NOT EDIT.
+# Rime 方案配置
+# 编码：UTF-8
+# 自动生成，请勿手动修改。
 
 schema:
   schema_id: zrm
-  name: 自然码双拼音形
+  name: 自然码·仓颉
   version: "2026-05-09"
   author:
     - rime-zong
   description: |
-    自然码双拼音形
-    单字：双拼两码 + 仓颉五代首尾辅助码，共四码。
-    词语：按固定规则生成六码词码。
-    仓颉：输入 o + 仓颉五代码，候选降权到最后。
+    自然码·仓颉
+    单字：显式生成双拼首码、双拼全码、双拼加一位辅码、双拼加两位辅码。
+    词语：显式生成无辅码、一位辅码、两位辅码词码。
+    仓颉：输入 o + 仓颉五代码，候选排在普通条目之后。
   dependencies:
     - pinyin_simp
 
@@ -57,6 +57,7 @@ engine:
 
 speller:
   alphabet: zyxwvutsrqponmlkjihgfedcba
+  delimiter: " ;"
   max_code_length: 6
   auto_select: false
   auto_select_unique_candidate: false
@@ -69,6 +70,7 @@ translator:
   enable_completion: false
   enable_user_dict: false
   enable_sentence: false
+  max_phrase_length: 8
 
 abc_segmentor:
   extra_tags:

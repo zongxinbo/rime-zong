@@ -7,10 +7,22 @@ from core.builder import build_scheme
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Build the flypy shuangpin + Cangjie auxiliary scheme.")
-    parser.add_argument("--simplified", action="store_true", help="Use simplified character frequency weights")
-    parser.add_argument("--min-word-weight", type=int, default=1, help="Minimum source word weight")
-    parser.add_argument("--max-word-length", type=int, default=8, help="Maximum word length")
+    parser = argparse.ArgumentParser(description="生成小鹤双拼 + 仓颉辅助码音形方案。")
+    parser.add_argument(
+        "--simplified",
+        dest="simplified",
+        action="store_true",
+        default=True,
+        help="使用简体字频列生成单字主读音和排序权重（默认）。",
+    )
+    parser.add_argument(
+        "--traditional",
+        dest="simplified",
+        action="store_false",
+        help="使用繁体字频列生成单字主读音和排序权重。",
+    )
+    parser.add_argument("--min-word-weight", type=int, default=5000, help="词源条目的最低权重。")
+    parser.add_argument("--max-word-length", type=int, default=4, help="收词的最大词长。")
     args = parser.parse_args()
 
     build_scheme(
@@ -23,4 +35,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

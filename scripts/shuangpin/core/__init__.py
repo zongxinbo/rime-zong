@@ -1,2 +1,1 @@
-"""Build helpers for shuangpin + auxiliary-code schemes."""
-
+"""双拼音形方案的构建辅助模块。"""

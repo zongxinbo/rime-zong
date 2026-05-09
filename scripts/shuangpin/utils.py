@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Generator, Iterable, Tuple, Iterator, overload
 
 def tsv_reader(path: str) -> Iterator[list[str]]:
-    """Yield each line which is parsed as list of strings. """
+    """逐行读取 TSV 文件，并把每一行拆成字段列表。"""
     with open(path, 'r', encoding='utf-8') as f:
         for line in f:
             line = line.rstrip('\n')
@@ -14,7 +14,7 @@ def tsv_reader(path: str) -> Iterator[list[str]]:
             yield parts
 
 def get_keys(parts: list[str], key_indices: int | Iterable[int]) -> str | Tuple[str, ...]:
-    """Returns tuples whose elements are selected by the indices from parts."""
+    """按指定列号从一行字段中取键；多列键会返回元组。"""
     if isinstance(key_indices, int):
         return parts[key_indices]
 
@@ -28,7 +28,7 @@ def read_tsv(path: str, key_indices: int, value_index: int) -> dict[str, str]: .
 @overload
 def read_tsv(path: str, key_indices: Iterable[int], value_index: int) -> dict[tuple[str, ...], str]: ...
 def read_tsv(path, key_indices, value_index):
-    """Read a TSV file into a dict."""
+    """把 TSV 文件读取成字典，并要求键不重复。"""
     res: dict[str | tuple[str, ...], str] = OrderedDict()
     for parts in tsv_reader(path):
         keys = get_keys(parts, key_indices)
@@ -36,7 +36,7 @@ def read_tsv(path, key_indices, value_index):
         try:
             assert keys not in res
         except:
-            print(f'Duplicate keys: {keys=}, {value=}')
+            print(f'发现重复键：{keys=}, {value=}')
             raise
         res[keys] = value
     return res
@@ -60,11 +60,11 @@ pinyin_table = read_tsv_many(chars_txt_path, 0, 1)
 freq_trad_table = read_tsv(chars_txt_path, (0, 1), 2)
 freq_simp_table = read_tsv(chars_txt_path, (0, 1), 3)
 
-# 僅考慮有讀音的字
+# 只考虑带读音的字；没有读音的部件不会参与后续双拼转换。
 all_chars = sorted(list(set(pinyin_table.keys())))
 
 def get_modified_date(file_path):
-    """Returns the modified date of a file as a datetime object."""
+    """读取文件修改时间，并转成 datetime 对象。"""
     timestamp = os.path.getmtime(file_path)
     return datetime.fromtimestamp(timestamp)
 

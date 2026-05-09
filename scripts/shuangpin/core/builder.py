@@ -28,15 +28,15 @@ def build_chars_prototype(schema: str, simplified: bool = False) -> tuple[list[C
     path = schema_prototype_dir(schema) / f"{schema}.chars.txt"
     write_chars_prototype(entries, path)
     aux_count = export_shouxin_aux()
-    print(f"Generated {SHOUXIN_AUX_PATH} ({aux_count} lines)")
+    print(f"已生成 {SHOUXIN_AUX_PATH}（{aux_count} 行）")
     return entries, dropped, path
 
 
 def build_scheme(
     schema: str,
     simplified: bool = False,
-    min_word_weight: int = 1,
-    max_word_length: int = 8,
+    min_word_weight: int = 5000,
+    max_word_length: int = 4,
     emit_schema: bool = True,
 ) -> None:
     converter = get_converter(schema)
@@ -73,11 +73,11 @@ def build_scheme(
         dropped_words=dropped_words,
     )
 
-    print(f"Generated {proto_dir / f'{schema}.chars.txt'}")
-    print(f"Generated {SHOUXIN_AUX_PATH} ({aux_count} lines)")
-    print(f"Generated {proto_dir / f'{schema}.words.txt'}")
-    print(f"Generated {proto_dir / f'{schema}.cangjie.txt'}")
-    print(f"Generated {schema_dir / f'{schema}.dict.yaml'}")
+    print(f"已生成 {proto_dir / f'{schema}.chars.txt'}")
+    print(f"已生成 {SHOUXIN_AUX_PATH}（{aux_count} 行）")
+    print(f"已生成 {proto_dir / f'{schema}.words.txt'}")
+    print(f"已生成 {proto_dir / f'{schema}.cangjie.txt'}")
+    print(f"已生成 {schema_dir / f'{schema}.dict.yaml'}")
     if emit_schema:
-        print(f"Generated {schema_dir / f'{schema}.schema.yaml'}")
-    print(f"Generated {proto_dir / f'{schema}.report.md'}")
+        print(f"已生成 {schema_dir / f'{schema}.schema.yaml'}")
+    print(f"已生成 {proto_dir / f'{schema}.report.md'}")

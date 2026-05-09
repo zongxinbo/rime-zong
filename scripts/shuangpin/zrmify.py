@@ -2,8 +2,8 @@
 
 # zrmify.py -- 把拼音（字符串）轉換成自然碼雙拼（字符串）
 #
-# Copyright (c) 2023  ksqsf
-# License: MIT License
+# 版權所有 (c) 2023  ksqsf
+# 授權協議：MIT 許可證
 
 '''
 把拼音（字符串）轉換成自然碼雙拼（字符串）。
@@ -80,7 +80,7 @@ from collections import defaultdict
 
 for (k, v) in 映射表.items():
     反向映射表[v].append(k)
-反向映射表['o'] = ['uo'] # only lo, bo, po, mo, fo
+反向映射表['o'] = ['uo'] # 自然碼裏 o 鍵只對應 lo、bo、po、mo、fo 這類 uo 韻。
 
 def unzrmify1(sp: str):
     '''將一個自然碼雙拼轉換回拼音'''

@@ -110,10 +110,9 @@ def build_char_entries(
 def write_chars_prototype(entries: list[CharEntry], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="\n") as f:
-        f.write("# text\tpinyin\tsp\taux\tcode\tweight\tsource\n")
+        f.write("# 字符\t拼音\t双拼\t辅助码\t完整编码\t权重\t来源\n")
         for entry in entries:
             f.write(
                 f"{entry.text}\t{entry.pinyin}\t{entry.sp}\t{entry.aux}\t"
                 f"{entry.code}\t{entry.weight}\t{entry.source}\n"
             )
-
