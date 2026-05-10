@@ -8,12 +8,17 @@ from .frequency import FrequencyScores, load_default_frequency_scores
 from .models import CharEntry, DictEntry, WordEntry
 
 
+CHAR_ONE_CODE_MIN_WEIGHT = 1_000_000
+CHAR_TWO_CODE_MIN_WEIGHT = 100_000
+CHAR_THREE_CODE_MIN_WEIGHT = 10_000
+
+
 def iter_char_dict_entries(entry: CharEntry, primary_weights: dict[str, int]) -> list[DictEntry]:
     """把单字原型展开成最终码表中的显式多编码条目。
 
     最终码表需要迁移到其他平台，所以不能依赖 Rime 的前缀补全。
-    主读音单字会展开为一、二、三、四码；异读只保留四码全码，避免
-    “她 j”“区 ou”这类异读短码污染高频短码空间。
+    高频主读音单字会按字频展开一、二、三、四码；低频主读音只保留更长的码。
+    异读只保留四码全码，避免“她 j”“区 ou”这类异读短码污染高频短码空间。
     """
 
     tier = 10 if entry.source == "radicals" else 20
@@ -23,12 +28,14 @@ def iter_char_dict_entries(entry: CharEntry, primary_weights: dict[str, int]) ->
     is_primary = entry.weight > 0 and entry.weight == primary_weights.get(entry.text, 0)
     codes = [entry.code]
     if is_primary:
-        codes = [
-            entry.sp[:1],
-            entry.sp,
-            entry.sp + entry.aux[:1],
-            entry.code,
-        ]
+        codes = []
+        if entry.weight >= CHAR_ONE_CODE_MIN_WEIGHT:
+            codes.append(entry.sp[:1])
+        if entry.weight >= CHAR_TWO_CODE_MIN_WEIGHT:
+            codes.append(entry.sp)
+        if entry.weight >= CHAR_THREE_CODE_MIN_WEIGHT:
+            codes.append(entry.sp + entry.aux[:1])
+        codes.append(entry.code)
     return [
         DictEntry(entry.text, code, entry.weight, tier, entry.source)
         for code in dict.fromkeys(codes)
@@ -39,9 +46,9 @@ def iter_char_dict_entries(entry: CharEntry, primary_weights: dict[str, int]) ->
 def iter_word_dict_entries(entry: WordEntry) -> list[DictEntry]:
     """把词语原型展开成短码路线和全码路线。
 
-    `WordEntry.code` 保存最短的逐字首码；`aliases` 保存加辅码短码、
-    纯双拼全码以及全码加辅码。这里不再从单一六码原型截前缀，避免
-    二字、三字、四字词规则不一致。
+    `WordEntry.code` 保存当前词条的主码：高频词是逐字首码，低频词是全双拼码；
+    `aliases` 保存同一路线的辅码定重码，以及另一条路线的全码或短码。
+    这里不再从单一六码原型截前缀，避免二字、三字、四字词规则不一致。
     """
 
     codes = [entry.code, *entry.aliases]
@@ -181,9 +188,9 @@ schema:
     - rime-zong
   description: |
     {name}
-    单字：显式生成双拼首码、双拼全码、双拼加一位辅码、双拼加两位辅码。
-    词语：显式生成短码、全双拼码及其辅码定重码。
-    仓颉：输入 o + 仓颉五代码，候选排在普通条目之后；必要时补 z 直达仓颉候选。
+    单字：一位辅助码末尾补 z；高频字显式生成短码，低频字保留全码，异读不占短码。
+    词语：高频词显式生成短码；所有入库词保留全双拼码及其辅码定重码。
+    仓颉：输入 o + 仓颉五代码，同字多码全部保留；必要时补 z 直达仓颉候选。
   dependencies:
     - pinyin_simp
 
