@@ -11,6 +11,14 @@ from .paths import CANGJIE5_DICT, PINYIN_ICE_BASE_DICT
 
 Converter = Callable[[str], str]
 
+# 默认收词阈值按词长区分：二字词编码短、语义凝固度高，放宽到很低
+# 以覆盖“白术”这类低频实词；三四字词数量膨胀更快，保持中等阈值。
+DEFAULT_MIN_WEIGHT_BY_LENGTH = {
+    2: 10,
+    3: 3000,
+    4: 3000,
+}
+
 # 这些字通常只承担语气作用，放在词尾时更像拼音输入法的造句片段，
 # 不适合作为音形码的固定词条。过滤时同时核对拼音，避免误删异读词。
 MOOD_SUFFIX_PINYIN = {
@@ -99,14 +107,38 @@ def is_light_phrase(text: str, pinyin: str) -> bool:
     return False
 
 
-def encode_word(text: str, pinyin: str, converter: Converter, aux_map: dict[str, str]) -> str | None:
+def shuangpin_syllables(text: str, pinyin: str, converter: Converter) -> list[str] | None:
+    """把词语拼音转换成逐字双拼码。
+
+    词语编码需要保证“一个汉字对应一个拼音音节”。如果词条里有儿化、
+    多音节外文、标注不齐等情况，直接返回 `None`，由上层丢弃。
+    """
+
     syllables = pinyin.split()
     if len(syllables) != len(text):
         return None
 
     try:
-        sps = [converter(syllable) for syllable in syllables]
+        return [converter(syllable) for syllable in syllables]
     except Exception:
+        return None
+
+
+def build_word_codes(
+    text: str,
+    pinyin: str,
+    converter: Converter,
+    aux_map: dict[str, str],
+) -> tuple[str, ...] | None:
+    """生成词语的全部静态编码。
+
+    规则分成两条路线：短码使用逐字双拼首码，并可追加首末字仓颉辅码；
+    全码使用逐字双拼全码，也可追加首末字仓颉辅码。这样既保留双拼
+    输入习惯，又能在词库扩大后用仓颉辅助码继续定重。
+    """
+
+    sps = shuangpin_syllables(text, pinyin, converter)
+    if sps is None:
         return None
 
     if any(len(sp) != 2 for sp in sps):
@@ -119,13 +151,17 @@ def encode_word(text: str, pinyin: str, converter: Converter, aux_map: dict[str,
     first_aux = auxes[0][0]
     last_aux = auxes[-1][0]
 
-    if len(text) == 2:
-        return sps[0] + sps[1] + first_aux + last_aux
-    if len(text) == 3:
-        return sps[0][0] + sps[1][0] + sps[2] + first_aux + last_aux
-    if len(text) == 4:
-        return sps[0][0] + sps[1][0] + sps[2][0] + sps[3][0] + first_aux + last_aux
-    return sps[0][0] + sps[1][0] + sps[2][0] + sps[-1][0] + first_aux + last_aux
+    short_base = "".join(sp[0] for sp in sps)
+    full_base = "".join(sps)
+    codes = (
+        short_base,
+        short_base + first_aux,
+        short_base + first_aux + last_aux,
+        full_base,
+        full_base + first_aux,
+        full_base + first_aux + last_aux,
+    )
+    return tuple(dict.fromkeys(codes))
 
 
 def collect_word_entries(
@@ -144,18 +180,25 @@ def collect_word_entries(
         weight = parse_int(parts[2], 0) if len(parts) >= 3 else 0
         length = len(text)
         if (
-            weight < min_weight_for_length(length)
-            or length > max_length
+            length > max_length
             or not is_han_word(text)
             or is_light_phrase(text, pinyin)
+            or weight < min_weight_for_length(length)
         ):
             continue
-        code = encode_word(text, pinyin, converter, aux_map)
-        if not code:
+        codes = build_word_codes(text, pinyin, converter, aux_map)
+        if not codes:
             dropped += 1
             continue
-        entry = WordEntry(text=text, pinyin=pinyin, code=code, weight=weight, length=length)
-        key = (text, code)
+        entry = WordEntry(
+            text=text,
+            pinyin=pinyin,
+            code=codes[0],
+            weight=weight,
+            length=length,
+            aliases=codes[1:],
+        )
+        key = (text, codes[0])
         old = seen.get(key)
         if old is None or entry.weight > old.weight:
             seen[key] = entry
@@ -166,7 +209,7 @@ def build_word_entries(
     converter: Converter,
     source_path: Path = PINYIN_ICE_BASE_DICT,
     cangjie_path: Path = CANGJIE5_DICT,
-    min_weight: int = 5000,
+    min_weight: int | None = None,
     max_length: int = 4,
 ) -> tuple[list[WordEntry], int]:
     aux_map = load_aux_map(cangjie_path)
@@ -174,12 +217,17 @@ def build_word_entries(
     dropped = 0
     seen: dict[tuple[str, str], WordEntry] = {}
 
+    def min_weight_for_length(length: int) -> int:
+        if min_weight is not None:
+            return min_weight
+        return DEFAULT_MIN_WEIGHT_BY_LENGTH.get(length, 3000)
+
     dropped = collect_word_entries(
         converter=converter,
         aux_map=aux_map,
         seen=seen,
         source_path=source_path,
-        min_weight_for_length=lambda _length: min_weight,
+        min_weight_for_length=min_weight_for_length,
         max_length=max_length,
     )
 
@@ -191,6 +239,10 @@ def build_word_entries(
 def write_words_prototype(entries: list[WordEntry], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="\n") as f:
-        f.write("# 词语\t拼音\t六码原型\t权重\t词长\n")
+        f.write("# 词语\t拼音\t六码原型\t权重\t词长\t附加词码\n")
         for entry in entries:
-            f.write(f"{entry.text}\t{entry.pinyin}\t{entry.code}\t{entry.weight}\t{entry.length}\n")
+            aliases = " ".join(entry.aliases)
+            f.write(
+                f"{entry.text}\t{entry.pinyin}\t{entry.code}\t"
+                f"{entry.weight}\t{entry.length}\t{aliases}\n"
+            )

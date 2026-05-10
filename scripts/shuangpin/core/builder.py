@@ -42,7 +42,7 @@ def build_chars_prototype(schema: str, simplified: bool = False) -> tuple[list[C
 def build_scheme(
     schema: str,
     simplified: bool = False,
-    min_word_weight: int = 5000,
+    min_word_weight: int | None = None,
     max_word_length: int = 4,
     emit_schema: bool = True,
 ) -> None:
@@ -76,7 +76,7 @@ def build_scheme(
         entries=merged,
         char_count=len(char_entries),
         word_count=len(word_entries),
-        cangjie_count=len(cangjie_entries),
+        cangjie_count=sum(1 for entry in merged if entry.source.startswith("cangjie")),
         dropped_chars=len(dropped_chars),
         dropped_words=dropped_words,
     )

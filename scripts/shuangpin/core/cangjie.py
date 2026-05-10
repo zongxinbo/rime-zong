@@ -120,9 +120,16 @@ def build_prefixed_cangjie_entries(
     weight: int = -1000000,
     tier: int = 90,
 ) -> list[DictEntry]:
+    """生成最终码表里的仓颉兜底条目。
+
+    仓颉码使用 `o + 仓颉码`。条目顺序保留仓颉五代原表的字符顺序，
+    同码时不再按字符文本重排；是否需要补 `z` 直达码由最终合表阶段
+    根据实际重码情况判断。
+    """
+
     entries: list[DictEntry] = []
     seen: set[tuple[str, str]] = set()
-    for text, codes in load_cangjie_codes(path).items():
+    for order, (text, codes) in enumerate(load_cangjie_codes(path).items()):
         if not codes:
             continue
         code = choose_cangjie_code(codes)
@@ -131,5 +138,14 @@ def build_prefixed_cangjie_entries(
         if key in seen:
             continue
         seen.add(key)
-        entries.append(DictEntry(text=text, code=out_code, weight=weight, tier=tier, source="cangjie"))
+        entries.append(
+            DictEntry(
+                text=text,
+                code=out_code,
+                weight=weight,
+                tier=tier,
+                source="cangjie",
+                order=order,
+            )
+        )
     return entries

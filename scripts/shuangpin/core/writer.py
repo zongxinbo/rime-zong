@@ -12,8 +12,8 @@ def iter_char_dict_entries(entry: CharEntry, primary_weights: dict[str, int]) ->
     """把单字原型展开成最终码表中的显式多编码条目。
 
     最终码表需要迁移到其他平台，所以不能依赖 Rime 的前缀补全。
-    主读音单字会展开为一、二、三、四码；异读只保留四码全码，
-    避免“她 j”这类异读短码污染高频短码空间。
+    主读音单字会展开为一、二、三、四码；异读只保留四码全码，避免
+    “她 j”“区 ou”这类异读短码污染高频短码空间。
     """
 
     tier = 10 if entry.source == "radicals" else 20
@@ -37,20 +37,45 @@ def iter_char_dict_entries(entry: CharEntry, primary_weights: dict[str, int]) ->
 
 
 def iter_word_dict_entries(entry: WordEntry) -> list[DictEntry]:
-    """把词语六码原型展开成 0/1/2 位辅助码三档词码。"""
+    """把词语原型展开成短码路线和全码路线。
 
-    codes = [entry.code]
-    if len(entry.code) == 6:
-        codes = [
-            entry.code[:4],
-            entry.code[:5],
-            entry.code,
-        ]
+    `WordEntry.code` 保存最短的逐字首码；`aliases` 保存加辅码短码、
+    纯双拼全码以及全码加辅码。这里不再从单一六码原型截前缀，避免
+    二字、三字、四字词规则不一致。
+    """
+
+    codes = [entry.code, *entry.aliases]
     return [
         DictEntry(entry.text, code, entry.weight, 30, "words")
         for code in dict.fromkeys(codes)
         if code
     ]
+
+
+def add_cangjie_direct_aliases(merged: dict[tuple[str, str], DictEntry]) -> None:
+    """只给被普通候选挡住的仓颉短码补 `z` 直达码。
+
+    例如 `oo`、`ou` 这类编码前面有拼音/双拼候选，仓颉候选会被排到
+    后面，于是补 `ooz`、`ouz`。补出来的直达码在自己的码位优先于
+    普通候选；如果原码已经 6 码，补 `z` 会超过方案最长码长，就不再生成。
+    """
+
+    normal_codes = {entry.code for entry in merged.values() if entry.source != "cangjie"}
+    for entry in list(merged.values()):
+        if entry.source != "cangjie" or entry.code not in normal_codes or len(entry.code) >= 6:
+            continue
+        alias = entry.code + "z"
+        key = (entry.text, alias)
+        if key in merged:
+            continue
+        merged[key] = DictEntry(
+            text=entry.text,
+            code=alias,
+            weight=entry.weight,
+            tier=5,
+            source="cangjie_direct",
+            order=entry.order,
+        )
 
 
 def merge_entries(
@@ -80,30 +105,43 @@ def merge_entries(
             put(dict_entry)
     for entry in cangjie_entries:
         put(entry)
+    add_cangjie_direct_aliases(merged)
 
-    # 最终码表不写词频列，候选顺序完全由文件顺序决定。同码候选先看
-    # 源码表权重：单字权重来自单字原型，词语权重来自 pinyin_ice.base；
-    # 这能保住“支付宝”这类现代高权重词。外部字词频率作为补充信号，
-    # 主要用于源表权重相近或为 0 的条目。
-    return sorted(
-        merged.values(),
-        key=lambda e: (
-            e.source == "cangjie",
-            e.code,
-            -max(e.weight, 0),
-            -frequencies.score_entry(e),
-            -e.weight,
-            e.tier,
-            e.text,
-        ),
-    )
+    def sort_key(entry: DictEntry) -> tuple[object, ...]:
+        """生成最终码表排序键。
+
+        最终码表不写词频列，候选顺序完全由文件顺序决定。三码及以内先
+        保单字手感，单字内部按外部字频排；四码及以上让词语源表权重
+        更有话语权，保住“支付宝”这类现代高权重词。仓颉兜底候选整体
+        放在最后，同码时按仓颉五代原表顺序排列。
+        """
+
+        if entry.source == "cangjie_direct":
+            return (0, entry.code, -1, entry.order, 0, entry.tier, entry.text)
+        if entry.source == "cangjie":
+            return (1, entry.code, entry.order, 0, 0, entry.text)
+
+        short_tier = entry.tier if len(entry.code) <= 3 else 0
+        if entry.source == "words":
+            primary = -max(entry.weight, 0)
+            secondary = -frequencies.score_entry(entry)
+        elif entry.source == "chars":
+            primary = -frequencies.score_entry(entry)
+            secondary = -max(entry.weight, 0)
+        else:
+            primary = -max(entry.weight, 0)
+            secondary = -frequencies.score_entry(entry)
+
+        return (0, entry.code, short_tier, primary, secondary, entry.tier, entry.text)
+
+    return sorted(merged.values(), key=sort_key)
 
 
 def write_cangjie_prototype(entries: list[DictEntry], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="\n") as f:
         f.write("# 字符\t编码\t权重\t来源\n")
-        for entry in sorted(entries, key=lambda e: (e.code, e.text)):
+        for entry in sorted(entries, key=lambda e: (e.code, e.order, e.text)):
             f.write(f"{entry.text}\t{entry.code}\t{entry.weight}\t{entry.source}\n")
 
 
@@ -144,8 +182,8 @@ schema:
   description: |
     {name}
     单字：显式生成双拼首码、双拼全码、双拼加一位辅码、双拼加两位辅码。
-    词语：显式生成无辅码、一位辅码、两位辅码词码。
-    仓颉：输入 o + 仓颉五代码，候选排在普通条目之后。
+    词语：显式生成短码、全双拼码及其辅码定重码。
+    仓颉：输入 o + 仓颉五代码，候选排在普通条目之后；必要时补 z 直达仓颉候选。
   dependencies:
     - pinyin_simp
 
@@ -191,7 +229,7 @@ engine:
 speller:
   alphabet: zyxwvutsrqponmlkjihgfedcba
   delimiter: " ;"
-  max_code_length: 6
+  max_code_length: 10
   auto_select: false
   auto_select_unique_candidate: false
 
@@ -200,7 +238,7 @@ translator:
   enable_charset_filter: true
   encode_commit_history: false
   enable_encoder: false
-  enable_completion: false
+  enable_completion: true
   enable_user_dict: false
   enable_sentence: false
   max_phrase_length: 8
@@ -212,7 +250,6 @@ reverse_lookup:
   dictionary: pinyin_simp
   prism: pinyin_simp
   prefix: "`"
-  suffix: "'"
   tips: 〔拼音〕
   preedit_format:
     - xform/([nl])v/$1ü/
@@ -233,6 +270,8 @@ punctuator:
 key_binder:
   import_preset: default
   bindings:
+    - {{ when: has_menu, accept: semicolon, send: 2 }}
+    - {{ when: has_menu, accept: apostrophe, send: 3 }}
     - {{ when: has_menu, accept: space, send: space }}
     - {{ when: has_menu, accept: Tab, send: Escape }}
     - {{ when: composing, accept: space, send: Escape }}
@@ -248,7 +287,7 @@ recognizer:
   import_preset: default
   patterns:
     punct: "^/([0-9]0?|[a-z]+)$"
-    reverse_lookup: "`[a-z]*'?$|[a-z]*'$"
+    reverse_lookup: "`[a-z]*$"
 """
         )
 
@@ -276,7 +315,7 @@ def write_report(
         f.write(f"- 最终条目数：{len(entries)}\n")
         f.write(f"- 单字原型条目数：{char_count}\n")
         f.write(f"- 词语原型条目数：{word_count}\n")
-        f.write(f"- o 前缀仓颉条目数：{cangjie_count}\n")
+        f.write(f"- 仓颉兜底条目数（含 z 直达）：{cangjie_count}\n")
         f.write(f"- 丢弃单字数：{dropped_chars}\n")
         f.write(f"- 丢弃词语数：{dropped_words}\n")
         f.write(f"- 有重码的编码数：{len(collisions)}\n\n")

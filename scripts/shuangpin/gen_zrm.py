@@ -21,7 +21,12 @@ def main() -> None:
         action="store_false",
         help="使用繁体字频列生成单字主读音和排序权重。",
     )
-    parser.add_argument("--min-word-weight", type=int, default=5000, help="词源条目的最低权重。")
+    parser.add_argument(
+        "--min-word-weight",
+        type=int,
+        default=None,
+        help="覆盖各词长默认收词阈值；不传则二字词 10、三四字词 3000。",
+    )
     parser.add_argument("--max-word-length", type=int, default=4, help="收词的最大词长。")
     args = parser.parse_args()
 

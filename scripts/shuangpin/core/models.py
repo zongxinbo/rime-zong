@@ -21,6 +21,7 @@ class WordEntry:
     code: str
     weight: int
     length: int
+    aliases: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -30,4 +31,4 @@ class DictEntry:
     weight: int
     tier: int
     source: str
-
+    order: int = 0

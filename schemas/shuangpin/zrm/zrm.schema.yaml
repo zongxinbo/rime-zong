@@ -5,14 +5,14 @@
 schema:
   schema_id: zrm
   name: 自然码·仓颉
-  version: "2026-05-09"
+  version: "2026-05-10"
   author:
     - rime-zong
   description: |
     自然码·仓颉
     单字：显式生成双拼首码、双拼全码、双拼加一位辅码、双拼加两位辅码。
-    词语：显式生成无辅码、一位辅码、两位辅码词码。
-    仓颉：输入 o + 仓颉五代码，候选排在普通条目之后。
+    词语：显式生成短码、全双拼码及其辅码定重码。
+    仓颉：输入 o + 仓颉五代码，候选排在普通条目之后；必要时补 z 直达仓颉候选。
   dependencies:
     - pinyin_simp
 
@@ -58,7 +58,7 @@ engine:
 speller:
   alphabet: zyxwvutsrqponmlkjihgfedcba
   delimiter: " ;"
-  max_code_length: 6
+  max_code_length: 10
   auto_select: false
   auto_select_unique_candidate: false
 
@@ -67,7 +67,7 @@ translator:
   enable_charset_filter: true
   encode_commit_history: false
   enable_encoder: false
-  enable_completion: false
+  enable_completion: true
   enable_user_dict: false
   enable_sentence: false
   max_phrase_length: 8
