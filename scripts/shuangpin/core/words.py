@@ -19,6 +19,14 @@ DEFAULT_MIN_WEIGHT_BY_LENGTH = {
     4: 3000,
 }
 
+# 词语“入库”和“给简码”分开控制：低频词仍可通过全双拼码输入，但不占逐字首码的短码空间。
+# 短码阈值抬到十万级，只让真正高频的口语词、常用实词和少量高频短语进入短码层。
+WORD_SHORT_CODE_MIN_WEIGHT_BY_LENGTH = {
+    2: 100000,
+    3: 100000,
+    4: 300000,
+}
+
 # 这些字通常只承担语气作用，放在词尾时更像拼音输入法的造句片段，
 # 不适合作为音形码的固定词条。过滤时同时核对拼音，避免误删异读词。
 MOOD_SUFFIX_PINYIN = {
@@ -84,18 +92,30 @@ BING_CONTENT_PREFIXES = (
     "并查",
 )
 
+# 三字及以上以“是”开头的条目，很多是从语料中抽出的句段，例如“是按照”
+# “是不可能”“是因为”。保留少数已经词化的“是非……”类词，其余不进固定词库。
+SHI_PREFIX_CONTENT_PREFIXES = (
+    "是非",
+)
+
 
 def is_han_word(text: str) -> bool:
     return len(text) >= 2 and all("\u3400" <= ch <= "\u9fff" for ch in text)
 
 
 def is_light_phrase(text: str, pinyin: str) -> bool:
+    # 二字口语词经常正是高频输入对象，例如“我的”“好了”“走了”，不按语气/助词规则过滤。
+    if len(text) < 3:
+        return False
+
     syllables = pinyin.split()
     if len(syllables) != len(text):
         return True
 
     last = text[-1]
     last_pinyin = syllables[-1]
+    if text.startswith("是") and not text.startswith(SHI_PREFIX_CONTENT_PREFIXES):
+        return True
     if MOOD_SUFFIX_PINYIN.get(last) == last_pinyin:
         return True
     if STRUCTURAL_SUFFIX_PINYIN.get(last) == last_pinyin:
@@ -129,6 +149,7 @@ def build_word_codes(
     pinyin: str,
     converter: Converter,
     aux_map: dict[str, str],
+    include_short: bool,
 ) -> tuple[str, ...] | None:
     """生成词语的全部静态编码。
 
@@ -153,14 +174,20 @@ def build_word_codes(
 
     short_base = "".join(sp[0] for sp in sps)
     full_base = "".join(sps)
-    codes = (
-        short_base,
-        short_base + first_aux,
-        short_base + first_aux + last_aux,
+    full_codes = (
         full_base,
         full_base + first_aux,
         full_base + first_aux + last_aux,
     )
+    if include_short:
+        codes = (
+            short_base,
+            short_base + first_aux,
+            short_base + first_aux + last_aux,
+            *full_codes,
+        )
+    else:
+        codes = full_codes
     return tuple(dict.fromkeys(codes))
 
 
@@ -170,6 +197,7 @@ def collect_word_entries(
     seen: dict[tuple[str, str], WordEntry],
     source_path: Path,
     min_weight_for_length: Callable[[int], int],
+    short_code_min_weight_for_length: Callable[[int], int],
     max_length: int,
 ) -> int:
     dropped = 0
@@ -186,7 +214,8 @@ def collect_word_entries(
             or weight < min_weight_for_length(length)
         ):
             continue
-        codes = build_word_codes(text, pinyin, converter, aux_map)
+        include_short = weight >= short_code_min_weight_for_length(length)
+        codes = build_word_codes(text, pinyin, converter, aux_map, include_short=include_short)
         if not codes:
             dropped += 1
             continue
@@ -222,12 +251,16 @@ def build_word_entries(
             return min_weight
         return DEFAULT_MIN_WEIGHT_BY_LENGTH.get(length, 3000)
 
+    def short_code_min_weight_for_length(length: int) -> int:
+        return WORD_SHORT_CODE_MIN_WEIGHT_BY_LENGTH.get(length, 20000)
+
     dropped = collect_word_entries(
         converter=converter,
         aux_map=aux_map,
         seen=seen,
         source_path=source_path,
         min_weight_for_length=min_weight_for_length,
+        short_code_min_weight_for_length=short_code_min_weight_for_length,
         max_length=max_length,
     )
 
@@ -239,7 +272,7 @@ def build_word_entries(
 def write_words_prototype(entries: list[WordEntry], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="\n") as f:
-        f.write("# 词语\t拼音\t六码原型\t权重\t词长\t附加词码\n")
+        f.write("# 词语\t拼音\t主码\t权重\t词长\t附加词码\n")
         for entry in entries:
             aliases = " ".join(entry.aliases)
             f.write(

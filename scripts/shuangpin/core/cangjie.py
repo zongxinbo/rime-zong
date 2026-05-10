@@ -32,6 +32,21 @@ CJK_TEXT_CHARS = {
 }
 
 
+def iter_cangjie_code_rows(path: Path = CANGJIE5_DICT):
+    """按源码表顺序逐行产出可用的单字符仓颉码。
+
+    这里不先按“字”聚合，是因为最终仓颉兜底需要保留同一个字的多个
+    正常编码，例如“哥”在仓颉五代原表中同时有 `mrmnr` 和 `mrnr`。
+    """
+
+    for order, parts in enumerate(iter_rime_dict_rows(path)):
+        if len(parts) < 2:
+            continue
+        text, code = parts[0], parts[1]
+        if is_han_char(text) and code:
+            yield order, text, code
+
+
 def is_han_char(text: str) -> bool:
     """判断一个字符是否可以进入本方案的汉字/部件码表。
 
@@ -51,12 +66,8 @@ def load_cangjie_codes(path: Path = CANGJIE5_DICT) -> dict[str, list[str]]:
     """读取仓颉五代码表，只保留可作为正文文字的单字符条目。"""
 
     codes: dict[str, list[str]] = defaultdict(list)
-    for parts in iter_rime_dict_rows(path):
-        if len(parts) < 2:
-            continue
-        text, code = parts[0], parts[1]
-        if is_han_char(text) and code:
-            codes[text].append(code)
+    for _order, text, code in iter_cangjie_code_rows(path):
+        codes[text].append(code)
     return codes
 
 
@@ -76,15 +87,16 @@ def choose_cangjie_code(codes: list[str]) -> str:
 def load_aux_map(path: Path = CANGJIE5_DICT) -> dict[str, str]:
     """生成单字音形方案使用的两位仓颉辅助码。
 
-    辅助码取仓颉码的首尾两码；如果某字仓颉码只有一位，就重复这一位，
-    保证“二码双拼 + 两位辅助码”的单字全码恒为四码。
+    辅助码取仓颉码的首尾两码；如果某字仓颉码只有一位，就在末尾补 `z`，
+    保证“二码双拼 + 两位辅助码”的单字全码恒为四码，同时避免 `十=uijj`
+    这种重复补位造成的手感误导。
     """
 
     raw = load_cangjie_codes(path)
     aux: dict[str, str] = {}
     for text, codes in raw.items():
         code = choose_cangjie_code(codes)
-        aux[text] = code + code if len(code) == 1 else code[0] + code[-1]
+        aux[text] = code + "z" if len(code) == 1 else code[0] + code[-1]
     return aux
 
 
@@ -92,8 +104,8 @@ def load_aux_lists(path: Path = CANGJIE5_DICT) -> dict[str, list[str]]:
     """生成手心输入法挂接辅助码所需的完整首尾码列表。
 
     手心挂接文件需要保留同一字的多个辅助码：正常仓颉码排在前面，
-    `x`、`z` 开头的兼容码排在后面；一位仓颉码在这里保持一位，
-    以兼容原来的手心导出格式。
+    `x`、`z` 开头的兼容码排在后面；一位仓颉码也补 `z`，与 Rime
+    主方案的两位辅助码规则保持一致。
     """
 
     raw = load_cangjie_codes(path)
@@ -102,7 +114,7 @@ def load_aux_lists(path: Path = CANGJIE5_DICT) -> dict[str, list[str]]:
         preferred: list[str] = []
         fallback: list[str] = []
         for code in codes:
-            aux = code[0] + code[-1] if len(code) > 1 else code
+            aux = code[0] + code[-1] if len(code) > 1 else code + "z"
             if code.startswith(LOW_PRIORITY_PREFIXES):
                 if aux not in preferred and aux not in fallback:
                     fallback.append(aux)
@@ -129,10 +141,7 @@ def build_prefixed_cangjie_entries(
 
     entries: list[DictEntry] = []
     seen: set[tuple[str, str]] = set()
-    for order, (text, codes) in enumerate(load_cangjie_codes(path).items()):
-        if not codes:
-            continue
-        code = choose_cangjie_code(codes)
+    for order, text, code in iter_cangjie_code_rows(path):
         out_code = prefix + code
         key = (text, out_code)
         if key in seen:

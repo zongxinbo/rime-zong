@@ -1,22 +1,22 @@
 # 字符	拼音	双拼	辅助码	完整编码	权重	来源
 丆		pp	mh	ppmh	0	radicals
 丌		pp	ml	ppml	0	radicals
-丨		pp	ll	ppll	0	radicals
+丨		pp	lz	pplz	0	radicals
 丩		pp	vl	ppvl	0	radicals
 丬		pp	lm	pplm	0	radicals
-丶		pp	ii	ppii	0	radicals
+丶		pp	iz	ppiz	0	radicals
 丷		pp	ih	ppih	0	radicals
-丿		pp	hh	pphh	0	radicals
+丿		pp	hz	pphz	0	radicals
 乀		pp	mo	ppmo	0	radicals
 乁		pp	mo	ppmo	0	radicals
 ⺄		pp	zv	ppzv	0	radicals
-乂		pp	kk	ppkk	0	radicals
+乂		pp	kz	ppkz	0	radicals
 乊		pp	hc	pphc	0	radicals
 乚		pp	lu	pplu	0	radicals
 𠃌		pp	mn	ppmn	0	radicals
 乛		pp	mh	ppmh	0	radicals
 𠂤		pp	hr	pphr	0	radicals
-亅		pp	nn	ppnn	0	radicals
+亅		pp	nz	ppnz	0	radicals
 亠		pp	im	ppim	0	radicals
 亻		pp	hl	pphl	0	radicals
 冂		pp	ls	ppls	0	radicals
@@ -39,21 +39,21 @@
 巜		pp	vv	ppvv	0	radicals
 廴		pp	nk	ppnk	0	radicals
 廾		pp	jj	ppjj	0	radicals
-廿		pp	tt	pptt	0	radicals
+廿		pp	tz	pptz	0	radicals
 弋		pp	ip	ppip	0	radicals
 𫜹		pp	sm	ppsm	0	radicals
 彑		pp	vm	ppvm	0	radicals
 彡		pp	hh	pphh	0	radicals
 彳		pp	ho	ppho	0	radicals
 忄		pp	hy	pphy	0	radicals
-手		pp	qq	ppqq	0	radicals
+手		pp	qz	ppqz	0	radicals
 扌		pp	dm	ppdm	0	radicals
 攵		pp	ok	ppok	0	radicals
-日		pp	aa	ppaa	0	radicals
-曰		pp	aa	ppaa	0	radicals
-月		pp	bb	ppbb	0	radicals
+日		pp	az	ppaz	0	radicals
+曰		pp	az	ppaz	0	radicals
+月		pp	bz	ppbz	0	radicals
 ⺼		pp	zb	ppzb	0	radicals
-水		pp	ee	ppee	0	radicals
+水		pp	ez	ppez	0	radicals
 氵		pp	im	ppim	0	radicals
 氺		pp	ff	ppff	0	radicals
 灬		pp	hf	pphf	0	radicals
@@ -104,7 +104,7 @@
 𡭔		pp	lc	pplc	0	radicals
 䒑		pp	cm	ppcm	0	radicals
 龸		pp	fb	ppfb	0	radicals
-㐅		pp	kk	ppkk	0	radicals
+㐅		pp	kz	ppkz	0	radicals
 龻		pp	vf	ppvf	0	radicals
 㐄		pp	ls	ppls	0	radicals
 𠂉		pp	hm	pphm	0	radicals
@@ -122,7 +122,7 @@
 㐂	xi	xi	pp	xipp	0	chars
 㐃	ma	ma	il	mail	0	chars
 㐄	kua	kw	ls	kwls	0	chars
-㐅	wu	wu	kk	wukk	0	chars
+㐅	wu	wu	kz	wukz	0	chars
 㐆	yi	yi	hs	yihs	0	chars
 㐆	yin	yn	hs	ynhs	0	chars
 㐌	si	si	od	siod	0	chars
@@ -9348,7 +9348,7 @@
 䶾	yu	yu	ho	yuho	0	chars
 䶿	e	ee	ou	eeou	0	chars
 䶿	ji	ji	ou	jiou	0	chars
-一	yi	yi	mm	yimm	35278860	chars
+一	yi	yi	mz	yimz	35278860	chars
 丁	ding	dy	mn	dymn	278627	chars
 丁	zheng	vg	mn	vgmn	0	chars
 丂	kao	kk	ms	kkms	0	chars
@@ -9405,15 +9405,15 @@
 並	bing	by	tc	bytc	0	chars
 並	bang	bh	tc	bhtc	0	chars
 丧	sang	sh	gv	shgv	128277	chars
-丨	gun	gp	ll	gpll	0	chars
-丨	shu	uu	ll	uull	0	chars
+丨	gun	gp	lz	gplz	0	chars
+丨	shu	uu	lz	uulz	0	chars
 丩	jiu	jq	vl	jqvl	0	chars
 个	ge	ge	ol	geol	14789406	chars
 个	gan	gj	ol	gjol	0	chars
 丫	ya	ya	cl	yacl	183167	chars
 丬	pan	pj	lm	pjlm	0	chars
 丬	qiang	qd	lm	qdlm	0	chars
-中	zhong	vs	ll	vsll	7680869	chars
+中	zhong	vs	lz	vslz	7680869	chars
 丮	ji	ji	nq	jinq	0	chars
 丮	xun	xp	nq	xpnq	0	chars
 丯	jie	jx	qk	jxqk	0	chars
@@ -9425,8 +9425,8 @@
 丳	chan	ij	lw	ijlw	0	chars
 临	lin	ln	la	lnla	332190	chars
 丵	zhuo	vo	tj	votj	0	chars
-丶	dian	dm	ii	dmii	0	chars
-丶	zhu	vu	ii	vuii	0	chars
+丶	dian	dm	iz	dmiz	0	chars
+丶	zhu	vu	iz	vuiz	0	chars
 丷	ba	ba	ih	baih	0	chars
 丸	wan	wj	ki	wjki	40281	chars
 丹	dan	dj	by	djby	255714	chars
@@ -9437,13 +9437,13 @@
 丼	jing	jy	ti	jyti	9000	chars
 丽	li	li	mb	limb	653445	chars
 举	ju	ju	fq	jufq	693503	chars
-丿	pie	px	hh	pxhh	0	chars
+丿	pie	px	hz	pxhz	0	chars
 乀	fu	fu	mo	fumo	0	chars
 乀	pie	px	mo	pxmo	0	chars
 乁	ji	ji	mo	jimo	0	chars
 乁	yi	yi	mo	yimo	0	chars
-乂	ai	ai	kk	aikk	0	chars
-乂	yi	yi	kk	yikk	418	chars
+乂	ai	ai	kz	aikz	0	chars
+乂	yi	yi	kz	yikz	418	chars
 乃	ai	ai	ns	ains	0	chars
 乃	nai	nl	ns	nlns	155797	chars
 乄	wu	wu	kv	wukv	0	chars
@@ -9545,7 +9545,7 @@
 亂	luan	lr	bu	lrbu	0	chars
 亃	lin	ln	fu	lnfu	0	chars
 亄	yi	yi	gu	yigu	0	chars
-亅	jue	jt	nn	jtnn	0	chars
+亅	jue	jt	nz	jtnz	0	chars
 了	le	le	nn	lenn	3481243	chars
 了	liao	lc	nn	lcnn	0	chars
 亇	ge	ge	nn	genn	0	chars
@@ -9629,7 +9629,7 @@
 亸	duo	do	yj	doyj	31	chars
 亹	men	mf	ym	mfym	0	chars
 亹	wei	wz	ym	wzym	30	chars
-人	ren	rf	oo	rfoo	18435295	chars
+人	ren	rf	oz	rfoz	18435295	chars
 亻	ren	rf	hl	rfhl	0	chars
 亼	ji	ji	om	jiom	0	chars
 亽	ji	ji	oi	jioi	0	chars
@@ -11271,7 +11271,7 @@
 區	qu	qu	sr	qusr	0	chars
 區	qiu	qq	sr	qqsr	0	chars
 區	kou	kb	sr	kbsr	0	chars
-十	shi	ui	jj	uijj	2567177	chars
+十	shi	ui	jz	uijz	2567177	chars
 卂	xun	xp	nj	xpnj	0	chars
 千	qian	qm	hj	qmhj	794964	chars
 卄	nian	nm	jj	nmjj	0	chars
@@ -11316,8 +11316,8 @@
 卛	lv	lv	vj	lvvj	0	chars
 卛	shuai	uy	vj	uyvj	0	chars
 卛	shuo	uo	vj	uovj	0	chars
-卜	bo	bo	yy	boyy	2000	chars
-卜	bu	bu	yy	buyy	57367	chars
+卜	bo	bo	yz	boyz	2000	chars
+卜	bu	bu	yz	buyz	57367	chars
 卝	gong	gs	ly	gsly	0	chars
 卝	guan	gr	ly	grly	0	chars
 卝	kuang	kd	ly	kdly	0	chars
@@ -11541,7 +11541,7 @@
 叠	die	dx	em	dxem	51212	chars
 叡	rui	rv	ye	rvye	0	chars
 叢	cong	cs	te	cste	0	chars
-口	kou	kb	rr	kbrr	2375024	chars
+口	kou	kb	rz	kbrz	2375024	chars
 古	gu	gu	jr	gujr	621960	chars
 句	gou	gb	pr	gbpr	1	chars
 句	ju	ju	pr	jupr	254300	chars
@@ -12873,9 +12873,9 @@
 圜	yuan	yr	wv	yrwv	1	chars
 圝	luan	lr	wf	lrwf	0	chars
 圞	luan	lr	wd	lrwd	0	chars
-土	tu	tu	gg	tugg	402279	chars
-土	du	du	gg	dugg	0	chars
-土	cha	ia	gg	iagg	0	chars
+土	tu	tu	gz	tugz	402279	chars
+土	du	du	gz	dugz	0	chars
+土	cha	ia	gz	iagz	0	chars
 圠	ya	ya	gu	yagu	0	chars
 圡	tu	tu	gi	tugi	0	chars
 圢	ting	ty	gn	tygn	0	chars
@@ -13620,9 +13620,9 @@
 夤	yin	yn	nc	ynnc	596	chars
 夥	huo	ho	wn	hown	3748	chars
 夦	chen	if	tn	iftn	0	chars
-大	da	da	kk	dakk	10828984	chars
-大	dai	dl	kk	dlkk	649	chars
-大	tai	tl	kk	tlkk	0	chars
+大	da	da	kz	dakz	10828984	chars
+大	dai	dl	kz	dlkz	649	chars
+大	tai	tl	kz	tlkz	0	chars
 夨	ce	ce	vk	cevk	0	chars
 夨	ze	ze	vk	zevk	0	chars
 天	tian	tm	mk	tmmk	6797499	chars
@@ -13744,8 +13744,8 @@
 奱	luan	lr	vk	lrvk	0	chars
 奲	che	ie	kj	iekj	0	chars
 奲	duo	do	kj	dokj	0	chars
-女	nv	nv	vv	nvvv	3362646	chars
-女	ru	ru	vv	ruvv	0	chars
+女	nv	nv	vz	nvvz	3362646	chars
+女	ru	ru	vz	ruvz	0	chars
 奴	nu	nu	ve	nuve	142209	chars
 奵	ding	dy	vn	dyvn	0	chars
 奵	tian	tm	vn	tmvn	0	chars
@@ -14752,7 +14752,7 @@
 尶	jian	jm	mt	jmmt	0	chars
 尷	gan	gj	kt	gjkt	0	chars
 尷	jian	jm	kt	jmkt	0	chars
-尸	shi	ui	ss	uiss	233817	chars
+尸	shi	ui	sz	uisz	233817	chars
 尹	yin	yn	sk	ynsk	65600	chars
 尹	yun	yp	sk	ypsk	0	chars
 尺	che	ie	so	ieso	1	chars
@@ -14836,7 +14836,7 @@
 屰	ji	ji	tu	jitu	0	chars
 屰	ni	ni	tu	nitu	0	chars
 屰	po	po	tu	potu	0	chars
-山	shan	uj	uu	ujuu	1526952	chars
+山	shan	uj	uz	ujuz	1526952	chars
 屲	wa	wa	hu	wahu	0	chars
 屳	xian	xm	ou	xmou	0	chars
 屴	li	li	us	lius	0	chars
@@ -15758,7 +15758,7 @@
 廽	hui	hv	nl	hvnl	0	chars
 廾	gong	gs	jj	gsjj	0	chars
 廾	nian	nm	jj	nmjj	0	chars
-廿	nian	nm	tt	nmtt	3123	chars
+廿	nian	nm	tz	nmtz	3123	chars
 开	jian	jm	mt	jmmt	0	chars
 开	kai	kl	mt	klmt	4346834	chars
 开	qian	qm	mt	qmmt	0	chars
@@ -15786,7 +15786,7 @@
 弐	er	er	mm	ermm	0	chars
 弑	shi	ui	km	uikm	4591	chars
 弒	shi	ui	km	uikm	0	chars
-弓	gong	gs	nn	gsnn	120521	chars
+弓	gong	gs	nz	gsnz	120521	chars
 弔	diao	dc	nl	dcnl	0	chars
 弔	di	di	nl	dinl	0	chars
 引	yin	yn	nl	ynnl	489419	chars
@@ -16036,7 +16036,7 @@
 忁	bao	bk	he	bkhe	0	chars
 忂	ju	ju	hg	juhg	0	chars
 忂	qu	qu	hg	quhg	0	chars
-心	xin	xn	pp	xnpp	1555833	chars
+心	xin	xn	pz	xnpz	1555833	chars
 忄	xin	xn	hy	xnhy	0	chars
 必	bi	bi	ph	biph	940785	chars
 忆	yi	yi	pn	yipn	229878	chars
@@ -16886,7 +16886,7 @@
 戆	zhuang	vd	yp	vdyp	1	chars
 戇	gang	gh	yp	ghyp	0	chars
 戇	zhuang	vd	yp	vdyp	0	chars
-戈	ge	ge	ii	geii	68258	chars
+戈	ge	ge	iz	geiz	68258	chars
 戉	yue	yt	iv	ytiv	0	chars
 戊	wu	wu	ih	wuih	3757	chars
 戋	jian	jm	ij	jmij	428	chars
@@ -16986,7 +16986,7 @@
 扈	hu	hu	hu	huhu	10073	chars
 扉	fei	fz	hy	fzhy	9977	chars
 扊	yan	yj	hf	yjhf	4	chars
-手	shou	ub	qq	ubqq	5076179	chars
+手	shou	ub	qz	ubqz	5076179	chars
 扌	shou	ub	dm	ubdm	0	chars
 才	cai	cl	dh	cldh	2774963	chars
 扎	za	za	qu	zaqu	1000	chars
@@ -18549,8 +18549,8 @@
 旣	ji	ji	hu	jihu	0	chars
 旣	xi	xi	hu	xihu	0	chars
 旤	huo	ho	bu	hobu	0	chars
-日	mi	mi	aa	miaa	0	chars
-日	ri	ri	aa	riaa	1944999	chars
+日	mi	mi	az	miaz	0	chars
+日	ri	ri	az	riaz	1944999	chars
 旦	dan	dj	am	djam	154394	chars
 旧	jiu	jq	la	jqla	429844	chars
 旨	zhi	vi	pa	vipa	53094	chars
@@ -18900,7 +18900,7 @@
 曭	tang	th	af	thaf	0	chars
 曮	yan	yj	ak	yjak	0	chars
 曯	zhu	vu	ai	vuai	0	chars
-曰	yue	yt	aa	ytaa	74013	chars
+曰	yue	yt	az	ytaz	74013	chars
 曱	ga	ga	wl	gawl	0	chars
 曱	ya	ya	wl	yawl	0	chars
 曱	yue	yt	wl	ytwl	0	chars
@@ -18943,8 +18943,8 @@
 朆	fen	ff	ch	ffch	0	chars
 朇	bi	bi	oj	bioj	0	chars
 朇	pi	pi	oj	pioj	0	chars
-月	rou	rb	bb	rbbb	0	chars
-月	yue	yt	bb	ytbb	546594	chars
+月	rou	rb	bz	rbbz	0	chars
+月	yue	yt	bz	ytbz	546594	chars
 有	you	yb	kb	ybkb	17847013	chars
 朊	ruan	rr	bu	rrbu	0	chars
 朋	peng	pg	bb	pgbb	88716	chars
@@ -18994,7 +18994,7 @@
 朥	lao	lk	bs	lkbs	0	chars
 朦	meng	mg	bo	mgbo	42683	chars
 朧	long	ls	bp	lsbp	0	chars
-木	mu	mu	dd	mudd	547209	chars
+木	mu	mu	dz	mudz	547209	chars
 朩	pin	pn	dc	pndc	0	chars
 未	wei	wz	jd	wzjd	758953	chars
 末	mo	mo	dj	modj	137858	chars
@@ -20885,7 +20885,7 @@
 氱	yang	yh	oh	yhoh	0	chars
 氲	yun	yp	ot	ypot	4028	chars
 氳	yun	yp	ot	ypot	0	chars
-水	shui	uv	ee	uvee	1817943	chars
+水	shui	uv	ez	uvez	1817943	chars
 氵	shui	uv	im	uvim	0	chars
 氶	cheng	ig	ne	igne	0	chars
 氶	zheng	vg	ne	vgne	0	chars
@@ -22500,7 +22500,7 @@
 灨	gan	gj	ec	gjec	0	chars
 灩	yan	yj	et	yjet	0	chars
 灪	yu	yu	eh	yueh	0	chars
-火	huo	ho	ff	hoff	1180390	chars
+火	huo	ho	fz	hofz	1180390	chars
 灬	biao	bc	hf	bchf	0	chars
 灬	huo	ho	hf	hohf	0	chars
 灭	mie	mx	mf	mxmf	280837	chars
@@ -24237,7 +24237,7 @@
 甮	beng	bg	pq	bgpq	0	chars
 甮	feng	fg	pq	fgpq	0	chars
 甯	ning	ny	jq	nyjq	106	chars
-田	tian	tm	ww	tmww	339958	chars
+田	tian	tm	wz	tmwz	339958	chars
 由	you	yb	lw	yblw	1400586	chars
 甲	jia	jw	wl	jwwl	253580	chars
 甲	xia	xw	wl	xwwl	0	chars
@@ -26358,7 +26358,7 @@
 競	jing	jy	yu	jyyu	0	chars
 竷	kan	kj	ye	kjye	0	chars
 竸	jing	jy	yu	jyyu	0	chars
-竹	zhu	vu	hh	vuhh	168423	chars
+竹	zhu	vu	hz	vuhz	168423	chars
 竺	du	du	hm	duhm	0	chars
 竺	zhu	vu	hm	vuhm	11419	chars
 竻	jin	jn	hs	jnhs	0	chars
@@ -34579,7 +34579,7 @@
 釐	li	li	jg	lijg	0	chars
 釐	xi	xi	jg	xijg	223	chars
 釐	lai	ll	jg	lljg	0	chars
-金	jin	jn	cc	jncc	1291889	chars
+金	jin	jn	cz	jncz	1291889	chars
 釒	jin	jn	oc	jnoc	0	chars
 釓	ga	ga	cu	gacu	0	chars
 釓	jiu	jq	cu	jqcu	0	chars
@@ -48784,7 +48784,7 @@
 𢎔	jie	jx	mv	jxmv	0	chars
 𢎕	chen	if	yp	ifyp	0	chars
 𢎖	qu	qu	bp	qubp	0	chars
-𢎗	nai	nl	nn	nlnn	0	chars
+𢎗	nai	nl	nz	nlnz	0	chars
 𢎙	xian	xm	ns	xmns	0	chars
 𢎚	dan	dj	ni	djni	0	chars
 𢎚	tan	tj	ni	tjni	0	chars
