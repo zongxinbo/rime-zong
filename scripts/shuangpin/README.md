@@ -114,4 +114,4 @@ schemas/shuangpin/zrm_single/zrm_single.schema.yaml
   字1双拼全码 + 字2双拼全码 + 字3双拼全码 + 字4双拼全码 + 首字辅码首码 + 末字辅码首码
 ```
 
-默认主词源使用 `schemas/common/essay-zh-hans.txt`，用它决定“哪些词值得收”和最终排序频率；词级读音优先借用 `schemas/pinyin_ice/pinyin_ice.base.dict.yaml`，再用 `scripts/shuangpin/prototypes/chars.txt` 对无多音歧义的词做兜底。默认入库阈值按 essay 频率区分：二字词不低于 50，三字词不低于 100，四字词不低于 50；pinyin_ice 不再反向抬高 essay 条目的权重，避免“我们将”“为保证”这类低频语流片段回流。另外从 `pinyin_ice.base` 只补 essay 缺失且权重不低于 500000 的高频二字词，补入词只生成全码路线。默认短码阈值同样按 essay 频率判断：二字词不低于 12000、三字词不低于 8000、四字词不低于 3000。这个设计把“主词库质量/排序”和“词级读音/极少量补缺”拆开，同时保留“白术”这类需要词级异读的条目。
+默认主词源使用 `schemas/common/essay-zh-hans.txt`，用它决定“哪些词值得收”和最终排序频率；词级读音优先借用 `schemas/pinyin_ice/pinyin_ice.base.dict.yaml`，再用 `scripts/shuangpin/prototypes/chars.txt` 对无多音歧义的词做兜底。默认入库阈值按 essay 频率区分：二字词不低于 50，三字词不低于 100，四字词不低于 30；四字词如果能拆成两个已经入库的二字词，则不再作为固定四字词收录。pinyin_ice 不再反向抬高 essay 条目的权重，避免“我们将”“为保证”这类低频语流片段回流。另外从 `pinyin_ice.base` 只补 essay 缺失且权重不低于 500000 的高频二字词，补入词只生成全码路线。默认短码阈值同样按 essay 频率判断：二字词不低于 12000、三字词不低于 8000、四字词不低于 3000。这个设计把“主词库质量/排序”和“词级读音/极少量补缺”拆开，同时保留“白术”这类需要词级异读的条目。
