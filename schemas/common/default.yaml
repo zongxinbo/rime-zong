@@ -9,6 +9,7 @@ schema_list:
   - schema: cangjie5_ice
   - schema: pinyin_ice_cangjie5
   - schema: zrm
+  - schema: zrm_single
   - schema: jaroomaji
 
 switcher:

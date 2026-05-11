@@ -17,9 +17,8 @@ Converter = Callable[[str], str]
 
 
 def get_converter(schema: str) -> Converter:
-    if schema == "zrm":
+    if schema in {"zrm", "zrm_single"}:
         return zrmify1
-    if schema == "flypy":
+    if schema in {"flypy", "flypy_single"}:
         return flypyify1
     raise ValueError(f"unsupported schema: {schema}")
-
