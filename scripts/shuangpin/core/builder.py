@@ -45,6 +45,8 @@ def build_scheme(
     min_word_weight: int | None = None,
     max_word_length: int = 4,
     emit_schema: bool = True,
+    include_words: bool = True,
+    max_code_length: int | None = None,
 ) -> None:
     converter = get_converter(schema)
     proto_dir = schema_prototype_dir(schema)
@@ -55,12 +57,15 @@ def build_scheme(
     aux_path = SHOUXIN_AUX_PATH
     aux_count = export_shouxin_aux(aux_path)
 
-    word_entries, dropped_words = build_word_entries(
-        converter,
-        min_weight=min_word_weight,
-        max_length=max_word_length,
-    )
-    write_words_prototype(word_entries, proto_dir / f"{schema}.words.txt")
+    word_entries = []
+    dropped_words = 0
+    if include_words:
+        word_entries, dropped_words = build_word_entries(
+            converter,
+            min_weight=min_word_weight,
+            max_length=max_word_length,
+        )
+        write_words_prototype(word_entries, proto_dir / f"{schema}.words.txt")
 
     cangjie_entries = build_prefixed_cangjie_entries()
     write_cangjie_prototype(cangjie_entries, proto_dir / f"{schema}.cangjie.txt")
@@ -68,7 +73,13 @@ def build_scheme(
     merged = merge_entries(char_entries, word_entries, cangjie_entries)
     write_dict(schema, merged, schema_dir / f"{schema}.dict.yaml")
     if emit_schema:
-        write_schema(schema, schema_dir / f"{schema}.schema.yaml")
+        write_schema(
+            schema,
+            schema_dir / f"{schema}.schema.yaml",
+            include_words=include_words,
+            max_code_length=max_code_length if max_code_length is not None else (10 if include_words else 6),
+            max_phrase_length=8 if include_words else 1,
+        )
 
     write_report(
         proto_dir / f"{schema}.report.md",
@@ -83,7 +94,10 @@ def build_scheme(
 
     print(f"已生成 {proto_dir / f'{schema}.chars.txt'}")
     print(f"已生成 {aux_path}（{aux_count} 行）")
-    print(f"已生成 {proto_dir / f'{schema}.words.txt'}")
+    if include_words:
+        print(f"已生成 {proto_dir / f'{schema}.words.txt'}")
+    else:
+        print("已跳过词语原型（单字方案不收词）")
     print(f"已生成 {proto_dir / f'{schema}.cangjie.txt'}")
     print(f"已生成 {schema_dir / f'{schema}.dict.yaml'}")
     if emit_schema:

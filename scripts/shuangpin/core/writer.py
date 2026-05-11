@@ -169,10 +169,26 @@ def write_dict(schema: str, entries: list[DictEntry], output_path: Path) -> None
             f.write(f"{entry.text}\t{entry.code}\n")
 
 
-def write_schema(schema: str, output_path: Path) -> None:
-    names = {"zrm": "自然码·仓颉", "flypy": "小鹤·仓颉"}
+def write_schema(
+    schema: str,
+    output_path: Path,
+    *,
+    include_words: bool = True,
+    max_code_length: int = 10,
+    max_phrase_length: int = 8,
+) -> None:
+    names = {
+        "zrm": "自然码·仓颉",
+        "zrm_single": "自然码·仓颉·单字",
+        "flypy": "小鹤·仓颉",
+        "flypy_single": "小鹤·仓颉·单字",
+    }
     name = names.get(schema, schema)
     today = dt.date.today().isoformat()
+    if include_words:
+        word_description = "词语：高频词显式生成短码；所有入库词保留全双拼码及其辅码定重码。"
+    else:
+        word_description = "词语：不收词，不造词，只保留静态单字和仓颉兜底。"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", encoding="utf-8", newline="\n") as f:
         f.write(
@@ -189,7 +205,7 @@ schema:
   description: |
     {name}
     单字：一位辅助码末尾补 z；高频字显式生成短码，低频字保留全码，异读不占短码。
-    词语：高频词显式生成短码；所有入库词保留全双拼码及其辅码定重码。
+    {word_description}
     仓颉：输入 o + 仓颉五代码，同字多码全部保留；必要时补 z 直达仓颉候选。
   dependencies:
     - pinyin_simp
@@ -236,7 +252,7 @@ engine:
 speller:
   alphabet: zyxwvutsrqponmlkjihgfedcba
   delimiter: " ;"
-  max_code_length: 10
+  max_code_length: {max_code_length}
   auto_select: false
   auto_select_unique_candidate: false
 
@@ -248,7 +264,7 @@ translator:
   enable_completion: true
   enable_user_dict: false
   enable_sentence: false
-  max_phrase_length: 8
+  max_phrase_length: {max_phrase_length}
 
 abc_segmentor:
   extra_tags:

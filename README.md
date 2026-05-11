@@ -11,6 +11,7 @@ Rime 方案集合，包含拼音、自然码、仓颉、郑码、四角号码和
 | [`cangjie5_ice`](schemas/cangjie/cangjie5/cangjie5_ice.schema.yaml) | 倉頡五代·雾凇 |
 | [`pinyin_ice_cangjie5`](schemas/pinyin_ice/pinyin_ice_cangjie5.schema.yaml) | 雾凇拼音·倉頡 |
 | [`zrm`](schemas/shuangpin/zrm/zrm.schema.yaml) | 自然码·仓颉 |
+| [`zrm_single`](schemas/shuangpin/zrm_single/zrm_single.schema.yaml) | 自然码·仓颉·单字 |
 | [`jaroomaji`](schemas/jaroomaji/jaroomaji.schema.yaml) | 日本語 |
 
 ## 方案说明
@@ -29,6 +30,7 @@ Rime 方案集合，包含拼音、自然码、仓颉、郑码、四角号码和
 | [`cangjie5_pinyin`](schemas/cangjie/cangjie5/cangjie5_pinyin.schema.yaml)<br>倉頡五代·拼音 | `pinyin_simp` | 仓颉五代 + 袖珍简化字拼音混合输入。仓颉候选保持单字，拼音候选可出词；输入 `` `拼音 `` 可拼音反查。 |
 | [`cangjie5_ice`](schemas/cangjie/cangjie5/cangjie5_ice.schema.yaml)<br>倉頡五代·雾凇 | `pinyin_ice` | 默认启用。仓颉五代 + 雾凇拼音混合输入。仓颉码和雾凇拼音都可参与候选，适合以仓颉为主、雾凇拼音补词；输入 `` `拼音 `` 使用雾凇拼音反查。 |
 | [`zrm`](schemas/shuangpin/zrm/zrm.schema.yaml)<br>自然码·仓颉 | `pinyin_simp` | 默认启用。自然码双拼作主码，仓颉五代首尾码作辅助码，一位辅助码末尾补 `z`；高频字词生成短码，低频字词保留全码，词语支持全双拼码及其辅码定重码；输入 `o` 加完整仓颉五代码可作仓颉兜底，同字多码全部保留，必要时补 `z` 可直达仓颉候选。 |
+| [`zrm_single`](schemas/shuangpin/zrm_single/zrm_single.schema.yaml)<br>自然码·仓颉·单字 | `pinyin_simp` | 默认启用。纯单字自然码音形方案，不收词、不造词；一位辅助码末尾补 `z`，高频字生成短码，低频字保留全码；输入 `o` 加完整仓颉五代码作隔离兜底，同字多码全部保留。 |
 | [`jaroomaji`](schemas/jaroomaji/jaroomaji.schema.yaml)<br>日本語 | `cangjie5`, `pinyin_simp` | 默认启用。[日本語罗马字](https://github.com/lazyfoxchan/rime-jaroomaji) 输入，支持平假名、片假名、日文符号。`-`、`l`、`L` 输入长音符号「ー」；按住 `Shift` 输出片假名；输入 `` `仓颉码 `` 可仓颉反查，输入 `` `P拼音 `` 可拼音反查。 |
 | [`zmcdzc`](schemas/zhengma/zmcdzc/zmcdzc.schema.yaml)<br>郑码 | `pinyin_simp` | 郑码超大字词。四码自动上屏，支持拼音反查、扩展字符集和简繁转换；`;` / `'` 可选第 2 / 第 3 候选；输入 `` `拼音 `` 可拼音反查。 |
 | [`lyzm`](schemas/zhengma/lyzm/lyzm.schema.yaml)<br>龙渊郑码 | `pinyin_simp` | 龙渊郑码。四码自动上屏，关闭用户词典和自动造句；输入 `` `拼音 `` 可拼音反查。 |
