@@ -46,17 +46,28 @@ def build_char_short_ranks(
         two_groups[entry.sp].append(entry)
         three_groups[entry.sp + entry.aux[:1]].append(entry)
 
-    def sort_key(entry: CharEntry) -> tuple[object, ...]:
+    def base_sort_key(entry: CharEntry) -> tuple[object, ...]:
         return (-frequencies.score_text(entry.text), -entry.weight, entry.text, entry.code)
 
-    def rank(groups: dict[str, list[CharEntry]]) -> dict[CharEntry, int]:
+    def rank(groups: dict[str, list[CharEntry]], sort_key) -> dict[CharEntry, int]:
         ranks: dict[CharEntry, int] = {}
         for group in groups.values():
             for index, entry in enumerate(sorted(group, key=sort_key), start=1):
                 ranks[entry] = index
         return ranks
 
-    return rank(one_groups), rank(two_groups), rank(three_groups)
+    one_ranks = rank(one_groups, base_sort_key)
+    two_ranks = rank(two_groups, base_sort_key)
+
+    def three_sort_key(entry: CharEntry) -> tuple[object, ...]:
+        # 三码是“二码 + 首辅码”的分流层；已经是二码首选的字，在三码里
+        # 会让位给同音同首辅码的高频替代字，例如 an=安、anj=案。
+        # 低频替代字不抢位，避免 sb=搜 之后 sbq 反而先出“擞”。
+        promoted_alternative = two_ranks.get(entry) != 1 and entry.weight >= CHAR_THREE_CODE_SECOND_MIN_WEIGHT
+        return (not promoted_alternative, *base_sort_key(entry))
+
+    three_ranks = rank(three_groups, three_sort_key)
+    return one_ranks, two_ranks, three_ranks
 
 
 def iter_char_dict_entries(
@@ -81,17 +92,19 @@ def iter_char_dict_entries(
     if is_primary:
         codes = []
         if one_code_ranks.get(entry) == 1:
-            codes.append(entry.sp[:1])
+            codes.append((entry.sp[:1], one_code_ranks[entry]))
         two_rank = two_code_ranks.get(entry)
         if two_rank == 1 or (two_rank == 2 and entry.weight >= CHAR_TWO_CODE_SECOND_MIN_WEIGHT):
-            codes.append(entry.sp)
+            codes.append((entry.sp, two_rank))
         three_rank = three_code_ranks.get(entry)
         if three_rank == 1 or (three_rank == 2 and entry.weight >= CHAR_THREE_CODE_SECOND_MIN_WEIGHT):
-            codes.append(entry.sp + entry.aux[:1])
-        codes.append(entry.code)
+            codes.append((entry.sp + entry.aux[:1], three_rank))
+        codes.append((entry.code, 0))
+    else:
+        codes = [(code, 0) for code in codes]
     return [
-        DictEntry(entry.text, code, entry.weight, tier, entry.source)
-        for code in dict.fromkeys(codes)
+        DictEntry(entry.text, code, entry.weight, tier, entry.source, order=rank)
+        for code, rank in dict.fromkeys(codes)
         if code
     ]
 
@@ -203,7 +216,8 @@ def merge_entries(
             primary = -max(entry.weight, 0)
             secondary = -frequencies.score_entry(entry)
 
-        return (0, entry.code, short_tier, primary, secondary, entry.tier, entry.text)
+        short_rank = entry.order if entry.source == "chars" and len(entry.code) <= 3 else 0
+        return (0, entry.code, short_tier, short_rank, primary, secondary, entry.tier, entry.text)
 
     return sorted(merged.values(), key=sort_key)
 
