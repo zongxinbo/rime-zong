@@ -8,32 +8,85 @@ from .frequency import FrequencyScores, load_default_frequency_scores
 from .models import CharEntry, DictEntry, WordEntry
 
 
-CHAR_ONE_CODE_MIN_WEIGHT = 1_000_000
-CHAR_TWO_CODE_MIN_WEIGHT = 100_000
-CHAR_THREE_CODE_MIN_WEIGHT = 10_000
+CHAR_TWO_CODE_SECOND_MIN_WEIGHT = 50_000
+CHAR_THREE_CODE_SECOND_MIN_WEIGHT = 10_000
 
 
-def iter_char_dict_entries(entry: CharEntry, primary_weights: dict[str, int]) -> list[DictEntry]:
+def is_primary_char_entry(entry: CharEntry, primary_weights: dict[str, int]) -> bool:
+    """判断单字读音是否为当前字的主读音。
+
+    单字源表会给多音字保留多条读音。短码只允许主读音参与，异读一律
+    只留四码全码，避免“区 ou”“她 j”这类低概率读音挤占短码。
+    """
+
+    return entry.source == "chars" and entry.weight > 0 and entry.weight == primary_weights.get(entry.text, 0)
+
+
+def build_char_short_ranks(
+    entries: list[CharEntry],
+    primary_weights: dict[str, int],
+    frequencies: FrequencyScores,
+) -> tuple[dict[CharEntry, int], dict[CharEntry, int], dict[CharEntry, int]]:
+    """为一、二、三码短码计算分组排名。
+
+    排名策略参考 Openfly 的“显式短码层”思想：一简只取每个首键首选；
+    二码保证每个双拼音节有首选，少量高频次选进入；三码按“完整双拼
+    + 首辅码”继续分流，也只收首选和高频次选。这样可以避免纯字频
+    阈值造成 `sb` 这类音节空码。
+    """
+
+    one_groups: dict[str, list[CharEntry]] = defaultdict(list)
+    two_groups: dict[str, list[CharEntry]] = defaultdict(list)
+    three_groups: dict[str, list[CharEntry]] = defaultdict(list)
+
+    for entry in entries:
+        if not is_primary_char_entry(entry, primary_weights):
+            continue
+        one_groups[entry.sp[:1]].append(entry)
+        two_groups[entry.sp].append(entry)
+        three_groups[entry.sp + entry.aux[:1]].append(entry)
+
+    def sort_key(entry: CharEntry) -> tuple[object, ...]:
+        return (-frequencies.score_text(entry.text), -entry.weight, entry.text, entry.code)
+
+    def rank(groups: dict[str, list[CharEntry]]) -> dict[CharEntry, int]:
+        ranks: dict[CharEntry, int] = {}
+        for group in groups.values():
+            for index, entry in enumerate(sorted(group, key=sort_key), start=1):
+                ranks[entry] = index
+        return ranks
+
+    return rank(one_groups), rank(two_groups), rank(three_groups)
+
+
+def iter_char_dict_entries(
+    entry: CharEntry,
+    primary_weights: dict[str, int],
+    one_code_ranks: dict[CharEntry, int],
+    two_code_ranks: dict[CharEntry, int],
+    three_code_ranks: dict[CharEntry, int],
+) -> list[DictEntry]:
     """把单字原型展开成最终码表中的显式多编码条目。
 
     最终码表需要迁移到其他平台，所以不能依赖 Rime 的前缀补全。
-    高频主读音单字会按字频展开一、二、三、四码；低频主读音只保留更长的码。
-    异读只保留四码全码，避免“她 j”“区 ou”这类异读短码污染高频短码空间。
+    主读音按分组排名生成一、二、三码短码；异读只保留四码全码。
     """
 
     tier = 10 if entry.source == "radicals" else 20
     if entry.source == "radicals":
         return [DictEntry(entry.text, entry.code, entry.weight, tier, entry.source)]
 
-    is_primary = entry.weight > 0 and entry.weight == primary_weights.get(entry.text, 0)
+    is_primary = is_primary_char_entry(entry, primary_weights)
     codes = [entry.code]
     if is_primary:
         codes = []
-        if entry.weight >= CHAR_ONE_CODE_MIN_WEIGHT:
+        if one_code_ranks.get(entry) == 1:
             codes.append(entry.sp[:1])
-        if entry.weight >= CHAR_TWO_CODE_MIN_WEIGHT:
+        two_rank = two_code_ranks.get(entry)
+        if two_rank == 1 or (two_rank == 2 and entry.weight >= CHAR_TWO_CODE_SECOND_MIN_WEIGHT):
             codes.append(entry.sp)
-        if entry.weight >= CHAR_THREE_CODE_MIN_WEIGHT:
+        three_rank = three_code_ranks.get(entry)
+        if three_rank == 1 or (three_rank == 2 and entry.weight >= CHAR_THREE_CODE_SECOND_MIN_WEIGHT):
             codes.append(entry.sp + entry.aux[:1])
         codes.append(entry.code)
     return [
@@ -97,6 +150,11 @@ def merge_entries(
     for entry in char_entries:
         if entry.source == "chars":
             primary_weights[entry.text] = max(primary_weights.get(entry.text, 0), entry.weight)
+    one_code_ranks, two_code_ranks, three_code_ranks = build_char_short_ranks(
+        char_entries,
+        primary_weights,
+        frequencies,
+    )
 
     def put(entry: DictEntry) -> None:
         key = (entry.text, entry.code)
@@ -105,7 +163,13 @@ def merge_entries(
             merged[key] = entry
 
     for entry in char_entries:
-        for dict_entry in iter_char_dict_entries(entry, primary_weights):
+        for dict_entry in iter_char_dict_entries(
+            entry,
+            primary_weights,
+            one_code_ranks,
+            two_code_ranks,
+            three_code_ranks,
+        ):
             put(dict_entry)
     for entry in word_entries:
         for dict_entry in iter_word_dict_entries(entry):
@@ -204,7 +268,7 @@ schema:
     - rime-zong
   description: |
     {name}
-    单字：一位辅助码末尾补 z；高频字显式生成短码，低频字保留全码，异读不占短码。
+    单字：一位辅助码末尾补 z；短码按分组首选和高频次选生成，异读不占短码。
     {word_description}
     仓颉：输入 o + 仓颉五代码，同字多码全部保留；必要时补 z 直达仓颉候选。
   dependencies:
