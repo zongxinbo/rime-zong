@@ -3,6 +3,8 @@ import os
 from datetime import datetime
 from typing import Generator, Iterable, Tuple, Iterator, overload
 
+from .paths import CHARS_SOURCE
+
 def tsv_reader(path: str) -> Iterator[list[str]]:
     """逐行读取 TSV 文件，并把每一行拆成字段列表。"""
     with open(path, 'r', encoding='utf-8') as f:
@@ -53,8 +55,7 @@ def read_tsv_many(path, key_indices, value_index):
         res[keys].append(value)
     return res
 
-base_dir = os.path.dirname(os.path.abspath(__file__))
-chars_txt_path = os.path.join(base_dir, 'prototypes/chars.txt')
+chars_txt_path = str(CHARS_SOURCE)
 
 pinyin_table = read_tsv_many(chars_txt_path, 0, 1)
 freq_trad_table = read_tsv(chars_txt_path, (0, 1), 2)

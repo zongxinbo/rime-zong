@@ -1,7 +1,9 @@
-import os
 from collections import defaultdict
 
-def get_cangjie_mapping(cangjie_path='../../schemas/cangjie/cangjie5/cangjie5.dict.yaml'):
+from .paths import CANGJIE5_DICT
+
+
+def get_cangjie_mapping(cangjie_path=CANGJIE5_DICT):
     """读取仓颉五代码表，生成“字 -> 首尾辅助码列表”的映射。
 
     同一个字可能有多个仓颉码。为了贴近日常输入，普通仓颉码的
