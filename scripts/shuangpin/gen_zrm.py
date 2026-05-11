@@ -25,7 +25,7 @@ def main() -> None:
         "--min-word-weight",
         type=int,
         default=None,
-        help="覆盖各词长默认收词阈值；不传则 essay 主词源按二字词 50、三字词 100、四字词 50。",
+        help="覆盖各词长默认收词阈值；不传则 essay 主词源按二字词 50、三字词 100、四字词 30。",
     )
     parser.add_argument("--max-word-length", type=int, default=4, help="收词的最大词长。")
     args = parser.parse_args()

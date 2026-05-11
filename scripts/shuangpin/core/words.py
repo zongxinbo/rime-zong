@@ -48,7 +48,7 @@ class WordPinyinInfo:
 DEFAULT_MIN_WEIGHT_BY_LENGTH = {
     2: 50,
     3: 100,
-    4: 50,
+    4: 30,
 }
 
 # “入库”和“给短码”分开控制。主词源条目只按 essay 频率判断短码资格；
@@ -236,6 +236,22 @@ def effective_word_weight(row: WordSourceRow) -> int:
     return row.weight
 
 
+def is_splittable_four_char_word(text: str, generated_two_char_words: set[str]) -> bool:
+    """判断四字词是否可以由两个已经入库的二字词自然拆出。
+
+    这类词如果继续作为固定四字词入库，常常会把“发布时间”“相关信息”
+    这类可组合语流片段带进码表；用户本来可以连续打两个二字词完成输入。
+    因此只在前二字和后二字都已经真实生成进二字词库时跳过，避免因为词源
+    里存在但实际无法生成的二字词而误删四字词。
+    """
+
+    return (
+        len(text) == 4
+        and text[:2] in generated_two_char_words
+        and text[2:] in generated_two_char_words
+    )
+
+
 def shuangpin_syllables(text: str, pinyin: str, converter: Converter) -> list[str] | None:
     """把词语拼音转换成逐字双拼码。
 
@@ -376,9 +392,10 @@ def build_word_entries(
 
     word_pinyin_map = load_word_pinyin_map(pinyin_path)
     char_pinyin_map = load_char_pinyin_map(char_pinyin_path)
+    source_rows = list(iter_word_source_rows(source_path))
     source_texts = {
         row.text
-        for row in iter_word_source_rows(source_path)
+        for row in source_rows
         if len(row.text) <= max_length and is_han_word(row.text)
     }
 
@@ -390,17 +407,41 @@ def build_word_entries(
     def short_code_min_weight_for_length(length: int) -> int:
         return ESSAY_SHORT_CODE_MIN_WEIGHT_BY_LENGTH.get(length, 10**18)
 
+    main_max_length = min(max_length, 3)
     dropped = collect_word_entries(
         converter=converter,
         aux_map=aux_map,
         seen=seen,
-        source_rows=iter_word_source_rows(source_path),
+        source_rows=(row for row in source_rows if len(row.text) <= main_max_length),
         min_weight_for_length=min_weight_for_length,
         short_code_min_weight_for_length=short_code_min_weight_for_length,
-        max_length=max_length,
+        max_length=main_max_length,
         word_pinyin_map=word_pinyin_map,
         char_pinyin_map=char_pinyin_map,
     )
+
+    if max_length >= 4:
+        generated_two_char_words = {
+            entry.text
+            for entry in seen.values()
+            if entry.length == 2
+        }
+        dropped += collect_word_entries(
+            converter=converter,
+            aux_map=aux_map,
+            seen=seen,
+            source_rows=(
+                row
+                for row in source_rows
+                if len(row.text) == 4
+                and not is_splittable_four_char_word(row.text, generated_two_char_words)
+            ),
+            min_weight_for_length=min_weight_for_length,
+            short_code_min_weight_for_length=short_code_min_weight_for_length,
+            max_length=max_length,
+            word_pinyin_map=word_pinyin_map,
+            char_pinyin_map=char_pinyin_map,
+        )
 
     dropped += collect_word_entries(
         converter=converter,
