@@ -18,6 +18,8 @@ CHARS_HEADER_TEMPLATE = PROTOTYPES_DIR / "chars.dict.yaml"
 PINYIN_SIMP_DICT = SCHEMAS_DIR / "pinyin_simp" / "pinyin_simp.dict.yaml"
 PINYIN_ICE_BASE_DICT = SCHEMAS_DIR / "pinyin_ice" / "pinyin_ice.base.dict.yaml"
 CANGJIE5_DICT = SCHEMAS_DIR / "cangjie" / "cangjie5" / "cangjie5.dict.yaml"
+ESSAY_ZH_HANS = SCHEMAS_DIR / "common" / "essay-zh-hans.txt"
+MULTI_DOMAIN_WORD_FREQ = FREQUENCY_DIR / "word" / "sc" / "multi_domain_word_freq.txt"
 
 CHAR_FREQUENCY_SOURCES = [
     (3.0, FREQUENCY_DIR / "char" / "sc" / "dialogue_char_freq.txt"),
