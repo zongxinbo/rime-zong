@@ -5,7 +5,7 @@
 schema:
   schema_id: zrm
   name: 自然码·仓颉
-  version: "2026-05-11"
+  version: "2026-05-12"
   author:
     - rime-zong
   description: |

@@ -26,20 +26,24 @@ def build_char_short_ranks(
     entries: list[CharEntry],
     primary_weights: dict[str, int],
     frequencies: FrequencyScores,
-) -> tuple[dict[CharEntry, int], dict[CharEntry, int], dict[CharEntry, int]]:
-    """为一、二、三码短码计算分组排名。
+) -> tuple[dict[CharEntry, int], dict[CharEntry, int], dict[CharEntry, int], dict[CharEntry, int]]:
+    """为一、二、三、四码计算分组排名。
 
     排名策略参考 Openfly 的“显式短码层”思想：一简只取每个首键首选；
     二码保证每个双拼音节有首选，少量高频次选进入；三码按“完整双拼
     + 首辅码”继续分流，也只收首选和高频次选。这样可以避免纯字频
-    阈值造成 `sb` 这类音节空码。
+    阈值造成 `sb` 这类音节空码。四码是完整音形码，不限制收录数量，
+    但同样遵循“更短首选让出更长首位”，让全码承担定重码职责。
     """
 
     one_groups: dict[str, list[CharEntry]] = defaultdict(list)
     two_groups: dict[str, list[CharEntry]] = defaultdict(list)
     three_groups: dict[str, list[CharEntry]] = defaultdict(list)
+    four_groups: dict[str, list[CharEntry]] = defaultdict(list)
 
     for entry in entries:
+        if entry.source == "chars" and entry.weight > 0:
+            four_groups[entry.code].append(entry)
         if not is_primary_char_entry(entry, primary_weights):
             continue
         one_groups[entry.sp[:1]].append(entry)
@@ -57,17 +61,37 @@ def build_char_short_ranks(
         return ranks
 
     one_ranks = rank(one_groups, base_sort_key)
-    two_ranks = rank(two_groups, base_sort_key)
+    one_code_entries = {entry for entry, rank_value in one_ranks.items() if rank_value == 1}
+
+    def two_sort_key(entry: CharEntry) -> tuple[object, ...]:
+        # 一简已经能首选出的字，在二码层有同码候选时让出首位。
+        # 但二码是完整双拼音节，仍允许这些高频字作为次选保留，避免音形方案失去拼音式预期。
+        has_shorter_code = entry in one_code_entries
+        return (has_shorter_code, *base_sort_key(entry))
+
+    two_ranks = rank(two_groups, two_sort_key)
+    two_code_leaders = {entry for entry, rank_value in two_ranks.items() if rank_value == 1}
+    shorter_code_leaders = one_code_entries | two_code_leaders
 
     def three_sort_key(entry: CharEntry) -> tuple[object, ...]:
-        # 三码是“二码 + 首辅码”的分流层；已经是二码首选的字，在三码里
-        # 会让位给同音同首辅码的高频替代字，例如 an=安、anj=案。
-        # 低频替代字不抢位，避免 sb=搜 之后 sbq 反而先出“擞”。
-        promoted_alternative = two_ranks.get(entry) != 1 and entry.weight >= CHAR_THREE_CODE_SECOND_MIN_WEIGHT
-        return (not promoted_alternative, *base_sort_key(entry))
+        # 三码是“二码 + 首辅码”的分流层；已经能用更短短码首选出的字，
+        # 在三码层有同码候选时继续让首位，减少“安 an、anj 仍然安第一”这类重复首选。
+        # 更短码里的次选不参与避让，例如“案”在 an 只是次选，仍可在 anj 成为首选。
+        has_shorter_code = entry in shorter_code_leaders
+        return (has_shorter_code, *base_sort_key(entry))
 
     three_ranks = rank(three_groups, three_sort_key)
-    return one_ranks, two_ranks, three_ranks
+    three_code_leaders = {entry for entry, rank_value in three_ranks.items() if rank_value == 1}
+    shorter_code_leaders = shorter_code_leaders | three_code_leaders
+
+    def four_sort_key(entry: CharEntry) -> tuple[object, ...]:
+        # 四码是完整编码层；已经能用一、二、三码首选出的字，
+        # 在完整码同码组里也让出首位，把全码位置留给还没有短码首选的字。
+        has_shorter_code = entry in shorter_code_leaders
+        return (has_shorter_code, *base_sort_key(entry))
+
+    four_ranks = rank(four_groups, four_sort_key)
+    return one_ranks, two_ranks, three_ranks, four_ranks
 
 
 def iter_char_dict_entries(
@@ -76,6 +100,7 @@ def iter_char_dict_entries(
     one_code_ranks: dict[CharEntry, int],
     two_code_ranks: dict[CharEntry, int],
     three_code_ranks: dict[CharEntry, int],
+    four_code_ranks: dict[CharEntry, int],
 ) -> list[DictEntry]:
     """把单字原型展开成最终码表中的显式多编码条目。
 
@@ -99,9 +124,9 @@ def iter_char_dict_entries(
         three_rank = three_code_ranks.get(entry)
         if three_rank == 1 or (three_rank == 2 and entry.weight >= CHAR_THREE_CODE_SECOND_MIN_WEIGHT):
             codes.append((entry.sp + entry.aux[:1], three_rank))
-        codes.append((entry.code, 0))
+        codes.append((entry.code, four_code_ranks.get(entry, 0)))
     else:
-        codes = [(code, 0) for code in codes]
+        codes = [(code, four_code_ranks.get(entry, 0)) for code in codes]
     return [
         DictEntry(entry.text, code, entry.weight, tier, entry.source, order=rank)
         for code, rank in dict.fromkeys(codes)
@@ -163,7 +188,7 @@ def merge_entries(
     for entry in char_entries:
         if entry.source == "chars":
             primary_weights[entry.text] = max(primary_weights.get(entry.text, 0), entry.weight)
-    one_code_ranks, two_code_ranks, three_code_ranks = build_char_short_ranks(
+    one_code_ranks, two_code_ranks, three_code_ranks, four_code_ranks = build_char_short_ranks(
         char_entries,
         primary_weights,
         frequencies,
@@ -182,6 +207,7 @@ def merge_entries(
             one_code_ranks,
             two_code_ranks,
             three_code_ranks,
+            four_code_ranks,
         ):
             put(dict_entry)
     for entry in word_entries:
@@ -216,8 +242,8 @@ def merge_entries(
             primary = -max(entry.weight, 0)
             secondary = -frequencies.score_entry(entry)
 
-        short_rank = entry.order if entry.source == "chars" and len(entry.code) <= 3 else 0
-        return (0, entry.code, short_tier, short_rank, primary, secondary, entry.tier, entry.text)
+        char_rank = entry.order if entry.source == "chars" else 0
+        return (0, entry.code, short_tier, char_rank, primary, secondary, entry.tier, entry.text)
 
     return sorted(merged.values(), key=sort_key)
 
