@@ -10,7 +10,7 @@ from .models import CharEntry, DictEntry, WordEntry
 
 CHAR_TWO_CODE_SECOND_MIN_WEIGHT = 50_000
 CHAR_THREE_CODE_SECOND_MIN_WEIGHT = 10_000
-
+UNRANKED_ORDER_BOTTOM = 999999
 
 def is_primary_char_entry(entry: CharEntry, primary_weights: dict[str, int]) -> bool:
     """判断单字读音是否为当前字的主读音。
@@ -42,7 +42,7 @@ def build_char_short_ranks(
     four_groups: dict[str, list[CharEntry]] = defaultdict(list)
 
     for entry in entries:
-        if entry.source == "chars" and entry.weight > 0:
+        if entry.source == "chars":
             four_groups[entry.code].append(entry)
         if not is_primary_char_entry(entry, primary_weights):
             continue
@@ -53,44 +53,46 @@ def build_char_short_ranks(
     def base_sort_key(entry: CharEntry) -> tuple[object, ...]:
         return (-frequencies.score_text(entry.text), -entry.weight, entry.text, entry.code)
 
-    def rank(groups: dict[str, list[CharEntry]], sort_key) -> dict[CharEntry, int]:
+    def rank_with_yielding(groups: dict[str, list[CharEntry]], leaders: set[CharEntry]) -> dict[CharEntry, int]:
+        """带词频隔离的条件让位排名算法。
+
+        1. 绝对字频隔离：有词频的字（常用区）绝对排在无词频字（生僻区）前面，生僻字永远垫底。
+        2. 限位让权（出简让全但不沉底）：在常用区内按字频降序排列。如果最高频的字已经在
+           更短的码长（leaders）中拿到了首选，则它会向后退位，让后面“还没有拿到首选的高频字”
+           顶上来做当前码长的首选。让位后的字退居次选，依然排在其他同码字和生僻字的前面。
+        """
         ranks: dict[CharEntry, int] = {}
         for group in groups.values():
-            for index, entry in enumerate(sorted(group, key=sort_key), start=1):
+            common = [e for e in group if e.weight > 0]
+            rare = [e for e in group if e.weight <= 0]
+            common.sort(key=base_sort_key)
+            rare.sort(key=base_sort_key)
+            if common:
+                promoted_idx = -1
+                for i, e in enumerate(common):
+                    if e not in leaders:
+                        promoted_idx = i
+                        break
+                if promoted_idx > 0:
+                    promoted = common.pop(promoted_idx)
+                    common.insert(0, promoted)
+            for index, entry in enumerate(common + rare, start=1):
                 ranks[entry] = index
         return ranks
 
-    one_ranks = rank(one_groups, base_sort_key)
+    one_ranks = rank_with_yielding(one_groups, set())
     one_code_entries = {entry for entry, rank_value in one_ranks.items() if rank_value == 1}
 
-    def two_sort_key(entry: CharEntry) -> tuple[object, ...]:
-        # 一简已经能首选出的字，在二码层有同码候选时让出首位。
-        # 但二码是完整双拼音节，仍允许这些高频字作为次选保留，避免音形方案失去拼音式预期。
-        has_shorter_code = entry in one_code_entries
-        return (has_shorter_code, *base_sort_key(entry))
-
-    two_ranks = rank(two_groups, two_sort_key)
+    two_ranks = rank_with_yielding(two_groups, one_code_entries)
     two_code_leaders = {entry for entry, rank_value in two_ranks.items() if rank_value == 1}
     shorter_code_leaders = one_code_entries | two_code_leaders
 
-    def three_sort_key(entry: CharEntry) -> tuple[object, ...]:
-        # 三码是“二码 + 首辅码”的分流层；已经能用更短短码首选出的字，
-        # 在三码层有同码候选时继续让首位，减少“安 an、anj 仍然安第一”这类重复首选。
-        # 更短码里的次选不参与避让，例如“案”在 an 只是次选，仍可在 anj 成为首选。
-        has_shorter_code = entry in shorter_code_leaders
-        return (has_shorter_code, *base_sort_key(entry))
-
-    three_ranks = rank(three_groups, three_sort_key)
+    three_ranks = rank_with_yielding(three_groups, shorter_code_leaders)
     three_code_leaders = {entry for entry, rank_value in three_ranks.items() if rank_value == 1}
     shorter_code_leaders = shorter_code_leaders | three_code_leaders
 
-    def four_sort_key(entry: CharEntry) -> tuple[object, ...]:
-        # 四码是完整编码层；已经能用一、二、三码首选出的字，
-        # 在完整码同码组里也让出首位，把全码位置留给还没有短码首选的字。
-        has_shorter_code = entry in shorter_code_leaders
-        return (has_shorter_code, *base_sort_key(entry))
-
-    four_ranks = rank(four_groups, four_sort_key)
+    four_ranks = rank_with_yielding(four_groups, shorter_code_leaders)
+    
     return one_ranks, two_ranks, three_ranks, four_ranks
 
 
@@ -242,7 +244,15 @@ def merge_entries(
             primary = -max(entry.weight, 0)
             secondary = -frequencies.score_entry(entry)
 
-        char_rank = entry.order if entry.source == "chars" else 0
+        # 对于正常进入排名的单字，保留其原有的短码排位次序（1, 2, 3...）。
+        # 对于词语，赋予排位 1，使其与首选单字处于同一竞争梯队。
+        # 处于同一梯队后，将由后面的 primary (权重/频次) 来决出真正的胜负。
+        # 如果是没有排位（如生僻字），给予极大的常量值使其彻底沉底。
+        if entry.source == "chars":
+            char_rank = entry.order if entry.order > 0 else UNRANKED_ORDER_BOTTOM
+        else:
+            char_rank = 1
+            
         return (0, entry.code, short_tier, char_rank, primary, secondary, entry.tier, entry.text)
 
     return sorted(merged.values(), key=sort_key)
