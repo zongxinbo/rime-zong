@@ -3,6 +3,38 @@ import json
 import re
 from pathlib import Path
 
+
+def is_explicit_completion_code(code):
+    """判断编码末键是否已经承担确认或选重功能。"""
+    return bool(code) and code[-1].isdigit()
+
+
+def normalize_code(code):
+    """规范化码表编码字段。
+
+    有些导入码表会把冗余全码写成 `kai[k1]` 这类形式，其中方括号内
+    是简码提示，并不是用户实际输入的按键。测评时只保留 `[` 之前的
+    真实编码。
+    """
+    return code.split('[', 1)[0]
+
+
+def infer_max_code_length(entries, default=4):
+    """根据单字条目自动推断方案最大码长。
+
+    Rime 码表可能包含词组码、符号辅助码或显式选重码，这些条目不一定
+    代表单字方案的真实最大码长。测评时只看单字编码，并排除末尾数字
+    这类已经承担选重/确认功能的编码。
+    """
+    lengths = [
+        len(code)
+        for text, code, _ in entries
+        if len(text) == 1 and code and not is_explicit_completion_code(code)
+    ]
+    if not lengths:
+        return default
+    return max(lengths)
+
 def parse_rime_dict(dict_path):
     """解析 Rime 字典文件，提取字符和编码"""
     with open(dict_path, 'r', encoding='utf-8') as f:
@@ -21,7 +53,7 @@ def parse_rime_dict(dict_path):
         parts = line.split('\t')
         if len(parts) >= 2:
             char = parts[0]
-            code = parts[1]
+            code = normalize_code(parts[1])
             weight = 0
             if len(parts) >= 3 and parts[2].isdigit():
                 weight = int(parts[2])

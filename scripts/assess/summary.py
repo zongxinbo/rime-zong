@@ -10,7 +10,7 @@ from short_code_efficiency import analyze_efficiency, analyze_top_n_efficiency
 from speed_equivalent import analyze_speed_equivalent
 from maximum_candidates import analyze_max_candidates
 from keyboard_heatmap import analyze_heatmap
-from utils import parse_rime_dict, get_charset_filter, load_freq, merge_freq
+from utils import parse_rime_dict, get_charset_filter, load_freq, merge_freq, infer_max_code_length
 import unicodedata
 
 if sys.stdout.encoding.lower() != 'utf-8':
@@ -55,11 +55,13 @@ def main():
     start_time = time.time()
     print(f"正在单次加载字典以提速: {dict_path} ...")
     _, entries = parse_rime_dict(dict_path)
+    max_length = infer_max_code_length(entries)
+    print(f"推断方案最大码长: {max_length}")
     
     import speed_equivalent as se
     import short_code_efficiency as sce
-    se_actual_codes = se.get_actual_codes(dict_path, max_length=4, _preloaded_entries=entries)
-    sce_actual_codes = sce.get_actual_codes(dict_path, max_length=4, _preloaded_entries=entries)
+    se_actual_codes = se.get_actual_codes(dict_path, max_length=max_length, _preloaded_entries=entries)
+    sce_actual_codes = sce.get_actual_codes(dict_path, max_length=max_length, _preloaded_entries=entries)
 
     print("正在加载字频数据...")
     freq_sources = {

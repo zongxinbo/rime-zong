@@ -1,7 +1,7 @@
 import argparse
 import json
 from collections import defaultdict
-from utils import parse_rime_dict, is_gb2312, load_freq
+from utils import parse_rime_dict, is_gb2312, load_freq, is_explicit_completion_code
 
 def load_equiv_table(path):
     with open(path, 'r', encoding='utf-8') as f:
@@ -36,7 +36,7 @@ def get_actual_codes(dict_path, max_length=4, _preloaded_entries=None):
         
         decorated = code
         if pos == 1:
-            if len(code) < max_length:
+            if len(code) < max_length and not is_explicit_completion_code(code):
                 decorated = code + "_"
         else:
             decorated = code + str(pos)
