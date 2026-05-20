@@ -4,9 +4,13 @@ import re
 from pathlib import Path
 
 
-def is_explicit_completion_code(code):
+def is_explicit_commit_code(code, commit_suffixes=None):
     """判断编码末键是否已经承担确认或选重功能。"""
-    return bool(code) and code[-1].isdigit()
+    if not code:
+        return False
+    if code[-1].isdigit():
+        return True
+    return bool(commit_suffixes) and code[-1] in set(commit_suffixes)
 
 
 def normalize_code(code):
@@ -19,21 +23,57 @@ def normalize_code(code):
     return code.split('[', 1)[0]
 
 
-def infer_max_code_length(entries, default=4):
+def infer_max_code_length(entries, default=4, commit_suffixes=None):
     """根据单字条目自动推断方案最大码长。
 
     Rime 码表可能包含词组码、符号辅助码或显式选重码，这些条目不一定
     代表单字方案的真实最大码长。测评时只看单字编码，并排除末尾数字
-    这类已经承担选重/确认功能的编码。
+    这类已经承担选重/确认功能的编码。参数化的上屏末字母仍按编码本身
+    计入最大码长，只影响后续是否补空格。
     """
     lengths = [
         len(code)
         for text, code, _ in entries
-        if len(text) == 1 and code and not is_explicit_completion_code(code)
+        if len(text) == 1 and code and not is_explicit_commit_code(code)
     ]
     if not lengths:
         return default
     return max(lengths)
+
+def is_cjk_text(text):
+    """判断字段是否像汉字/词条字段。"""
+    for char in text:
+        cp = ord(char)
+        if (
+            0x3400 <= cp <= 0x4DBF
+            or 0x4E00 <= cp <= 0x9FFF
+            or 0x20000 <= cp <= 0x2A6DF
+            or 0x2A700 <= cp <= 0x2B73F
+            or 0x2B740 <= cp <= 0x2B81F
+            or 0x2B820 <= cp <= 0x2CEAF
+            or 0x2CEB0 <= cp <= 0x2EBEF
+            or 0x30000 <= cp <= 0x3134F
+            or 0xF900 <= cp <= 0xFAFF
+            or cp in (0x3005, 0x3007)
+        ):
+            return True
+    return False
+
+
+def split_dict_line(line):
+    """拆分码表行，兼容 Tab 与空格分隔。"""
+    return line.split()
+
+
+def parse_entry_fields(parts):
+    """从字段中识别词条和编码，兼容 `字 码` 与 `码 字`。"""
+    text, code = parts[0], parts[1]
+    first_is_text = is_cjk_text(text)
+    second_is_text = is_cjk_text(code)
+    if second_is_text and not first_is_text:
+        text, code = code, text
+    return text, normalize_code(code)
+
 
 def parse_rime_dict(dict_path):
     """解析 Rime 字典文件，提取字符和编码"""
@@ -50,13 +90,14 @@ def parse_rime_dict(dict_path):
         line = line.strip()
         if not line or line.startswith('#'):
             continue
-        parts = line.split('\t')
+        parts = split_dict_line(line)
         if len(parts) >= 2:
-            char = parts[0]
-            code = normalize_code(parts[1])
+            char, code = parse_entry_fields(parts)
             weight = 0
-            if len(parts) >= 3 and parts[2].isdigit():
-                weight = int(parts[2])
+            for part in parts[2:]:
+                if part.isdigit():
+                    weight = int(part)
+                    break
             entries.append((char, code, weight))
             
     return header, entries

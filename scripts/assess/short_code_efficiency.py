@@ -1,8 +1,8 @@
 import argparse
 from collections import defaultdict
-from utils import parse_rime_dict, is_gb2312, load_freq, is_explicit_completion_code
+from utils import parse_rime_dict, is_gb2312, load_freq, is_explicit_commit_code
 
-def get_actual_codes(dict_path, max_length=4, _preloaded_entries=None):
+def get_actual_codes(dict_path, max_length=4, _preloaded_entries=None, commit_suffixes=None):
     """
     严格还原 yuhao-assess 的 codeTableService.ts 逻辑
     """
@@ -48,7 +48,7 @@ def get_actual_codes(dict_path, max_length=4, _preloaded_entries=None):
 
     def apply_selection(code, pos):
         if pos == 1:
-            if len(code) < max_length and not is_explicit_completion_code(code):
+            if len(code) < max_length and not is_explicit_commit_code(code, commit_suffixes):
                 return code + "_"
             return code
         return code + str(pos)
@@ -58,11 +58,11 @@ def get_actual_codes(dict_path, max_length=4, _preloaded_entries=None):
     
     return char_to_final_short, char_to_final_full
 
-def analyze_top_n_efficiency(dict_path, freq_data, top_n, charset_filter=is_gb2312, max_length=4, _preloaded_entries=None, _preloaded_actual_codes=None):
+def analyze_top_n_efficiency(dict_path, freq_data, top_n, charset_filter=is_gb2312, max_length=4, _preloaded_entries=None, _preloaded_actual_codes=None, commit_suffixes=None):
     if _preloaded_actual_codes is not None:
         char_to_short, char_to_full = _preloaded_actual_codes
     else:
-        char_to_short, char_to_full = get_actual_codes(dict_path, max_length=max_length, _preloaded_entries=_preloaded_entries)
+        char_to_short, char_to_full = get_actual_codes(dict_path, max_length=max_length, _preloaded_entries=_preloaded_entries, commit_suffixes=commit_suffixes)
     
     processed = []
     for char, freq in freq_data.items():
@@ -93,8 +93,8 @@ def analyze_top_n_efficiency(dict_path, freq_data, top_n, charset_filter=is_gb23
         
     return tw / tf if tf > 0 else 0.0
 
-def analyze_efficiency(dict_path, freq_data, charset_filter=is_gb2312, max_length=4, _preloaded_entries=None):
-    char_to_short, char_to_full = get_actual_codes(dict_path, max_length=max_length, _preloaded_entries=_preloaded_entries)
+def analyze_efficiency(dict_path, freq_data, charset_filter=is_gb2312, max_length=4, _preloaded_entries=None, commit_suffixes=None):
+    char_to_short, char_to_full = get_actual_codes(dict_path, max_length=max_length, _preloaded_entries=_preloaded_entries, commit_suffixes=commit_suffixes)
     valid_chars = [c for c in char_to_full.keys() if c in freq_data and charset_filter(c)]
     
     res = {}

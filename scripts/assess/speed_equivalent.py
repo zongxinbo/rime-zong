@@ -1,14 +1,14 @@
 import argparse
 import json
 from collections import defaultdict
-from utils import parse_rime_dict, is_gb2312, load_freq, is_explicit_completion_code
+from utils import parse_rime_dict, is_gb2312, load_freq, is_explicit_commit_code
 
 def load_equiv_table(path):
     with open(path, 'r', encoding='utf-8') as f:
         content = json.load(f)
         return content.get("data", content)
 
-def get_actual_codes(dict_path, max_length=4, _preloaded_entries=None):
+def get_actual_codes(dict_path, max_length=4, _preloaded_entries=None, commit_suffixes=None):
     """
     回归到第 18 轮的纯粹逻辑：
     1. 完全基于物理行号顺序。
@@ -36,7 +36,7 @@ def get_actual_codes(dict_path, max_length=4, _preloaded_entries=None):
         
         decorated = code
         if pos == 1:
-            if len(code) < max_length and not is_explicit_completion_code(code):
+            if len(code) < max_length and not is_explicit_commit_code(code, commit_suffixes):
                 decorated = code + "_"
         else:
             decorated = code + str(pos)
@@ -49,11 +49,11 @@ def get_actual_codes(dict_path, max_length=4, _preloaded_entries=None):
             
     return char_to_final_codes
 
-def analyze_speed_equivalent(dict_path, freq_data, equiv_table_path, charset_filter=is_gb2312, mode='all', max_length=4, _preloaded_entries=None, _preloaded_actual_codes=None):
+def analyze_speed_equivalent(dict_path, freq_data, equiv_table_path, charset_filter=is_gb2312, mode='all', max_length=4, _preloaded_entries=None, _preloaded_actual_codes=None, commit_suffixes=None):
     if _preloaded_actual_codes is not None:
         char_all_codes = _preloaded_actual_codes
     else:
-        char_all_codes = get_actual_codes(dict_path, max_length=max_length, _preloaded_entries=_preloaded_entries)
+        char_all_codes = get_actual_codes(dict_path, max_length=max_length, _preloaded_entries=_preloaded_entries, commit_suffixes=commit_suffixes)
 
     equiv_data = load_equiv_table(equiv_table_path)
     
