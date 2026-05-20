@@ -38,8 +38,8 @@ PUNCTUATION_KEYS = {
 }
 PUNCTUATION_CHAR_RATIO = 0.13
 
-def analyze_heatmap(dict_path, freq_path, charset_filter=is_gb2312, _preloaded_freq=None, max_length=4, simulate_punctuation=False, _preloaded_entries=None):
-    char_all_codes = get_actual_codes(dict_path, max_length=max_length, _preloaded_entries=_preloaded_entries)
+def analyze_heatmap(dict_path, freq_path, charset_filter=is_gb2312, _preloaded_freq=None, max_length=4, simulate_punctuation=False, _preloaded_entries=None, commit_suffixes=None):
+    char_all_codes = get_actual_codes(dict_path, max_length=max_length, _preloaded_entries=_preloaded_entries, commit_suffixes=commit_suffixes)
     
     if _preloaded_freq is not None:
         freqs = _preloaded_freq

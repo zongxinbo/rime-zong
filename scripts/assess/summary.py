@@ -47,21 +47,25 @@ def main():
     parser = argparse.ArgumentParser(description="Rime 方案全维度性能评估报告")
     parser.add_argument("--dict", required=True, help="待评估的字典文件路径")
     parser.add_argument("--equiv", default="scripts/assess/data/equiv_table.json", help="速度当量表路径")
+    parser.add_argument("--commit-suffixes", default="", help="编码以这些字符结尾时视为已上屏，不再补空格，例如 aeiou")
     args = parser.parse_args()
 
     dict_path = args.dict
+    commit_suffixes = args.commit_suffixes
     
     import time
     start_time = time.time()
     print(f"正在单次加载字典以提速: {dict_path} ...")
     _, entries = parse_rime_dict(dict_path)
-    max_length = infer_max_code_length(entries)
+    max_length = infer_max_code_length(entries, commit_suffixes=commit_suffixes)
     print(f"推断方案最大码长: {max_length}")
+    if commit_suffixes:
+        print(f"编码末键上屏字符: {commit_suffixes}")
     
     import speed_equivalent as se
     import short_code_efficiency as sce
-    se_actual_codes = se.get_actual_codes(dict_path, max_length=max_length, _preloaded_entries=entries)
-    sce_actual_codes = sce.get_actual_codes(dict_path, max_length=max_length, _preloaded_entries=entries)
+    se_actual_codes = se.get_actual_codes(dict_path, max_length=max_length, _preloaded_entries=entries, commit_suffixes=commit_suffixes)
+    sce_actual_codes = sce.get_actual_codes(dict_path, max_length=max_length, _preloaded_entries=entries, commit_suffixes=commit_suffixes)
 
     print("正在加载字频数据...")
     freq_sources = {
@@ -176,7 +180,7 @@ def main():
     print("\n" + "="*30 + " [6] 键盘热力与负载分析 " + "="*30)
     # 严格对齐 yuhao-assess：默认使用 北语简体 (BLCU)
     blcu_norm = freq_data.get("北语简体", {})
-    hm = analyze_heatmap(dict_path, "", _preloaded_freq=blcu_norm, _preloaded_entries=entries)
+    hm = analyze_heatmap(dict_path, "", _preloaded_freq=blcu_norm, max_length=max_length, _preloaded_entries=entries, commit_suffixes=commit_suffixes)
     if hm:
         print(f"  [左右手平衡 (相对比)]")
         l_p, r_p = hm['hand_balance']['left'], hm['hand_balance']['right']
