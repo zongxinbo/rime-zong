@@ -7,8 +7,6 @@ sort: by_weight
 ...
 
 是	a
-日	a
-曰	a
 昌	aa
 昍	aa
 𭥗	aa
@@ -2466,7 +2464,6 @@ sort: by_weight
 日	az
 曰	azz
 有	b
-月	b
 㸓	ba
 𠕌	ba
 𠕾	ba
@@ -7640,7 +7637,6 @@ sort: by_weight
 㓀	byz
 月	bz
 说	c
-金	c
 鈤	ca
 錩	caa
 𫓣	caaf
@@ -10288,7 +10284,6 @@ sort: by_weight
 𮢭	cyyj
 金	cz
 来	d
-木	d
 根	da
 杳	da
 𣏬	da
@@ -14411,7 +14406,6 @@ sort: by_weight
 㰅	dyyb
 木	dz
 没	e
-水	e
 沓	ea
 汩	ea
 汨	ea
@@ -18917,7 +18911,6 @@ sort: by_weight
 𣱶	eyz
 水	ez
 你	f
-火	f
 𫴸	fa
 𭴌	fa
 焻	faa
@@ -22214,7 +22207,6 @@ sort: by_weight
 𤑦	fyyb
 火	fz
 去	g
-土	g
 声	ga
 𡉭	ga
 𪣧	gaa
@@ -25674,8 +25666,6 @@ sort: by_weight
 圤	gyz
 土	gz
 的	h
-竹	h
-丿	h
 白	ha
 𱷳	ha
 𬕑	haa
@@ -36052,8 +36042,6 @@ sort: by_weight
 竹	hz
 丿	hzz
 我	i
-戈	i
-丶	i
 𭥎	ia
 𣉣	iaa
 𢌂	iaae
@@ -40257,7 +40245,6 @@ sort: by_weight
 𣀨	izye
 丶	izz
 都	j
-十	j
 𬂛	j
 䥌	jaac
 覩	jabu
@@ -44159,9 +44146,8 @@ sort: by_weight
 𡧽	jyvu
 𫳖	jywr
 十	jz
+𬂛	jz
 在	k
-大	k
-乂	k
 㐅	k
 𤵖	ka
 𤻈	kaah
@@ -47682,10 +47668,9 @@ sort: by_weight
 癠	kyx
 𤴩	kyz
 大	kz
+㐅	kz
 乂	kzz
 个	l
-中	l
-丨	l
 旧	la
 衵	la
 裮	laa
@@ -51897,7 +51882,6 @@ sort: by_weight
 裴	lyyv
 中	lz
 丨	lzz
-一	m
 百	ma
 𣄼	ma
 𠄵	maam
@@ -60770,8 +60754,6 @@ sort: by_weight
 𬔗	myyt
 一	mz
 了	n
-弓	n
-亅	n
 𢎗	n
 色	na
 𣄽	na
@@ -65973,8 +65955,8 @@ sort: by_weight
 弦	nyvi
 𭛈	nywm
 弓	nz
+𢎗	nz
 亅	nzz
-人	o
 但	oa
 㒲	oa
 𬽪	oa
@@ -71960,7 +71942,6 @@ sort: by_weight
 人	oz
 𰨇	ozmf
 也	p
-心	p
 旨	pa
 旬	pa
 𰑃	pa
@@ -74358,7 +74339,6 @@ sort: by_weight
 𡷊	pyyu
 心	pz
 看	q
-手	q
 把	qa
 抇	qa
 𢪏	qa
@@ -78142,7 +78122,6 @@ sort: by_weight
 𢮯	qyyv
 手	qz
 只	r
-口	r
 吧	ra
 𠯐	ra
 𠯭	ra
@@ -83405,7 +83384,6 @@ sort: by_weight
 𨛜	rzru
 𨞠	rztu
 那	s
-尸	s
 𡰶	sa
 𫧍	sa
 𧢇	sabu
@@ -87414,7 +87392,6 @@ sort: by_weight
 𡱦	syym
 尸	sz
 着	t
-廿	t
 昔	ta
 䒤	ta
 𣅑	ta
@@ -94142,7 +94119,6 @@ sort: by_weight
 𦷿	tyyw
 廿	tz
 就	u
-山	u
 㞱	ua
 𡹌	uab
 𡹨	uabe
@@ -96403,7 +96379,6 @@ sort: by_weight
 𪨨	uyy
 山	uz
 好	v
-女	v
 𪥨	va
 娼	vaa
 𫲞	vaam
@@ -100855,7 +100830,6 @@ sort: by_weight
 𡣪	vyyb
 女	vz
 要	w
-田	w
 𣅍	wa
 𭥫	wa
 畼	wamh
@@ -102645,7 +102619,6 @@ sort: by_weight
 以	x
 难	xz
 这	y
-卜	y
 𣅀	ya
 𨑨	ya
 𨗏	yaaa
