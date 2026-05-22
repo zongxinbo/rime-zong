@@ -2,9 +2,9 @@
 """
 Wucang5 二简方案生成脚本
 支持两种模式：
-1. 原生码位保护模式（默认）：保护高频 GB2312 原生二码字，其他原生二码位允许高频长码字竞争。
+1. 原生码位保护模式（默认）：保护高频 GB2312 原生二码字，其他原生二码位按净收益竞争。
 2. GB2312 保护模式 (gb_only=True): 仅 GB2312 汉字有资格，且仅占据空槽（无 GB2312 原主）。
-3. 关闭保护时：允许长码字与“原主字”(全码=2)竞争。若长码字频次 > 原主频次 * 1.5，则生成简码。
+3. 关闭保护时：允许长码字与“原主字”(全码=2)竞争，按省码收益扣除原主代价后排序。
 """
 
 import sys
@@ -22,6 +22,26 @@ from core.cangjie_builder import (
     REPO_ROOT
 )
 
+NATIVE_2_PENALTY_RATIO = 1.5
+
+
+def _load_excluded_chars_and_occupied_codes() -> tuple[set[str], set[str]]:
+    """加载已有更短简码字，并保护同长度的既有码位。"""
+    excluded_chars = set()
+    occupied_codes = set()
+    for f_name in ["z_code.txt", "one_code.txt"]:
+        p = REPO_ROOT / "scripts/cangjie/prototypes" / f_name
+        if p.exists():
+            with open(p, "r", encoding="utf-8") as f:
+                for line in f:
+                    parts = line.strip().split("\t")
+                    if len(parts) >= 1 and parts[0] and not parts[0].startswith("#"):
+                        excluded_chars.add(parts[0])
+                    if len(parts) == 2 and len(parts[1]) == 2:
+                        occupied_codes.add(parts[1])
+    return excluded_chars, occupied_codes
+
+
 def generate_shortcut_2(
     gb_only: bool = False,
     prefix: bool = True,
@@ -34,16 +54,8 @@ def generate_shortcut_2(
     source_dict = REPO_ROOT / "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
     output_path = REPO_ROOT / "scripts/cangjie/prototypes/two_code.txt"
 
-    # 1. 排除名单 (z 和 1)
-    excluded_chars = set()
-    for f_name in ["z_code.txt", "one_code.txt"]:
-        p = REPO_ROOT / "scripts/cangjie/prototypes" / f_name
-        if p.exists():
-            with open(p, "r", encoding="utf-8") as f:
-                for line in f:
-                    parts = line.strip().split("\t")
-                    if len(parts) >= 1 and parts[0] and not parts[0].startswith("#"):
-                        excluded_chars.add(parts[0])
+    # 1. 排除名单 (z 和 1)，并保护既有二码简码位。
+    excluded_chars, occupied_codes = _load_excluded_chars_and_occupied_codes()
 
     # 2. 获取加权得分
     if char_scores is None:
@@ -73,29 +85,41 @@ def generate_shortcut_2(
             if score <= 0: continue
             if gb_only and not is_gb2312(char): continue
             code2 = full_code[:2] if prefix else full_code[0] + full_code[-1]
-            candidates_by_code[code2]["long"].append((char, score))
+            candidates_by_code[code2]["long"].append((char, score, len(full_code)))
 
-    # 4. 判定
+    # 4. 按净收益判定：省码收益 - 原生码位代价。
     valid_shortcuts = []
     for code2, data in candidates_by_code.items():
-        if not data["long"]: continue
-        
-        best_long = max(data["long"], key=lambda x: x[1])
-        long_char, long_score = best_long
-        
-        threshold = 0
+        if code2 in occupied_codes:
+            continue
+        if not data["long"]:
+            continue
+
+        native_penalty = 0
         if data["orig"]:
             orig_char, orig_score = data["orig"]
             if gb_only or (protect_native and is_gb2312(orig_char) and orig_score >= protect_native_min_score):
-                threshold = float('inf') # 高频 GB2312 原生码位绝对保护
+                continue
             else:
-                threshold = orig_score * 1.5 # 1.5 倍竞争
-            
-        if long_score > threshold:
-            valid_shortcuts.append((long_char, code2, long_score))
+                native_penalty = orig_score * NATIVE_2_PENALTY_RATIO
+
+        best_item = None
+        for long_char, long_score, full_len in data["long"]:
+            saved_keys = full_len - 2
+            if saved_keys <= 0:
+                continue
+            net_score = long_score * saved_keys - native_penalty
+            if net_score <= 0:
+                continue
+            item = (long_char, code2, long_score, net_score, saved_keys)
+            if best_item is None or item[3] > best_item[3]:
+                best_item = item
+
+        if best_item is not None:
+            valid_shortcuts.append(best_item)
 
     # 5. 过滤与输出
-    valid_shortcuts.sort(key=lambda x: x[2], reverse=True)
+    valid_shortcuts.sort(key=lambda x: x[3], reverse=True)
     
     if count > 0:
         top_n = valid_shortcuts[:count]
@@ -116,7 +140,7 @@ def generate_shortcut_2(
 
     with open(output_path, "w", encoding="utf-8", newline="\n") as f:
         f.write("# 二简\n")
-        for char, code, _ in top_n:
+        for char, code, *_ in top_n:
             f.write(f"{char}\t{code}\n")
     
     print(f"二简生成完成: {output_path} (数量: {len(top_n)})")

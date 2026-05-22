@@ -5,7 +5,7 @@
   1. 对象：GB2312 一级字，或达到频率门槛的 GB2312 二级字；
   2. 取码：full_code[:4]；
   3. 四简码位内部去重，同字只保留一个四简；
-  4. 压到原生四码位时，只有收益明显高于原主才放行。
+  4. 压到原生四码位时，按省码收益扣除原主代价后判定。
 """
 
 import sys
@@ -92,6 +92,7 @@ def generate_shortcut_4(
                 "char": e.text,
                 "code": code4,
                 "score": score,
+                "net_score": score,
                 "conflicts": conflicts,
                 "full_code": e.code,
                 "level": level,
@@ -114,10 +115,12 @@ def generate_shortcut_4(
                 rejected_native += 1
                 continue
 
-            # 平衡版：如果原生四码字已经有更短简码，放行；否则需要明显高频。
+            # 平衡版：如果原生四码字已经有更短简码，放行；否则按净收益竞争。
             active_conflicts = [ch for ch in conflicts if ch not in excluded_chars]
             max_conflict_score = max((char_scores.get(ch, 0) for ch in active_conflicts), default=0)
-            if not active_conflicts or item["score"] > max_conflict_score * BALANCED_NATIVE4_RATIO:
+            net_score = item["score"] - max_conflict_score * BALANCED_NATIVE4_RATIO
+            item["net_score"] = net_score
+            if not active_conflicts or net_score > 0:
                 allowed_native += 1
                 accepted.append(item)
             else:
@@ -128,7 +131,7 @@ def generate_shortcut_4(
         used_codes = set()
         used_chars = set()
         accepted.sort(key=lambda item: (
-            -item["score"],
+            -item["net_score"],
             len(item["conflicts"]),
             item["code"],
             item["char"],
@@ -141,10 +144,10 @@ def generate_shortcut_4(
             selected.append(item)
 
     if count > 0:
-        selected.sort(key=lambda item: (-item["score"], item["code"], item["char"]))
+        selected.sort(key=lambda item: (-item["net_score"], item["code"], item["char"]))
         selected = selected[:count]
 
-    selected.sort(key=lambda item: (item["code"], -item["score"], item["char"]))
+    selected.sort(key=lambda item: (item["code"], -item["net_score"], item["char"]))
 
     with open(output_path, "w", encoding="utf-8", newline="\n") as f:
         f.write(f"# 四简（{mode}，GB2312 五码字）\n")

@@ -43,6 +43,7 @@ def main():
     # 0. 预加载加权字频（统一语料库得分）
     char_scores = get_weighted_frequencies()
 
+    # 一简是单独校准的原型文件，生产构建只消费，不自动重算。
     # 按依赖顺序生成简码：S2 → S3 → S4
     print("=" * 50)
     print("正在生成二简原型...")

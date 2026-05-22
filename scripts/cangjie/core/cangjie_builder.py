@@ -59,8 +59,6 @@ def generate_dict(
                 parts = line.strip().split("\t")
                 if len(parts) == 2 and not parts[0].startswith("#"):
                     char, code = parts[0], parts[1]
-                    if priority == 1 and char in z_root_chars and len(code) == 1:
-                        continue
                     shortcut_entries.append((char, code, priority))
                     if priority == 0:
                         z_root_chars.add(char)
