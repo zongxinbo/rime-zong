@@ -18,13 +18,14 @@ def main():
     parser = argparse.ArgumentParser(description="Sicang5 生产构建脚本 (四码方案·纯单字流)")
     parser.add_argument("--exclude-extended", action="store_true", default=False,
                         help="过滤增广字集（Ext-B及以上）")
-    parser.add_argument("--gb-only", action="store_true", default=False, help="仅对 GB2312 汉字生成简码并实施保护")
     parser.add_argument("--s2-prefix", action=argparse.BooleanOptionalAction, default=True, help="二简：提取规则取前两码（而非首尾码）")
-    parser.add_argument("--s2-count", type=int, default=200, help="二简：输出数量限制")
+    parser.add_argument("--s2-count", type=int, default=150, help="二简：输出数量限制")
     parser.add_argument("--s2-coverage", type=float, default=0, help="二简：按累计字频覆盖率自动决定数量")
     parser.add_argument("--s3-prefix", action=argparse.BooleanOptionalAction, default=True, help="三简：提取规则取前三码（而非前两码+末码）")
-    parser.add_argument("--s3-count", type=int, default=400, help="三简：固定输出数量")
+    parser.add_argument("--s3-count", type=int, default=300, help="三简：固定输出数量")
     parser.add_argument("--s3-coverage", type=float, default=0, help="三简：按累计字频覆盖率自动决定数量")
+    parser.add_argument("--protect-native", action=argparse.BooleanOptionalAction, default=True, help="二简保护高频 GB2312 原生二码位，三简保护已有原生三码位")
+    parser.add_argument("--s2-protect-native-min-score", type=float, default=100000, help="原生二码字达到该综合字频才受保护")
     parser.add_argument("--only-first-full-code", action=argparse.BooleanOptionalAction, default=False, help="仅取第一个全码（用于去重）")
     args = parser.parse_args()
 
@@ -35,20 +36,21 @@ def main():
     print("=" * 50)
     print("正在生成二简原型...")
     generate_shortcut_2(
-        gb_only=args.gb_only,
         prefix=args.s2_prefix,
         count=args.s2_count,
         auto_coverage=args.s2_coverage,
-        char_scores=char_scores
+        char_scores=char_scores,
+        protect_native=args.protect_native,
+        protect_native_min_score=args.s2_protect_native_min_score
     )
 
     print("正在生成三简原型...")
     generate_shortcut_3(
-        gb_only=args.gb_only,
         prefix=args.s3_prefix,
         count=args.s3_count,
         auto_coverage=args.s3_coverage,
-        char_scores=char_scores
+        char_scores=char_scores,
+        protect_native=args.protect_native
     )
 
     print("=" * 50)

@@ -17,11 +17,11 @@ python scripts/cangjie/core/gen_shortcut_4.py
 
 默认构建参数：
 
-- 二简：固定 `200` 个
-- 三简：固定 `400` 个
+- 二简：上限 `150` 个；默认保护高频 GB2312 原生二码位，保护门槛 `100000`
+- 三简：固定 `300` 个
 - 四简：默认关闭，可用 `--s4` 开启 `balanced` 模式，给 GB2312 五码字生成四简
 - 四简数量：启用后默认上限 `1000` 个；GB2312 二级字需达到综合字频 `1000` 才可进入
-- 简码总量：builder 口径含 `z_code` 字根码 31 个和一简 25 个，默认合计 `656` 个
+- 简码总量：builder 口径含 `z_code` 字根码 31 个和一简 25 个，默认合计 `506` 个
 
 ```powershell
 python scripts/cangjie/gen_wucang5.py
@@ -46,6 +46,12 @@ python scripts/cangjie/gen_wucang5.py --s4 --s4-level2-min-score 1000
 
 # 改用覆盖率决定二简/三简数量
 python scripts/cangjie/gen_wucang5.py --s2-count 0 --s2-coverage 0.85 --s3-count 0 --s3-coverage 0.90
+
+# 关闭原生码位保护，恢复高频长码字抢二简/三简码位
+python scripts/cangjie/gen_wucang5.py --no-protect-native
+
+# 调整二简原生码位保护门槛
+python scripts/cangjie/gen_wucang5.py --s2-protect-native-min-score 100000
 ```
 
 四简模式说明：
