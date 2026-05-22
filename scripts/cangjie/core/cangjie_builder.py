@@ -34,9 +34,8 @@ def generate_dict(
 ):
     """生成最终字典。
 
-    支持 Z/S1/S2/S3/S4 简码层级，并实现"位置降权"：
-    同码组内，已获简码的字的长全码条目排在最后（退避），
-    保证首选候选是真正需要该编码的字。
+    支持 Z/S1/S2/S3/S4 简码层级。简码只在自身码位优先，不再让
+    该字的全码退避，避免用户按仓颉全码时被冷僻字顶到前面。
     """
     print(f"正在解析原始仓颉编码: {source_dict}...")
     raw_entries = parse_cangjie_dict(source_dict)
@@ -51,7 +50,6 @@ def generate_dict(
     print("正在加载简码规则...")
     shortcut_entries = []  # (char, code, priority)
     z_single_code_chars = set()
-    chars_with_shortcut = {}  # char -> 最短简码长度
 
     def load_shortcut(path, priority):
         if not path or not path.exists():
@@ -64,10 +62,6 @@ def generate_dict(
                     shortcut_entries.append((char, code, priority))
                     if priority == 0 and code.endswith("zz"):
                         z_single_code_chars.add(char)
-                    # 记录该字获得的最短简码长度
-                    cur = chars_with_shortcut.get(char, 999)
-                    if len(code) < cur:
-                        chars_with_shortcut[char] = len(code)
 
     # 优先级数字越小越靠前
     load_shortcut(shortcut_paths.get('z'), 0)
@@ -87,36 +81,31 @@ def generate_dict(
     for char, code, _ in shortcut_entries:
         used_text_code.add((char, code))
 
-    fullcode_entries = []  # (char, code, freq, is_demoted)
+    fullcode_entries = []  # (char, code, freq)
     for char, full_codes in char_full_codes.items():
         if char in z_single_code_chars:
             full_codes = [code for code in full_codes if len(code) == 1]
         freq = char_freqs.get(char, 0)
-        shortcut_len = chars_with_shortcut.get(char, 999)
         for full_code in full_codes:
             code_proj = project_code(full_code, max_code_length)
             if (char, code_proj) in used_text_code:
                 continue
             used_text_code.add((char, code_proj))
-            # 位置降权：如果该字已有更短的简码，则标记退避
-            is_demoted = len(code_proj) > shortcut_len
-            fullcode_entries.append((char, code_proj, freq, is_demoted))
+            fullcode_entries.append((char, code_proj, freq))
 
     # ── 第三步：合并排序输出 ──
     # 排序键设计：
     #   1. 按编码分组
-    #   2. 简码条目优先（priority 0-4），然后原生全码（非退避），最后退避条目
+    #   2. 简码条目优先（priority 0-4），然后全码
     #   3. 同级内按字频降序
     all_entries = []
 
     for char, code, priority in shortcut_entries:
         freq = char_freqs.get(char, 0)
-        # sort_tier: 简码 (0-4) < 原生全码 (5) < 退避 (6)
         all_entries.append((code, priority, -freq, char))
 
-    for char, code, freq, is_demoted in fullcode_entries:
-        tier = 6 if is_demoted else 5
-        all_entries.append((code, tier, -freq, char))
+    for char, code, freq in fullcode_entries:
+        all_entries.append((code, 5, -freq, char))
 
     all_entries.sort()
 
@@ -149,15 +138,12 @@ def generate_dict(
         if len(seen_entries) >= 2:
             entry2 = seen_entries[1]
             char2 = entry2[3]
-            tier2 = entry2[1]
-            # 如果该字是因为已有更短简码而被降权的（tier >= 6），则不生成后缀码
-            if tier2 < 6:
-                new_code_z = code + 'z'
-                if (char2, new_code_z) not in used_text_code:
-                    freq2 = char_freqs.get(char2, 0)
-                    suffix_entries.append((new_code_z, 1, -freq2, char2))
-                    used_text_code.add((char2, new_code_z))
-                    suffix_count += 1
+            new_code_z = code + 'z'
+            if (char2, new_code_z) not in used_text_code:
+                freq2 = char_freqs.get(char2, 0)
+                suffix_entries.append((new_code_z, 1, -freq2, char2))
+                used_text_code.add((char2, new_code_z))
+                suffix_count += 1
 
     all_entries.extend(suffix_entries)
     all_entries.sort()
@@ -189,9 +175,8 @@ def generate_dict(
 
     sc_count = len(shortcut_entries)
     fc_count = len(fullcode_entries)
-    dm_count = sum(1 for _, _, _, d in fullcode_entries if d)
     print(
-        f"完成：简码={sc_count} 全码={fc_count} 退避={dm_count}"
+        f"完成：简码={sc_count} 全码={fc_count}"
         f" 后缀消重={suffix_count}"
         f" 总计={len(all_entries)} 输出={output_path}"
     )

@@ -2,8 +2,9 @@
 """
 Wucang5 三简方案生成脚本
 支持两种模式：
-1. 传统模式 (gb_only=False): 允许长码字与“原主字”(全码=3)竞争。若长码字频次 > 原主频次 * 1.2，则生成简码。
+1. 原生码位保护模式（默认）：长码字只占空槽，不抢已有三码全码字。
 2. GB2312 保护模式 (gb_only=True): 仅 GB2312 汉字有资格，且仅占据空槽（无 GB2312 原主）。
+3. 关闭保护时：允许长码字与“原主字”(全码=3)竞争。若长码字频次 > 原主频次 * 1.2，则生成简码。
 """
 
 import sys
@@ -21,7 +22,7 @@ from core.cangjie_builder import (
     REPO_ROOT
 )
 
-def generate_shortcut_3(gb_only: bool = False, prefix: bool = True, count: int = 0, auto_coverage: float = 0.90, char_scores: dict[str, int] = None):
+def generate_shortcut_3(gb_only: bool = False, prefix: bool = True, count: int = 0, auto_coverage: float = 0.90, char_scores: dict[str, int] = None, protect_native: bool = True):
     source_dict = REPO_ROOT / "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
     output_path = REPO_ROOT / "scripts/cangjie/prototypes/three_code.txt"
 
@@ -51,15 +52,15 @@ def generate_shortcut_3(gb_only: bool = False, prefix: bool = True, count: int =
     # 3. 分组候选
     candidates_by_code = defaultdict(lambda: {"orig": None, "long": []})
     for char, full_code in char_codes.items():
-        score = char_scores.get(char, 0)
-        if score <= 0: continue
-        
         if len(full_code) == 3:
             if not gb_only or is_gb2312(char):
                 curr_orig = candidates_by_code[full_code]["orig"]
+                score = char_scores.get(char, 0)
                 if not curr_orig or score > curr_orig[1]:
                     candidates_by_code[full_code]["orig"] = (char, score)
         elif len(full_code) > 3:
+            score = char_scores.get(char, 0)
+            if score <= 0: continue
             if gb_only and not is_gb2312(char): continue
             code3 = full_code[:3] if prefix else full_code[0] + full_code[1] + full_code[-1]
             candidates_by_code[code3]["long"].append((char, score))
@@ -74,7 +75,7 @@ def generate_shortcut_3(gb_only: bool = False, prefix: bool = True, count: int =
         
         threshold = 0
         if data["orig"]:
-            if gb_only:
+            if gb_only or protect_native:
                 threshold = float('inf')
             else:
                 threshold = data["orig"][1] * 1.2
@@ -114,8 +115,10 @@ def main():
     parser.add_argument("--prefix", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--count", type=int, default=0)
     parser.add_argument("--auto-coverage", type=float, default=0.90)
+    parser.add_argument("--protect-native", action=argparse.BooleanOptionalAction, default=True,
+                        help="保护已有三码全码位，不让长码字抢位")
     args = parser.parse_args()
-    generate_shortcut_3(gb_only=args.gb_only, prefix=args.prefix, count=args.count, auto_coverage=args.auto_coverage)
+    generate_shortcut_3(gb_only=args.gb_only, prefix=args.prefix, count=args.count, auto_coverage=args.auto_coverage, protect_native=args.protect_native)
 
 if __name__ == "__main__":
     main()
