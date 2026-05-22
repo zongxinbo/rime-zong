@@ -49,7 +49,7 @@ def generate_dict(
     # ── 第一步：加载各层级简码 ──
     print("正在加载简码规则...")
     shortcut_entries = []  # (char, code, priority)
-    z_single_code_chars = set()
+    z_root_chars = set()
 
     def load_shortcut(path, priority):
         if not path or not path.exists():
@@ -59,9 +59,11 @@ def generate_dict(
                 parts = line.strip().split("\t")
                 if len(parts) == 2 and not parts[0].startswith("#"):
                     char, code = parts[0], parts[1]
+                    if priority == 1 and char in z_root_chars and len(code) == 1:
+                        continue
                     shortcut_entries.append((char, code, priority))
-                    if priority == 0 and code.endswith("zz"):
-                        z_single_code_chars.add(char)
+                    if priority == 0:
+                        z_root_chars.add(char)
 
     # 优先级数字越小越靠前
     load_shortcut(shortcut_paths.get('z'), 0)
@@ -83,8 +85,8 @@ def generate_dict(
 
     fullcode_entries = []  # (char, code, freq)
     for char, full_codes in char_full_codes.items():
-        if char in z_single_code_chars:
-            full_codes = [code for code in full_codes if len(code) == 1]
+        if char in z_root_chars:
+            full_codes = [code for code in full_codes if len(code) != 1]
         freq = char_freqs.get(char, 0)
         for full_code in full_codes:
             code_proj = project_code(full_code, max_code_length)
