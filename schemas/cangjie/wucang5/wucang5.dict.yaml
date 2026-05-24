@@ -2,7 +2,7 @@
 # 由 cangjie_builder.py 生成
 ---
 name: wucang5
-version: '2026-05-22'
+version: '2026-05-24'
 sort: by_weight
 ...
 
@@ -152,9 +152,8 @@ sort: by_weight
 𣈎	abkd
 㬗	abkf
 𥀦	abkhe
-晕	abkq
 晖	abkq
-晖	abkqz
+晕	abkq
 𣌰	abks
 𫦱	abks
 𫦱	abksz
@@ -1213,10 +1212,9 @@ sort: by_weight
 𨷾	anann
 䦪	anapv
 闒	anasm
-晚	anau
 冕	anau
+晚	anau
 晩	anau
-冕	anauz
 䦘	anav
 閺	anayk
 閒	anb
@@ -2081,12 +2079,11 @@ sort: by_weight
 𧢈	arbuu
 𬢂	arbuu
 𭫁	ard
-照	arf
 煦	arf
+照	arf
 𤋗	arf
 𤋜	arf
 𰟈	arf
-煦	arfz
 𭏏	arg
 𣇒	arhg
 𭤤	arhml
@@ -2125,10 +2122,9 @@ sort: by_weight
 旫	ash
 𣅉	ashi
 昭	ashr
-晚	ashu
 冕	ashu
+晚	ashu
 𩳺	ashui
-冕	ashuz
 𠕣	ashx
 𣋣	asit
 𭧿	asit
@@ -4566,8 +4562,8 @@ sort: by_weight
 𧳉	bhtt
 貓	bhtw
 𧴟	bhtyj
-见	bhu
 冗	bhu
+见	bhu
 𧲠	bhu
 𣎯	bhua
 臢	bhuc
@@ -4581,7 +4577,6 @@ sort: by_weight
 膬	bhuu
 貀	bhuu
 貀	bhuuz
-冗	bhuz
 胝	bhvi
 𫆗	bhvl
 𧳩	bhvno
@@ -5675,10 +5670,9 @@ sort: by_weight
 朎	boii
 𦜲	boii
 𦜲	boiiz
-贼	boij
 贱	boij
+贼	boij
 赇	boije
-贱	boijz
 贼	boik
 𰷫	boikk
 𫎦	boikp
@@ -15245,7 +15239,6 @@ sort: by_weight
 𱣸	dtysz
 𣗄	dtyu
 𣒣	dtyv
-来	dtz
 想	du
 札	du
 杣	du
@@ -16113,11 +16106,10 @@ sort: by_weight
 𭱯	ebhmz
 沉	ebhn
 𬈒	ebhp
-观	ebhu
 沉	ebhu
+观	ebhu
 𤂚	ebhu
 𬢇	ebhu
-沉	ebhuz
 𤀊	ebhv
 滔	ebhx
 㶁	ebin
@@ -18354,10 +18346,9 @@ sort: by_weight
 𬇝	emcl
 𤄉	emcn
 𪶮	emcp
-酒	emcw
 洒	emcw
+酒	emcw
 𨠆	emcw
-洒	emcwz
 汙	emd
 𤁋	emdm
 𤃉	emdp
@@ -29947,8 +29938,8 @@ sort: by_weight
 𨤙	hdkvf
 𪙖	hdkyu
 𥝛	hdkz
-种	hdl
 秉	hdl
+种	hdl
 䇿	hdl
 𣏮	hdl
 䅹	hdlav
@@ -30001,7 +29992,6 @@ sort: by_weight
 秞	hdlwz
 𰨻	hdlx
 秭	hdlxh
-秉	hdlz
 笨	hdm
 𥝍	hdm
 𫀧	hdm
@@ -41104,8 +41094,8 @@ sort: by_weight
 𱫳	ihrf
 𢈹	ihrj
 㢂	ihrr
-成	ihs
 庐	ihs
+成	ihs
 𢉞	ihsb
 𣒷	ihsd
 𰏾	ihse
@@ -41115,7 +41105,6 @@ sort: by_weight
 𮍏	ihsll
 𱻣	ihsmm
 廐	ihsu
-庐	ihsz
 允	ihu
 𢉐	ihuf
 廆	ihui
@@ -42957,9 +42946,8 @@ sort: by_weight
 𫼐	isbmc
 𫼍	isbnd
 扃	isbr
-盛	isbt
 扁	isbt
-扁	isbtz
+盛	isbt
 𫎠	isbuc
 𲂩	isbuc
 𢩀	isbyi
@@ -43590,9 +43578,8 @@ sort: by_weight
 诈	ivos
 诲	ivowy
 询	ivp
-询	ivpa
 诣	ivpa
-诣	ivpaz
+询	ivpa
 𫍙	ivpd
 谧	ivpht
 𬣝	ivpim
@@ -47617,10 +47604,9 @@ sort: by_weight
 弿	jtcn
 𰍉	jtcn
 𰍉	jtcnz
-赛	jtco
 蹇	jtco
+赛	jtco
 䞿	jtco
-蹇	jtcoz
 㥶	jtcp
 𢞝	jtcp
 𢞝	jtcpz
@@ -48094,8 +48080,8 @@ sort: by_weight
 𰣭	kavz
 𭼡	kawe
 𣂏	kayj
-有	kb
 冇	kb
+有	kb
 𡗚	kb
 𰣹	kbam
 𤷂	kbau
@@ -48192,11 +48178,10 @@ sort: by_weight
 㚗	kbmz
 郁	kbn
 𤶖	kbnd
-郁	kbnl
 郗	kbnl
+郁	kbnl
 郩	kbnl
 𨛼	kbnl
-郗	kbnlz
 𡙞	kbnm
 欷	kbno
 𣣲	kbno
@@ -48260,7 +48245,6 @@ sort: by_weight
 𰳳	kbyhv
 𬂑	kbykm
 𰣤	kbyz
-冇	kbz
 㾣	kc
 𡗕	kc
 𡗜	kc
@@ -50182,10 +50166,9 @@ sort: by_weight
 錾	klc
 椠	kld
 𭼤	klde
-在	klg
 堑	klg
+在	klg
 𤹒	klgi
-堑	klgz
 𤼖	klii
 𰣿	klip
 𱱊	klis
@@ -64491,8 +64474,8 @@ sort: by_weight
 𥊾	mumbc
 𩑬	mumbc
 𩓑	mumbc
-顾	mumbo
 顽	mumbo
+顾	mumbo
 𬛭	mumbu
 𠒓	mumcw
 尫	mumg
@@ -70068,7 +70051,6 @@ sort: by_weight
 𫯖	nnytk
 𡗌	nnyvg
 㚊	nnyvo
-了	nnz
 𠄏	nnz
 𫸪	nnz
 𫸪	nnzz
@@ -73681,8 +73663,8 @@ sort: by_weight
 慜	okpz
 伡	okq
 𦓫	okqd
-知	okr
 佑	okr
+知	okr
 𥏼	okras
 𠌳	okrb
 𬾿	okrb
@@ -73703,7 +73685,6 @@ sort: by_weight
 𰁱	okru
 𪓳	okrxu
 跾	okryo
-佑	okrz
 仂	oks
 𭄞	oks
 𱐩	oks
@@ -81351,9 +81332,8 @@ sort: by_weight
 𰔗	qhlkz
 𢭣	qhll
 蛪	qhlmi
-抓	qhlo
 掀	qhlo
-掀	qhloz
+抓	qhlo
 𢴩	qhlq
 𢹱	qhlx
 折	qhm
@@ -84563,14 +84543,13 @@ sort: by_weight
 嚗	rate
 𠾝	ratk
 𡄗	ratr
-吧	rau
 邑	rau
+吧	rau
 𨚋	rauf
 𡃢	raum
 𡅜	raur
 𡄊	raut
 𮖄	rauv
-邑	rauz
 𨙨	rauz
 哏	rav
 𡀾	ravf
@@ -88360,10 +88339,9 @@ sort: by_weight
 𪢋	romo
 𪢋	romoz
 𡀍	romp
-哈	romr
 啥	romr
+哈	romr
 哬	romr
-啥	romrz
 喩	romv
 吃	ron
 𩒻	ronc
@@ -89165,12 +89143,11 @@ sort: by_weight
 𠱸	rsll
 𠲬	rsll
 𠲬	rsllz
-别	rsln
 別	rsln
+别	rsln
 㓵	rsln
 𭈨	rsln
 𤿱	rslne
-別	rslnz
 𭈌	rslo
 𭋃	rslp
 𡄦	rslr
@@ -94909,13 +94886,12 @@ sort: by_weight
 繭	tbli
 繭	tbliz
 𧒤	tblmi
-前	tbln
 蒯	tbln
+前	tbln
 𠞁	tbln
 𠞣	tbln
 𠞳	tbln
 𦮯	tbln
-蒯	tblnz
 𬝂	tblu
 苴	tbm
 𰰡	tbm
@@ -95330,7 +95306,6 @@ sort: by_weight
 彂	tcnok
 𭛁	tcnok
 𬸨	tcnom
-歉	tcnoz
 𧃑	tcnq
 𫤱	tcnq
 𫤱	tcnqz
@@ -96461,7 +96436,6 @@ sort: by_weight
 𦤄	thbu
 𦤅	thbu
 𧅫	thbu
-首	thbuz
 𦾦	thbv
 𫇽	thbv
 𫇽	thbvz
@@ -101376,11 +101350,10 @@ sort: by_weight
 𮶳	tvmg
 𮶳	tvmgz
 𰱍	tvmh
-药	tvmi
 薅	tvmi
+药	tvmi
 蔣	tvmi
 荮	tvmi
-薅	tvmiz
 𬝈	tvmj
 𦲚	tvmk
 𮎿	tvmk

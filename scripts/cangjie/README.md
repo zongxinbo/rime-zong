@@ -24,6 +24,8 @@ python scripts/cangjie/core/gen_shortcut_4.py
 - 一简：单独运行 `core/gen_shortcut_1.py` 生成校准表；生产构建只消费 `one_code.txt`，不自动重算
 - 简码总量：builder 口径含 `z_code` 字根码 31 个、一简 25 个、二简 150 个、三简 300 个，默认合计 `506` 个
 - 字根字：未被一简校准表选中的字根字不保留原生一简入口，统一经 `az/azz` 等 `z_code` 字根码输入
+- 全码排序：采用简码让位；已有简码字让位给同码且达到综合字频 `1000` 的无简码字，可用 `--fullcode-yield-min-score` 调整
+- 后缀选重：Sicang5/Wucang5 默认开启 `z` 后缀直达第二候选；如果第二候选已有首选简码，则不再补后缀
 
 ```powershell
 python scripts/cangjie/gen_wucang5.py
@@ -54,6 +56,13 @@ python scripts/cangjie/gen_wucang5.py --no-protect-native
 
 # 调整二简原生码位保护门槛
 python scripts/cangjie/gen_wucang5.py --s2-protect-native-min-score 100000
+
+# 调整全码简码让位的顶位门槛
+python scripts/cangjie/gen_wucang5.py --fullcode-yield-min-score 1000
+
+# 关闭或开启 z 后缀直达第二候选
+python scripts/cangjie/gen_wucang5.py --no-suffix-z
+python scripts/cangjie/gen_sicang5.py --no-suffix-z
 ```
 
 四简模式说明：

@@ -18,6 +18,7 @@ FREQ_PATHS = {
     "Essay": REPO_ROOT / "schemas/common/essay-zh-hans.txt"
 }
 FREQ_WEIGHTS = {"Dialogue": 6, "Subtlex": 5, "Zhihu": 4, "BLCU": 2, "Essay": 1}
+DEFAULT_FULLCODE_YIELD_MIN_SCORE = 1000
 
 def generate_dict(
     output_path: Path,
@@ -31,11 +32,13 @@ def generate_dict(
     min_phrase_weight: int = None,
     only_first_full_code: bool = False,
     char_freqs: dict[str, int] = None,
+    fullcode_yield_min_score: float = DEFAULT_FULLCODE_YIELD_MIN_SCORE,
+    suffix_z: bool = True,
 ):
     """生成最终字典。
 
-    支持 Z/S1/S2/S3/S4 简码层级。简码只在自身码位优先，不再让
-    该字的全码退避，避免用户按仓颉全码时被冷僻字顶到前面。
+    支持 Z/S1/S2/S3/S4 简码层级。简码只在自身码位优先；该字的
+    全码如果还有未获简码且达到常用门槛的重码字，则让出首选位，避免全码位被冷僻字顶上来。
     """
     print(f"正在解析原始仓颉编码: {source_dict}...")
     raw_entries = parse_cangjie_dict(source_dict)
@@ -97,53 +100,63 @@ def generate_dict(
     # 排序键设计：
     #   1. 按编码分组
     #   2. 简码条目优先（priority 0-4），然后全码
-    #   3. 同级内按字频降序
+    #   3. 全码层按字频降序，但已有简码的首选让位给未获简码且达到常用门槛的字
     all_entries = []
+    shortcut_chars = {char for char, _, priority in shortcut_entries if priority >= 1}
+    fullcode_order = build_fullcode_yield_order(
+        fullcode_entries,
+        shortcut_chars,
+        min_promote_score=fullcode_yield_min_score,
+    )
 
     for char, code, priority in shortcut_entries:
         freq = char_freqs.get(char, 0)
-        all_entries.append((code, priority, -freq, char))
+        all_entries.append((code, priority, 0, -freq, char))
 
     for char, code, freq in fullcode_entries:
-        all_entries.append((code, 5, -freq, char))
+        all_entries.append((code, 5, fullcode_order[(char, code)], -freq, char))
 
     all_entries.sort()
-
-    # ── 第四步：后缀消重（z=第二候选）──
-    # 对于重码组，给第2选生成 code+z
-    # 跳过加后缀后超过 max_code_length 的情况
-    code_groups = defaultdict(list)
-    for entry in all_entries:
-        code_groups[entry[0]].append(entry)
+    shortcut_leader_chars = build_shortcut_leader_chars(all_entries)
 
     suffix_entries = []
     suffix_count = 0
-    for code, entries in code_groups.items():
-        if code.startswith('z'):
-            continue
-        if len(code) >= max_code_length:
-            continue  # 加后缀会超长，跳过
+    if suffix_z:
+        # ── 第四步：后缀消重（z=第二候选）──
+        # 对于重码组，给第2选生成 code+z
+        # 跳过加后缀后超过 max_code_length 的情况
+        code_groups = defaultdict(list)
+        for entry in all_entries:
+            code_groups[entry[0]].append(entry)
 
-        # 取去重后的候选顺序（按排序后的先后）
-        # 每个 entry 格式: (code, tier, -freq, char)
-        seen_entries = []
-        seen_chars = set()
-        for entry in entries:
-            char = entry[3]
-            if char not in seen_chars:
-                seen_entries.append(entry)
-                seen_chars.add(char)
+        for code, entries in code_groups.items():
+            if code.startswith('z'):
+                continue
+            if len(code) >= max_code_length:
+                continue  # 加后缀会超长，跳过
 
-        # 第2选 → code+z
-        if len(seen_entries) >= 2:
-            entry2 = seen_entries[1]
-            char2 = entry2[3]
-            new_code_z = code + 'z'
-            if (char2, new_code_z) not in used_text_code:
-                freq2 = char_freqs.get(char2, 0)
-                suffix_entries.append((new_code_z, 1, -freq2, char2))
-                used_text_code.add((char2, new_code_z))
-                suffix_count += 1
+            # 取去重后的候选顺序（按排序后的先后）
+            # 每个 entry 格式: (code, tier, order, -freq, char)
+            seen_entries = []
+            seen_chars = set()
+            for entry in entries:
+                char = entry[4]
+                if char not in seen_chars:
+                    seen_entries.append(entry)
+                    seen_chars.add(char)
+
+            # 第2选 → code+z
+            if len(seen_entries) >= 2:
+                entry2 = seen_entries[1]
+                char2 = entry2[4]
+                if char2 in shortcut_leader_chars:
+                    continue
+                new_code_z = code + 'z'
+                if (char2, new_code_z) not in used_text_code:
+                    freq2 = char_freqs.get(char2, 0)
+                    suffix_entries.append((new_code_z, 1, 0, -freq2, char2))
+                    used_text_code.add((char2, new_code_z))
+                    suffix_count += 1
 
     all_entries.extend(suffix_entries)
     all_entries.sort()
@@ -170,7 +183,7 @@ def generate_dict(
         header_lines.extend(["...", ""])
         f.write("\n".join(header_lines) + "\n")
 
-        for code, tier, neg_freq, char in all_entries:
+        for code, tier, order, neg_freq, char in all_entries:
             f.write(f"{char}\t{code}\n")
 
     sc_count = len(shortcut_entries)
@@ -178,6 +191,7 @@ def generate_dict(
     print(
         f"完成：简码={sc_count} 全码={fc_count}"
         f" 后缀消重={suffix_count}"
+        f" 全码让位门槛={fullcode_yield_min_score:g}"
         f" 总计={len(all_entries)} 输出={output_path}"
     )
 
@@ -268,6 +282,59 @@ def project_code(code: str, max_code_length: int) -> str:
     if len(code) <= max_code_length:
         return code
     return code[:max_code_length-1] + code[-1]
+
+
+def build_fullcode_yield_order(
+    entries: list[tuple[str, str, int]],
+    shortcut_chars: set[str],
+    min_promote_score: float = DEFAULT_FULLCODE_YIELD_MIN_SCORE,
+) -> dict[tuple[str, str], int]:
+    """计算全码候选位次：有简码的首选让位给未获简码的常用字。
+
+    `entries` 元素为 (char, code, freq)。同码组先按字频降序排列；
+    如果首选字已有 S1/S2/S3/S4 简码，则把后面第一个没有简码且字频
+    达到 `min_promote_score` 的字提到首位。找不到这样的字就不动。
+    """
+
+    code_groups: dict[str, list[tuple[str, str, int]]] = defaultdict(list)
+    for entry in entries:
+        code_groups[entry[1]].append(entry)
+
+    order: dict[tuple[str, str], int] = {}
+    for group in code_groups.values():
+        yielded = sorted(group, key=lambda entry: (-entry[2], entry[0]))
+        if yielded and yielded[0][0] in shortcut_chars:
+            promoted_idx = -1
+            for index, entry in enumerate(yielded[1:], start=1):
+                if entry[0] not in shortcut_chars and entry[2] >= min_promote_score:
+                    promoted_idx = index
+                    break
+            if promoted_idx > 0:
+                promoted = yielded.pop(promoted_idx)
+                yielded.insert(0, promoted)
+
+        for rank, (char, code, _) in enumerate(yielded):
+            order[(char, code)] = rank
+    return order
+
+
+def build_shortcut_leader_chars(entries: list[tuple[str, int, int, int, str]]) -> set[str]:
+    """返回已经拥有首选简码入口的字。
+
+    后缀 `z` 是给第二候选补直达路。如果某字已经在任一简码位是
+    第一候选，再给它补第二候选后缀就是冗余路径。
+    """
+
+    leaders: set[str] = set()
+    code_groups: dict[str, list[tuple[str, int, int, int, str]]] = defaultdict(list)
+    for entry in entries:
+        code_groups[entry[0]].append(entry)
+
+    for group in code_groups.values():
+        first = group[0]
+        if first[1] < 5:
+            leaders.add(first[4])
+    return leaders
 
 
 def parse_cangjie_dict(path: Path) -> list[Entry]:
