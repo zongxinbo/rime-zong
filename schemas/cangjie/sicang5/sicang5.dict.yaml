@@ -2,7 +2,7 @@
 # 由 cangjie_builder.py 生成
 ---
 name: sicang5
-version: '2026-05-22'
+version: '2026-05-24'
 sort: by_weight
 ...
 
@@ -144,8 +144,8 @@ sort: by_weight
 𣈎	abkd
 𥀦	abke
 㬗	abkf
-晕	abkq
 晖	abkq
+晕	abkq
 𣌰	abks
 𫦱	abks
 暖	abm
@@ -1105,8 +1105,8 @@ sort: by_weight
 𮤔	anao
 𨵒	anat
 𨵷	anat
-晚	anau
 冕	anau
+晚	anau
 晩	anau
 䦘	anav
 䦪	anav
@@ -1926,12 +1926,11 @@ sort: by_weight
 𧢈	arbu
 𬢂	arbu
 𭫁	ard
-照	arf
 煦	arf
+照	arf
 𤋗	arf
 𤋜	arf
 𰟈	arf
-煦	arfz
 𭏏	arg
 𣇒	arhg
 𭤤	arhl
@@ -1969,8 +1968,8 @@ sort: by_weight
 𣅉	ashi
 𩳺	ashi
 昭	ashr
-晚	ashu
 冕	ashu
+晚	ashu
 𠕣	ashx
 𣋣	asit
 𭧿	asit
@@ -4228,8 +4227,8 @@ sort: by_weight
 𧳉	bhtt
 貓	bhtw
 𧳫	bhtw
-见	bhu
 冗	bhu
+见	bhu
 𧲠	bhu
 𣎯	bhua
 貒	bhub
@@ -4242,7 +4241,6 @@ sort: by_weight
 䑄	bhut
 膬	bhuu
 貀	bhuu
-冗	bhuz
 胝	bhvi
 𫆗	bhvl
 胍	bhvo
@@ -5241,8 +5239,8 @@ sort: by_weight
 赙	boii
 朎	boii
 𦜲	boii
-贼	boij
 贱	boij
+贼	boij
 贼	boik
 𰷫	boik
 䑎	boim
@@ -5303,8 +5301,8 @@ sort: by_weight
 𮲪	bomj
 𬥻	bomk
 朎	boml
-脸	bomm
 赋	bomm
+脸	bomm
 腧	bomn
 䏗	bomn
 𰢤	bomn
@@ -5411,8 +5409,8 @@ sort: by_weight
 𰷤	boyj
 𣥙	boym
 赅	boyo
-贴	boyr
 赔	boyr
+贴	boyr
 詧	boyr
 𦟋	boyr
 𬢯	boyr
@@ -13910,7 +13908,6 @@ sort: by_weight
 𱣸	dtys
 𣗄	dtyu
 𣒣	dtyv
-来	dtz
 想	du
 札	du
 杣	du
@@ -14657,8 +14654,8 @@ sort: by_weight
 沉	ebhn
 𬈒	ebhp
 𧗉	ebht
-观	ebhu
 沉	ebhu
+观	ebhu
 𤂚	ebhu
 𬢇	ebhu
 𤀊	ebhv
@@ -16627,8 +16624,8 @@ sort: by_weight
 𬇝	emcl
 𤄉	emcn
 𪶮	emcp
-酒	emcw
 洒	emcw
+酒	emcw
 𨠆	emcw
 汙	emd
 𤁋	emdm
@@ -27224,8 +27221,8 @@ sort: by_weight
 䅖	hdkv
 𨤕	hdkv
 𥝛	hdkz
-种	hdl
 秉	hdl
+种	hdl
 䇿	hdl
 𣏮	hdl
 䅢	hdlb
@@ -27272,7 +27269,6 @@ sort: by_weight
 𫁁	hdlw
 𰨻	hdlx
 𥟍	hdly
-秉	hdlz
 笨	hdm
 𥝍	hdm
 𫀧	hdm
@@ -35499,8 +35495,8 @@ sort: by_weight
 𬖄	hyhc
 𦩁	hyhd
 𮎇	hyhd
-般	hyhe
 艘	hyhe
+般	hyhe
 舨	hyhe
 𬜛	hyhe
 𬜜	hyhe
@@ -36220,8 +36216,8 @@ sort: by_weight
 䳸	ichf
 𪃰	ichf
 𪇵	ichf
-魔	ichi
 麽	ichi
+魔	ichi
 𪎒	ichi
 𢋪	ichk
 𪎑	ichn
@@ -36378,8 +36374,8 @@ sort: by_weight
 𩿯	idhf
 𪁱	idhf
 𢒹	idhh
-魔	idhi
 麽	idhi
+魔	idhi
 𣔗	idhi
 𪎒	idhi
 𰏷	idhi
@@ -37605,8 +37601,8 @@ sort: by_weight
 𱫳	ihrf
 𢈹	ihrj
 㢂	ihrr
-成	ihs
 庐	ihs
+成	ihs
 𢉞	ihsb
 𢧿	ihsb
 𣒷	ihsd
@@ -37616,7 +37612,6 @@ sort: by_weight
 𮍏	ihsl
 𱻣	ihsm
 廐	ihsu
-庐	ihsz
 允	ihu
 𢉐	ihuf
 廆	ihui
@@ -39350,8 +39345,8 @@ sort: by_weight
 𢩀	isbi
 𢨷	isbm
 扃	isbr
-盛	isbt
 扁	isbt
+盛	isbt
 𢩒	isbu
 肩	isbz
 𢨱	isci
@@ -39772,8 +39767,8 @@ sort: by_weight
 讬	ivhp
 𰶂	ivhp
 𬣺	ivhq
-话	ivhr
 诟	ivhr
+话	ivhr
 诰	ivhr
 𰈛	ivhr
 𰵤	ivhr
@@ -39958,8 +39953,8 @@ sort: by_weight
 诈	ivos
 诲	ivoy
 询	ivp
-询	ivpa
 谐	ivpa
+询	ivpa
 诣	ivpa
 谍	ivpd
 𫍙	ivpd
@@ -43760,8 +43755,8 @@ sort: by_weight
 𰙶	jtcm
 弿	jtcn
 𰍉	jtcn
-赛	jtco
 蹇	jtco
+赛	jtco
 䞿	jtco
 㥶	jtcp
 𢞝	jtcp
@@ -44202,8 +44197,8 @@ sort: by_weight
 𰣭	kavz
 𭼡	kawe
 𣂏	kayj
-有	kb
 冇	kb
+有	kb
 𡗚	kb
 𰣹	kbam
 𤷂	kbau
@@ -44294,8 +44289,8 @@ sort: by_weight
 㚗	kbmz
 郁	kbn
 𤶖	kbnd
-郁	kbnl
 郗	kbnl
+郁	kbnl
 郩	kbnl
 𨛼	kbnl
 𡙞	kbnm
@@ -44354,7 +44349,6 @@ sort: by_weight
 龓	kbyp
 𰳳	kbyv
 𰣤	kbyz
-冇	kbz
 㾣	kc
 𡗕	kc
 𡗜	kc
@@ -46149,10 +46143,9 @@ sort: by_weight
 錾	klc
 椠	kld
 𭼤	klde
-在	klg
 堑	klg
+在	klg
 𤹒	klgi
-堑	klgz
 𤼖	klii
 𰣿	klip
 𱱊	klis
@@ -46921,8 +46914,8 @@ sort: by_weight
 𮝳	kqyc
 辌	kqyf
 𰺝	kqyg
-较	kqyk
 辙	kqyk
+较	kqyk
 𫟦	kqyo
 𬨇	kqyo
 𧬓	kqyr
@@ -52762,8 +52755,8 @@ sort: by_weight
 霹	mbsj
 𫕝	mbsl
 𲉻	mbsl
-雪	mbsm
 翩	mbsm
+雪	mbsm
 翮	mbsm
 䨒	mbsm
 𦑅	mbsm
@@ -59664,8 +59657,8 @@ sort: by_weight
 㒬	mumg
 𥔊	mumg
 𰢢	mumn
-顾	mumo
 顽	mumo
+顾	mumo
 豗	mumo
 㒮	mumo
 𡯝	mumr
@@ -64989,7 +64982,6 @@ sort: by_weight
 𡖞	nnyr
 𥪷	nnyt
 𧙭	nnyv
-了	nnz
 𠄏	nnz
 𫸪	nnz
 𫸪	nnzz
@@ -65681,8 +65673,8 @@ sort: by_weight
 𮩞	nvgt
 饭	nvh
 𲋣	nvhd
-饭	nvhe
 馊	nvhe
+饭	nvhe
 饪	nvhg
 𫗮	nvhg
 饿	nvhi
@@ -65789,8 +65781,8 @@ sort: by_weight
 𫗠	nvpo
 𬲯	nvpr
 𬳀	nvpr
-饱	nvpu
 饨	nvpu
+饱	nvpu
 𲋩	nvqf
 馔	nvrc
 𬲬	nvrc
@@ -68353,8 +68345,8 @@ sort: by_weight
 慜	okpz
 伡	okq
 𦓫	okqd
-知	okr
 佑	okr
+知	okr
 𱳡	okra
 𠌳	okrb
 𬾿	okrb
@@ -68373,7 +68365,6 @@ sort: by_weight
 𧡐	okru
 𪓳	okru
 𰁱	okru
-佑	okrz
 仂	oks
 𭄞	oks
 𱐩	oks
@@ -75371,8 +75362,8 @@ sort: by_weight
 𭡓	qhlk
 𰔗	qhlk
 𢭣	qhll
-抓	qhlo
 掀	qhlo
+抓	qhlo
 𢴩	qhlq
 𢹱	qhlx
 折	qhm
@@ -78204,14 +78195,13 @@ sort: by_weight
 嚗	rate
 𠾝	ratk
 𡄗	ratr
-吧	rau
 邑	rau
+吧	rau
 𨚋	rauf
 𡃢	raum
 𡅜	raur
 𡄊	raut
 𮖄	rauv
-邑	rauz
 𨙨	rauz
 哏	rav
 𡀾	ravf
@@ -81660,8 +81650,8 @@ sort: by_weight
 𪢋	romo
 𫖲	romo
 𡀍	romp
-哈	romr
 啥	romr
+哈	romr
 哬	romr
 喩	romv
 吃	ron
@@ -82392,8 +82382,8 @@ sort: by_weight
 𤿱	rsle
 𠱸	rsll
 𠲬	rsll
-别	rsln
 別	rsln
+别	rsln
 㓵	rsln
 𭈨	rsln
 𭈌	rslo
@@ -87732,8 +87722,8 @@ sort: by_weight
 萤	tbli
 繭	tbli
 𧒤	tbli
-前	tbln
 蒯	tbln
+前	tbln
 𠞁	tbln
 𠞣	tbln
 𠞳	tbln
@@ -93427,8 +93417,8 @@ sort: by_weight
 莊	tvmg
 𮶳	tvmg
 𰱍	tvmh
-药	tvmi
 薅	tvmi
+药	tvmi
 蔣	tvmi
 荮	tvmi
 𬝈	tvmj
@@ -99461,8 +99451,8 @@ sort: by_weight
 𢑣	vmnk
 纼	vmnl
 𫄝	vmnl
-经	vmnm
 绉	vmnm
+经	vmnm
 纾	vmnn
 𫰞	vmnn
 𱺑	vmnn
@@ -104307,8 +104297,8 @@ sort: by_weight
 彰	yjhh
 𢒛	yjhh
 𨐦	yjhi
-辨	yjhj
 瓣	yjhj
+辨	yjhj
 𨐜	yjhj
 𩫪	yjhj
 𩫫	yjhj

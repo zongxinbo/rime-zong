@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent))
 
-from core.cangjie_builder import generate_dict, REPO_ROOT, get_weighted_frequencies
+from core.cangjie_builder import DEFAULT_FULLCODE_YIELD_MIN_SCORE, generate_dict, REPO_ROOT, get_weighted_frequencies
 from core.gen_shortcut_2 import generate_shortcut_2
 from core.gen_shortcut_3 import generate_shortcut_3
 
@@ -26,6 +26,8 @@ def main():
     parser.add_argument("--s3-coverage", type=float, default=0, help="三简：按累计字频覆盖率自动决定数量")
     parser.add_argument("--protect-native", action=argparse.BooleanOptionalAction, default=True, help="二简保护高频 GB2312 原生二码位，三简保护已有原生三码位")
     parser.add_argument("--s2-protect-native-min-score", type=float, default=100000, help="原生二码字达到该综合字频才受保护")
+    parser.add_argument("--fullcode-yield-min-score", type=float, default=DEFAULT_FULLCODE_YIELD_MIN_SCORE, help="全码简码让位：可顶位字的最低综合字频")
+    parser.add_argument("--suffix-z", action=argparse.BooleanOptionalAction, default=True, help="是否为无首选简码的第二候选生成 z 后缀直达码（默认开启）")
     parser.add_argument("--only-first-full-code", action=argparse.BooleanOptionalAction, default=False, help="仅取第一个全码（用于去重）")
     args = parser.parse_args()
 
@@ -69,6 +71,8 @@ def main():
         max_code_length=4,
         exclude_extended=args.exclude_extended,
         only_first_full_code=args.only_first_full_code,
+        fullcode_yield_min_score=args.fullcode_yield_min_score,
+        suffix_z=args.suffix_z,
     )
 
 if __name__ == "__main__":
