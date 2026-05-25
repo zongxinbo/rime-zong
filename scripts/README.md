@@ -4,11 +4,12 @@
 
 ## 生成三码 / 四码仓颉五代
 
-从 `schemas/cangjie/cangjie5/cangjie5.dict.yaml` 取码生成 `schemas/cangjie/sancang5/sancang5.dict.yaml`（三码）或 `schemas/cangjie/sicang5/sicang5.dict.yaml`（四码）：
+从 `schemas/cangjie/cangjie5/cangjie5.dict.yaml` 取码生成仓颉派生方案：
 
 ```powershell
 python scripts\cangjie\gen_sancang5.py
 python scripts\cangjie\gen_sicang5.py
+python scripts\cangjie\gen_wucang5.py
 ```
 
 常用选项：
@@ -21,11 +22,13 @@ python scripts\cangjie\gen_sancang5.py --include-phrases --generated-phrase-min-
 
 说明：
 
-- `gen_sicang5.py` 生成纯单字四码字典。`gen_sancang5.py` 默认生成带 `vocabulary` 的字典，按字频排序同码候选。
+- `gen_sicang5.py` 生成纯单字四码字典；`gen_wucang5.py` 生成纯单字五码字典；`gen_sancang5.py` 默认生成带 `vocabulary` 的字典，按字频排序同码候选。
+- Sicang5/Wucang5 默认共享二简、三简原型：二简 `300` 个、三简 `800` 个，候选池按 Rime 默认 `extended_charset=常用` 状态过滤。
+- `--protect-native-min-score` 默认 `100000`，同时控制二三简高频 GB2312 原生码位保护，以及长码候选入选的最低综合字频。
 - `--include-phrases` 会读取词频文件中的多字词，逐字取码并拼接成词语编码。
 - `--no-vocabulary` 不写入 Rime 的 `vocabulary`、`max_phrase_length`、`min_phrase_weight` 字段，适合生成更便携的单字码表。
 - `--generated-phrase-min-weight` 只影响脚本实际生成的词语，不影响 YAML 头部的 `min_phrase_weight` 字段。
-- 核心提取逻辑均封装在 `scripts\cangjie\cangjie_builder.py` 模块中。
+- 核心提取逻辑封装在 `scripts\cangjie\core\cangjie_builder.py` 模块中。
 
 脚本写正式 dict 时会先写临时文件，再替换目标文件，不会先删除原文件。
 

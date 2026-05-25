@@ -243,11 +243,32 @@ def is_han_char(text: str) -> bool:
     return any(start <= cp <= end for start, end in HAN_RANGES)
 
 
+def is_extended_cjk(text: str) -> bool:
+    """判断是否会被 librime 默认 charset_filter 视为扩展汉字。"""
+    if len(text) != 1:
+        return False
+    cp = ord(text)
+    return (
+        (0x3400 <= cp <= 0x4DBF) or    # CJK Unified Ideographs Extension A
+        (0x20000 <= cp <= 0x2A6DF) or  # CJK Unified Ideographs Extension B
+        (0x2A700 <= cp <= 0x2B73F) or  # CJK Unified Ideographs Extension C
+        (0x2B740 <= cp <= 0x2B81F) or  # CJK Unified Ideographs Extension D
+        (0x2B820 <= cp <= 0x2CEAF) or  # CJK Unified Ideographs Extension E
+        (0x2CEB0 <= cp <= 0x2EBEF) or  # CJK Unified Ideographs Extension F
+        (0x30000 <= cp <= 0x3134F) or  # CJK Unified Ideographs Extension G
+        (0x31350 <= cp <= 0x323AF) or  # CJK Unified Ideographs Extension H
+        (0x2EBF0 <= cp <= 0x2EE5F) or  # CJK Unified Ideographs Extension I
+        (0x323B0 <= cp <= 0x3347F) or  # CJK Unified Ideographs Extension J
+        (0xF900 <= cp <= 0xFAFF) or    # CJK Compatibility Ideographs
+        (0x2F800 <= cp <= 0x2FA1F)     # CJK Compatibility Ideographs Supplement
+    )
+
+
 def is_common_han_char(text: str) -> bool:
-    """判断是否为常用汉字（Rime 默认字符集，即基本多文种平面 BMP 内的汉字，排除 Ext-B 及以上的增广生僻字）"""
+    """判断是否为 Rime extended_charset 关闭时可见的常用汉字。"""
     if not is_han_char(text):
         return False
-    return ord(text) < 0x20000
+    return not is_extended_cjk(text)
 
 
 def gb2312_level(text: str) -> int | None:
