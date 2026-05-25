@@ -3,8 +3,8 @@
 Wucang5 生产构建脚本 (五码方案·纯单字流)
 
 流程：
-  1. 生成二简（空槽全占，GB2312 保护）
-  2. 生成三简（空槽全占，GB2312 保护，排除 S2 字）
+  1. 生成二简（常用字集空槽，高频 GB2312 原住民保护）
+  2. 生成三简（常用字集空槽，高频 GB2312 原住民保护，排除 S2 字）
   3. 可选生成四简（默认关闭，可显式启用 GB2312 五码字截断到四码）
   4. 调用 cangjie_builder 生成最终字典（位置降权排序）
 """
@@ -22,15 +22,15 @@ from core.gen_shortcut_4 import DEFAULT_LEVEL2_MIN_SCORE, generate_shortcut_4
 def main():
     parser = argparse.ArgumentParser(description="Wucang5 生产构建脚本 (五码方案·纯单字流)")
     parser.add_argument("--exclude-extended", action="store_true", default=False,
-                        help="过滤增广字集（Ext-B及以上）")
+                        help="过滤 Rime 默认 charset_filter 会隐藏的增广字集")
     parser.add_argument("--s2-prefix", action=argparse.BooleanOptionalAction, default=True, help="二简：提取规则取前两码（而非首尾码）")
-    parser.add_argument("--s2-count", type=int, default=150, help="二简：输出数量限制")
+    parser.add_argument("--s2-count", type=int, default=300, help="二简：输出数量限制")
     parser.add_argument("--s2-coverage", type=float, default=0, help="二简：按累计字频覆盖率自动决定数量")
     parser.add_argument("--s3-prefix", action=argparse.BooleanOptionalAction, default=True, help="三简：提取规则取前三码（而非前两码+末码）")
-    parser.add_argument("--s3-count", type=int, default=300, help="三简：固定输出数量")
+    parser.add_argument("--s3-count", type=int, default=800, help="三简：固定输出数量")
     parser.add_argument("--s3-coverage", type=float, default=0, help="三简：按累计字频覆盖率自动决定数量")
-    parser.add_argument("--protect-native", action=argparse.BooleanOptionalAction, default=True, help="二简保护高频 GB2312 原生二码位，三简保护已有原生三码位")
-    parser.add_argument("--s2-protect-native-min-score", type=float, default=100000, help="原生二码字达到该综合字频才受保护")
+    parser.add_argument("--protect-native", action=argparse.BooleanOptionalAction, default=True, help="保护高频 GB2312 原生二三码位")
+    parser.add_argument("--protect-native-min-score", type=float, default=100000, help="综合字频门槛：原生二三码字达到该值才受保护，长码字达到该值才可入选简码")
     parser.add_argument("--fullcode-yield-min-score", type=float, default=DEFAULT_FULLCODE_YIELD_MIN_SCORE, help="全码简码让位：可顶位字的最低综合字频")
     parser.add_argument("--suffix-z", action=argparse.BooleanOptionalAction, default=True, help="是否为无首选简码的第二候选生成 z 后缀直达码（默认开启）")
     parser.add_argument("--s4", action=argparse.BooleanOptionalAction, default=False, help="四简：是否生成 GB2312 五码字四简（默认关闭，可用 --s4 开启）")
@@ -55,7 +55,7 @@ def main():
         auto_coverage=args.s2_coverage,
         char_scores=char_scores,
         protect_native=args.protect_native,
-        protect_native_min_score=args.s2_protect_native_min_score
+        protect_native_min_score=args.protect_native_min_score
     )
 
     print("正在生成三简原型...")
@@ -64,7 +64,8 @@ def main():
         count=args.s3_count,
         auto_coverage=args.s3_coverage,
         char_scores=char_scores,
-        protect_native=args.protect_native
+        protect_native=args.protect_native,
+        protect_native_min_score=args.protect_native_min_score
     )
 
     shortcut_paths = {

@@ -17,12 +17,13 @@ python scripts/cangjie/core/gen_shortcut_4.py
 
 默认构建参数：
 
-- 二简：上限 `150` 个；默认保护高频 GB2312 原生二码位，保护门槛 `100000`
-- 三简：固定 `300` 个
+- 二简：上限 `300` 个；默认保护高频 GB2312 原生二码位，综合字频门槛 `100000`
+- 三简：固定 `800` 个；默认保护高频 GB2312 原生三码位，综合字频门槛 `100000`
+- 二简、三简候选池按 Rime 默认 `extended_charset=常用` 状态过滤；长码候选也需达到综合字频门槛才可入选
 - 四简：默认关闭，可用 `--s4` 开启 `balanced` 模式，给 GB2312 五码字生成四简
 - 四简数量：启用后默认上限 `1000` 个；GB2312 二级字需达到综合字频 `1000` 才可进入
 - 一简：单独运行 `core/gen_shortcut_1.py` 生成校准表；生产构建只消费 `one_code.txt`，不自动重算
-- 简码总量：builder 口径含 `z_code` 字根码 31 个、一简 25 个、二简 150 个、三简 300 个，默认合计 `506` 个
+- 简码总量：builder 口径含 `z_code` 字根码 31 个、一简 25 个、二简 300 个、三简 800 个，默认合计 `1156` 个
 - 字根字：未被一简校准表选中的字根字不保留原生一简入口，统一经 `az/azz` 等 `z_code` 字根码输入
 - 全码排序：采用简码让位；已有简码字让位给同码且达到综合字频 `1000` 的无简码字，可用 `--fullcode-yield-min-score` 调整
 - 后缀选重：Sicang5/Wucang5 默认开启 `z` 后缀直达第二候选；如果第二候选已有首选简码，则不再补后缀
@@ -54,8 +55,8 @@ python scripts/cangjie/gen_wucang5.py --s2-count 0 --s2-coverage 0.85 --s3-count
 # 关闭原生码位保护，恢复高频长码字抢二简/三简码位
 python scripts/cangjie/gen_wucang5.py --no-protect-native
 
-# 调整二简原生码位保护门槛
-python scripts/cangjie/gen_wucang5.py --s2-protect-native-min-score 100000
+# 调整二三简原生码位保护与长码候选入选门槛
+python scripts/cangjie/gen_wucang5.py --protect-native-min-score 100000
 
 # 调整全码简码让位的顶位门槛
 python scripts/cangjie/gen_wucang5.py --fullcode-yield-min-score 1000

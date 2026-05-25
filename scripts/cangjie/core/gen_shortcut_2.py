@@ -5,6 +5,8 @@ Wucang5 二简方案生成脚本
 1. 原生码位保护模式（默认）：保护高频 GB2312 原生二码字，其他原生二码位按净收益竞争。
 2. GB2312 保护模式 (gb_only=True): 仅 GB2312 汉字有资格，且仅占据空槽（无 GB2312 原主）。
 3. 关闭保护时：允许长码字与“原主字”(全码=2)竞争，按省码收益扣除原主代价后排序。
+
+`protect_native_min_score` 同时作为二简长码字最低入选得分，避免低频冷字填满尾部空槽。
 """
 
 import sys
@@ -18,7 +20,7 @@ from core.cangjie_builder import (
     parse_frequency_file,
     get_weighted_frequencies,
     is_gb2312,
-    is_han_char,
+    is_common_han_char,
     REPO_ROOT
 )
 
@@ -64,7 +66,7 @@ def generate_shortcut_2(
     raw_entries = parse_cangjie_dict(source_dict)
     char_codes = {}
     for e in raw_entries:
-        if not is_han_char(e.text) or e.code.startswith('z') or e.code.startswith('x'): continue
+        if not is_common_han_char(e.text) or e.code.startswith('z') or e.code.startswith('x'): continue
         if e.text in excluded_chars: continue
         # 记录每个字的最短编码
         if e.text not in char_codes or len(e.code) < len(char_codes[e.text]):
@@ -82,7 +84,7 @@ def generate_shortcut_2(
                     candidates_by_code[full_code]["orig"] = (char, score)
         elif len(full_code) > 2:
             score = char_scores.get(char, 0)
-            if score <= 0: continue
+            if score < protect_native_min_score: continue
             if gb_only and not is_gb2312(char): continue
             code2 = full_code[:2] if prefix else full_code[0] + full_code[-1]
             candidates_by_code[code2]["long"].append((char, score, len(full_code)))
@@ -154,7 +156,7 @@ def main():
     parser.add_argument("--protect-native", action=argparse.BooleanOptionalAction, default=True,
                         help="保护高频 GB2312 原生二码位，不让长码字抢位")
     parser.add_argument("--protect-native-min-score", type=float, default=100000,
-                        help="原生二码字达到该综合字频才受 --protect-native 保护")
+                        help="综合字频门槛：原生二码字达到该值才受保护，长码字达到该值才可入选二简")
     args = parser.parse_args()
     generate_shortcut_2(
         gb_only=args.gb_only,
