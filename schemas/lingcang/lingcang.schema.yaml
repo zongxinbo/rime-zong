@@ -33,6 +33,7 @@ engine:
     - ascii_composer
     - recognizer
     - key_binder
+    - lua_processor@*lingcang_auto_select
     - speller
     - punctuator
     - selector
@@ -59,7 +60,10 @@ speller:
   delimiter: " ;"
   max_code_length: 4
   auto_select: true
-  auto_select_pattern: "[bcdfghjklmnpqrstvwxyz]{4}|[bcdfghjklmnpqrstvwxyz]{1,3}[aeiou]"
+  auto_select_pattern: "[aeiou]|[bcdfghjklmnpqrstvwxyz]{1,3}[aeiou]|[bcdfghjklmnpqrstvwxyz]{4}"
+
+lingcang_auto_select:
+  commit_suffixes: aeiou
 
 translator:
   dictionary: lingcang

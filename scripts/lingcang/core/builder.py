@@ -13,15 +13,40 @@ from scripts.cangjie.core.cangjie_builder import (
 )
 
 from .mapping import EncodedChar, encode_lingcang
-from .paths import OUTPUT_DICT, REPORT_PATH, SOURCE_DICT
+from .paths import ONE_CODE_PATH, OUTPUT_DICT, REPORT_PATH, SOURCE_DICT, TWO_CODE_PATH
+
+
+def load_shortcuts(scores: dict[str, int]) -> list[EncodedChar]:
+    entries: list[EncodedChar] = []
+    for path, source_prefix in [(ONE_CODE_PATH, "S1"), (TWO_CODE_PATH, "S2")]:
+        if not path.exists():
+            continue
+        for line in path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            parts = line.split("\t")
+            if len(parts) < 2:
+                continue
+            text, code = parts[0], parts[1]
+            entries.append(
+                EncodedChar(
+                    text=text,
+                    source_code=f"{source_prefix}:{code}",
+                    code=code,
+                    weight=scores.get(text, 0),
+                )
+            )
+    return entries
 
 
 def build_entries(*, only_first_full_code: bool = False) -> list[EncodedChar]:
     scores = get_weighted_frequencies()
     raw_entries = parse_cangjie_dict(SOURCE_DICT)
 
+    shortcut_entries = load_shortcuts(scores)
     seen_chars: set[str] = set()
-    seen_text_code: set[tuple[str, str]] = set()
+    seen_text_code: set[tuple[str, str]] = {(entry.text, entry.code) for entry in shortcut_entries}
     entries: list[EncodedChar] = []
     skipped_prefix_code = 0
     skipped_unknown_code = 0
@@ -56,7 +81,9 @@ def build_entries(*, only_first_full_code: bool = False) -> list[EncodedChar]:
     entries.sort(key=lambda item: (item.code, -item.weight, item.source_code, item.text))
     build_entries.skipped_prefix_code = skipped_prefix_code
     build_entries.skipped_unknown_code = skipped_unknown_code
-    return entries
+    build_entries.shortcut_count = len(shortcut_entries)
+    build_entries.full_count = len(entries)
+    return shortcut_entries + entries
 
 
 def render_dict(entries: list[EncodedChar]) -> str:
@@ -220,6 +247,8 @@ def write_report(entries: list[EncodedChar]) -> None:
         "## 生成统计",
         "",
         f"- 总条目：{len(entries)}",
+        f"- 简码条目：{getattr(build_entries, 'shortcut_count', 0)}",
+        f"- 全码条目：{getattr(build_entries, 'full_count', len(entries))}",
         f"- 唯一码位：{len(code_groups)}",
         f"- 重码组：{len(collision_groups)}",
         f"- 最大候选数：{max_group}",

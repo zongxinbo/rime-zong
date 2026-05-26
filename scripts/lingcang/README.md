@@ -24,10 +24,25 @@
 
 | A 码 | 原仓颉字根 |
 | :--- | :--- |
-| `x` | 水、難 |
-| `y` | 戈、卜 |
-| `v` | 人、女 |
+| `c` | 金、人 |
+| `n` | 日、弓 |
 | `w` | 山、田 |
-| `z` | 日 |
+| `x` | 戈、難 |
+| `z` | 水 |
 
 其余非 B 区字根尽量保留原键。设计上需要把 25 个仓颉字根映射到 21 个非 B 区字母，因此至少合并 4 对字根。
+
+生成一简/二简原型：
+
+```powershell
+python scripts\lingcang\gen_shortcuts.py
+```
+
+默认按 `A 区 21 键 × B 区 5 键 - 25 个字根位` 自动生成 80 个二简码位。
+
+输出：
+
+```text
+scripts/lingcang/prototypes/one_code.txt
+scripts/lingcang/prototypes/two_code.txt
+```
