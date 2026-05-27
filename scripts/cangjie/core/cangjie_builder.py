@@ -10,6 +10,12 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+IDS_PATH = REPO_ROOT / "scripts" / "ids" / "ids.txt"
+
+# IDS 运算符集合
+_LR = set("⿰⿲")     # 左右 / 左中右
+_UD = set("⿱⿳")     # 上下 / 上中下
+_WRAP = set("⿴⿵⿶⿷⿸⿹⿺⿻")  # 包围 / 半包围
 FREQ_PATHS = {
     "Dialogue": REPO_ROOT / "schemas/common/frequency/char/sc/dialogue_char_freq.txt",
     "Subtlex": REPO_ROOT / "schemas/common/frequency/char/sc/subtlex_char_freq.txt",
@@ -34,6 +40,11 @@ def generate_dict(
     char_freqs: dict[str, int] = None,
     fullcode_yield_min_score: float = DEFAULT_FULLCODE_YIELD_MIN_SCORE,
     suffix_z: bool = True,
+    suffix_structure: bool = False,
+    suffix_structure_charset: str = "gbk",
+    suffix_structure_occupied_policy: str = "protect-min-score",
+    suffix_structure_protect_min_score: float = 100000,
+    suffix_structure_keymap: str = "zxwa",
 ):
     """生成最终字典。
 
@@ -162,6 +173,82 @@ def generate_dict(
     all_entries.sort()
     print(f"后缀消重：生成 {suffix_count} 个 z 后缀条目")
 
+    # ── 结构后缀消重 ──
+    structure_suffix_entries = []
+    structure_suffix_count = 0
+    if suffix_structure:
+        ids_structure = load_ids_structure_map()
+        if len(suffix_structure_keymap) != 4 or not suffix_structure_keymap.isascii() or not suffix_structure_keymap.islower():
+            raise ValueError("--suffix-structure-keymap 必须是 4 个小写 ASCII 字母")
+        key_translate = dict(zip("asdf", suffix_structure_keymap))
+        ids_structure = {
+            char: key_translate.get(suffix_key, suffix_key)
+            for char, suffix_key in ids_structure.items()
+        }
+
+        # 重建排序后的 code_groups
+        code_groups_struct = defaultdict(list)
+        for entry in all_entries:
+            code_groups_struct[entry[0]].append(entry)
+
+        occupied_codes = {entry[0] for entry in all_entries}
+        protected_codes: set[str] = set()
+        if suffix_structure_occupied_policy == "protect-min-score":
+            for code, entries in code_groups_struct.items():
+                first = entries[0]
+                first_char = first[4]
+                if first[1] < 5 or char_freqs.get(first_char, 0) >= suffix_structure_protect_min_score:
+                    protected_codes.add(code)
+        elif suffix_structure_occupied_policy != "skip-any":
+            raise ValueError("--suffix-structure-occupied-policy 只能是 skip-any 或 protect-min-score")
+
+        generated_structure_codes: set[str] = set()
+
+        for code, entries_in_group in code_groups_struct.items():
+            if code.startswith('z'):
+                continue
+            if len(code) >= max_code_length:
+                continue
+
+            seen_entries = []
+            seen_chars = set()
+            for entry in entries_in_group:
+                char = entry[4]
+                if char not in seen_chars:
+                    seen_entries.append(entry)
+                    seen_chars.add(char)
+
+            # 为第2候选及之后的字生成结构后缀
+            for entry in seen_entries[1:]:
+                char = entry[4]
+                if char in shortcut_leader_chars:
+                    continue
+                suffix_key = ids_structure.get(char)
+                if suffix_key is None:
+                    continue
+                if not suffix_structure_charset_allows(char, suffix_structure_charset):
+                    continue
+                new_code = code + suffix_key
+                # 结构后缀自身不互相制造新重码；对既有低频全码占用可按策略放行。
+                if new_code in generated_structure_codes:
+                    continue
+                if suffix_structure_occupied_policy == "skip-any" and new_code in occupied_codes:
+                    continue
+                if suffix_structure_occupied_policy == "protect-min-score" and new_code in protected_codes:
+                    continue
+                if (char, new_code) in used_text_code:
+                    continue
+                freq = char_freqs.get(char, 0)
+                structure_suffix_entries.append((new_code, 1, 0, -freq, char))
+                used_text_code.add((char, new_code))
+                occupied_codes.add(new_code)
+                generated_structure_codes.add(new_code)
+                structure_suffix_count += 1
+
+        all_entries.extend(structure_suffix_entries)
+        all_entries.sort()
+        print(f"结构后缀消重：生成 {structure_suffix_count} 个结构后缀条目")
+
     # ── 第五步：写入文件 ──
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w", encoding="utf-8", newline="\n") as f:
@@ -190,7 +277,7 @@ def generate_dict(
     fc_count = len(fullcode_entries)
     print(
         f"完成：简码={sc_count} 全码={fc_count}"
-        f" 后缀消重={suffix_count}"
+        f" z后缀={suffix_count} 结构后缀={structure_suffix_count}"
         f" 全码让位门槛={fullcode_yield_min_score:g}"
         f" 总计={len(all_entries)} 输出={output_path}"
     )
@@ -293,6 +380,26 @@ def gb2312_level(text: str) -> int | None:
 def is_gb2312(text: str) -> bool:
     """判断是否为 GB2312 汉字区内的汉字。"""
     return gb2312_level(text) is not None
+
+
+def is_gbk(text: str) -> bool:
+    """判断是否可用 GBK 编码。"""
+    try:
+        text.encode("gbk")
+    except UnicodeEncodeError:
+        return False
+    return True
+
+
+def suffix_structure_charset_allows(text: str, charset: str) -> bool:
+    """结构后缀候选字集过滤。"""
+    if charset == "all":
+        return True
+    if charset == "gbk":
+        return is_gbk(text)
+    if charset == "gb2312":
+        return is_gb2312(text)
+    raise ValueError("--suffix-structure-charset 只能是 all、gbk 或 gb2312")
 
 
 def is_han_text(text: str) -> bool:
@@ -437,6 +544,40 @@ def get_weighted_frequencies() -> dict[str, int]:
         else:
             print(f"Warning: Frequency file not found: {path}", file=sys.stderr)
     return char_scores
+
+
+def load_ids_structure_map(ids_path: Path = None) -> dict[str, str]:
+    """从 ids.txt 加载汉字结构映射：char -> suffix_key (a/s/d/f)。
+
+    键位固定为 asdf（全左手）：
+      a = 左右/左中右  s = 上下/上中下  d = 包围/半包围  f = 独体
+    """
+    if ids_path is None:
+        ids_path = IDS_PATH
+    mapping: dict[str, str] = {}
+    if not ids_path.exists():
+        print(f"Warning: IDS file not found: {ids_path}", file=sys.stderr)
+        return mapping
+    with open(ids_path, "r", encoding="utf-8") as f:
+        for line in f:
+            parts = line.strip().split()
+            if len(parts) < 3:
+                continue
+            char = parts[1]
+            ids = parts[2]
+            if len(char) != 1:
+                continue
+            first = ids[0] if ids else ""
+            if first in _LR:
+                mapping[char] = "a"
+            elif first in _UD:
+                mapping[char] = "s"
+            elif first in _WRAP:
+                mapping[char] = "d"
+            else:
+                mapping[char] = "f"
+    print(f"IDS 结构数据已加载：{len(mapping)} 字")
+    return mapping
 
 
 def normalize_prefixes(prefixes: list[str]) -> tuple[str, ...]:
