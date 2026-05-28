@@ -15,11 +15,16 @@ import argparse
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 from core.cangjie_builder import (
+    CANGJIE5_DICT_PATH,
+    FOUR_CODE_PATH,
+    ONE_CODE_PATH,
     parse_cangjie_dict,
     get_weighted_frequencies,
     gb2312_level,
     is_han_char,
-    REPO_ROOT
+    THREE_CODE_PATH,
+    TWO_CODE_PATH,
+    Z_CODE_PATH,
 )
 
 BALANCED_NATIVE4_RATIO = 3.0
@@ -29,8 +34,7 @@ DEFAULT_LEVEL2_MIN_SCORE = 1000
 def _load_excluded_chars() -> set[str]:
     """加载已经获得更短码的字，四简不再重复发放。"""
     excluded_chars = set()
-    for f_name in ["z_code.txt", "one_code.txt", "two_code.txt", "three_code.txt"]:
-        p = REPO_ROOT / "scripts/cangjie/prototypes" / f_name
+    for p in [Z_CODE_PATH, ONE_CODE_PATH, TWO_CODE_PATH, THREE_CODE_PATH]:
         if not p.exists():
             continue
         with open(p, "r", encoding="utf-8") as f:
@@ -47,8 +51,8 @@ def generate_shortcut_4(
     level2_min_score: int | float = DEFAULT_LEVEL2_MIN_SCORE,
     char_scores: dict[str, int | float] | None = None,
 ):
-    source_dict = REPO_ROOT / "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
-    output_path = REPO_ROOT / "scripts/cangjie/prototypes/four_code.txt"
+    source_dict = CANGJIE5_DICT_PATH
+    output_path = FOUR_CODE_PATH
 
     if mode not in {"safe", "balanced", "aggressive"}:
         raise ValueError(f"未知四简模式: {mode}")

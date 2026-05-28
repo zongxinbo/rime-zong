@@ -16,12 +16,16 @@ import argparse
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 from core.cangjie_builder import (
+    CANGJIE5_DICT_PATH,
+    ONE_CODE_PATH,
     parse_cangjie_dict,
     parse_frequency_file,
     get_weighted_frequencies,
     is_gb2312,
     is_common_han_char,
-    REPO_ROOT
+    THREE_CODE_PATH,
+    TWO_CODE_PATH,
+    Z_CODE_PATH,
 )
 
 NATIVE_3_PENALTY_RATIO = 1.2
@@ -31,8 +35,7 @@ def _load_excluded_chars_and_occupied_codes() -> tuple[set[str], set[str]]:
     """加载已有更短简码字，并保护同长度的既有码位。"""
     excluded_chars = set()
     occupied_codes = set()
-    for f_name in ["z_code.txt", "one_code.txt", "two_code.txt"]:
-        p = REPO_ROOT / "scripts/cangjie/prototypes" / f_name
+    for p in [Z_CODE_PATH, ONE_CODE_PATH, TWO_CODE_PATH]:
         if p.exists():
             with open(p, "r", encoding="utf-8") as f:
                 for line in f:
@@ -53,8 +56,8 @@ def generate_shortcut_3(
     protect_native: bool = True,
     protect_native_min_score: int | float = 100000,
 ):
-    source_dict = REPO_ROOT / "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
-    output_path = REPO_ROOT / "scripts/cangjie/prototypes/three_code.txt"
+    source_dict = CANGJIE5_DICT_PATH
+    output_path = THREE_CODE_PATH
 
     # 1. 排除名单 (z, 1, 2)，并保护既有三码简码位。
     excluded_chars, occupied_codes = _load_excluded_chars_and_occupied_codes()

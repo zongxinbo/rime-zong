@@ -14,7 +14,18 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent))
 
-from core.cangjie_builder import DEFAULT_FULLCODE_YIELD_MIN_SCORE, generate_dict, REPO_ROOT, get_weighted_frequencies
+from core.cangjie_builder import (
+    CANGJIE5_DICT_PATH,
+    DEFAULT_FULLCODE_YIELD_MIN_SCORE,
+    FOUR_CODE_PATH,
+    ONE_CODE_PATH,
+    THREE_CODE_PATH,
+    TWO_CODE_PATH,
+    WUCANG5_DICT_PATH,
+    Z_CODE_PATH,
+    generate_dict,
+    get_weighted_frequencies,
+)
 from core.gen_shortcut_2 import generate_shortcut_2
 from core.gen_shortcut_3 import generate_shortcut_3
 from core.gen_shortcut_4 import DEFAULT_LEVEL2_MIN_SCORE, generate_shortcut_4
@@ -69,10 +80,10 @@ def main():
     )
 
     shortcut_paths = {
-        1: REPO_ROOT / "scripts/cangjie/prototypes/one_code.txt",
-        2: REPO_ROOT / "scripts/cangjie/prototypes/two_code.txt",
-        3: REPO_ROOT / "scripts/cangjie/prototypes/three_code.txt",
-        'z': REPO_ROOT / "scripts/cangjie/prototypes/z_code.txt",
+        1: ONE_CODE_PATH,
+        2: TWO_CODE_PATH,
+        3: THREE_CODE_PATH,
+        'z': Z_CODE_PATH,
     }
     s4_count_text = "不限制" if args.s4_count == 0 else str(args.s4_count)
     s4_level2_text = "不过滤" if args.s4_level2_min_score == 0 else str(args.s4_level2_min_score)
@@ -84,23 +95,22 @@ def main():
             level2_min_score=args.s4_level2_min_score,
             char_scores=char_scores,
         )
-        shortcut_paths[4] = REPO_ROOT / "scripts/cangjie/prototypes/four_code.txt"
+        shortcut_paths[4] = FOUR_CODE_PATH
     else:
         print(f"四简未启用: 跳过生成（可用 --s4 开启；当前预设: 模式 {args.s4_mode} 数量限制 {s4_count_text} 二级字门槛 {s4_level2_text})")
         # 如果不使用四简，确保旧的原型文件不会被包含（如果它还存在的话）
-        p4 = REPO_ROOT / "scripts/cangjie/prototypes/four_code.txt"
-        if p4.exists():
-            p4.unlink()  # 删除旧的四简原型文件，防止误入字典
-            print(f"已删除旧四简原型文件: {p4}")
+        if FOUR_CODE_PATH.exists():
+            FOUR_CODE_PATH.unlink()  # 删除旧的四简原型文件，防止误入字典
+            print(f"已删除旧四简原型文件: {FOUR_CODE_PATH}")
         else:
             print("四简原型文件不存在，无需清理")
 
     print("=" * 50)
     print("正在构建最终字典...")
     generate_dict(
-        output_path=REPO_ROOT / "schemas/cangjie/wucang5/wucang5.dict.yaml",
+        output_path=WUCANG5_DICT_PATH,
         shortcut_paths=shortcut_paths,
-        source_dict=REPO_ROOT / "schemas/cangjie/cangjie5/cangjie5.dict.yaml",
+        source_dict=CANGJIE5_DICT_PATH,
         char_freqs=char_scores,
         max_code_length=5,
         exclude_extended=args.exclude_extended,

@@ -24,10 +24,12 @@ from collections import defaultdict
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 from core.cangjie_builder import (
+    CANGJIE5_DICT_PATH,
+    ONE_CODE_PATH,
+    ONE_CODE_REPORT_PATH,
     parse_cangjie_dict,
     parse_frequency_file,
     is_han_char,
-    REPO_ROOT,
     FREQ_PATHS,
     FREQ_WEIGHTS
 )
@@ -205,7 +207,7 @@ def get_final_version(char_codes, all_freqs, results):
 
 
 def main():
-    source = REPO_ROOT / "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
+    source = CANGJIE5_DICT_PATH
     freq_paths = FREQ_PATHS
 
     raw_entries = parse_cangjie_dict(source)
@@ -226,7 +228,7 @@ def main():
             print(f"Warning: {path} not found.")
 
     current_codes = {}
-    current_path = REPO_ROOT / "scripts/cangjie/prototypes/one_code.txt"
+    current_path = ONE_CODE_PATH
     if current_path.exists():
         with open(current_path, "r", encoding="utf-8") as f:
             for line in f:
@@ -243,7 +245,7 @@ def main():
         final_version, char_scores, protected_map = {}, {}, {}
         print("Error: Required Dialogue frequencies missing.")
 
-    output_path = REPO_ROOT / "scripts/cangjie/prototypes/one_code_report.md"
+    output_path = ONE_CODE_REPORT_PATH
     with open(output_path, "w", encoding="utf-8", newline="\n") as f:
         f.write("# 一简方案分配对比表\n\n")
         f.write("本表对比了：\n")
@@ -281,7 +283,7 @@ def main():
     print(f"对比结果已保存至: {output_path}")
 
     # 同时更新实际的一简方案文件
-    one_code_path = REPO_ROOT / "scripts/cangjie/prototypes/one_code.txt"
+    one_code_path = ONE_CODE_PATH
     with open(one_code_path, "w", encoding="utf-8", newline="\n") as f:
         f.write("# 一简\n")
         for letter in LETTERS:

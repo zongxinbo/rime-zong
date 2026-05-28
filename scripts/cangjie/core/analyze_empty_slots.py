@@ -8,15 +8,15 @@ import sys
 from pathlib import Path
 
 # 导入通用工具
-sys.path.append(str(Path(__file__).resolve().parent))
-from cangjie_builder import (
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from core.cangjie_builder import (
+    CANGJIE5_DICT_PATH,
     parse_cangjie_dict,
     is_han_char,
-    REPO_ROOT
 )
 
 def main():
-    source_dict = REPO_ROOT / "schemas/cangjie/cangjie5/cangjie5.dict.yaml"
+    source_dict = CANGJIE5_DICT_PATH
     
     print("正在解析原始仓颉编码...")
     entries = parse_cangjie_dict(source_dict)

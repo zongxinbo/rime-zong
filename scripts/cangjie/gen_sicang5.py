@@ -10,7 +10,17 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent))
 
-from core.cangjie_builder import DEFAULT_FULLCODE_YIELD_MIN_SCORE, generate_dict, REPO_ROOT, get_weighted_frequencies
+from core.cangjie_builder import (
+    CANGJIE5_DICT_PATH,
+    DEFAULT_FULLCODE_YIELD_MIN_SCORE,
+    ONE_CODE_PATH,
+    SICANG5_DICT_PATH,
+    THREE_CODE_PATH,
+    TWO_CODE_PATH,
+    Z_CODE_PATH,
+    generate_dict,
+    get_weighted_frequencies,
+)
 from core.gen_shortcut_2 import generate_shortcut_2
 from core.gen_shortcut_3 import generate_shortcut_3
 
@@ -69,14 +79,14 @@ def main():
     print("=" * 50)
     print("正在构建最终字典...")
     generate_dict(
-        output_path=REPO_ROOT / "schemas/cangjie/sicang5/sicang5.dict.yaml",
+        output_path=SICANG5_DICT_PATH,
         shortcut_paths={
-            1: REPO_ROOT / "scripts/cangjie/prototypes/one_code.txt",
-            2: REPO_ROOT / "scripts/cangjie/prototypes/two_code.txt",
-            3: REPO_ROOT / "scripts/cangjie/prototypes/three_code.txt",
-            'z': REPO_ROOT / "scripts/cangjie/prototypes/z_code.txt",
+            1: ONE_CODE_PATH,
+            2: TWO_CODE_PATH,
+            3: THREE_CODE_PATH,
+            'z': Z_CODE_PATH,
         },
-        source_dict=REPO_ROOT / "schemas/cangjie/cangjie5/cangjie5.dict.yaml",
+        source_dict=CANGJIE5_DICT_PATH,
         char_freqs=char_scores,
         max_code_length=4,
         exclude_extended=args.exclude_extended,
