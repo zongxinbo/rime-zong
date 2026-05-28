@@ -1,0 +1,100 @@
+from __future__ import annotations
+
+
+HAN_RANGES: tuple[tuple[int, int], ...] = (
+    (0x3400, 0x4DBF),
+    (0x4E00, 0x9FFF),
+    (0xF900, 0xFAFF),
+    (0x20000, 0x2A6DF),
+    (0x2A700, 0x2B739),
+    (0x2B740, 0x2B81D),
+    (0x2B820, 0x2CEA1),
+    (0x2CEB0, 0x2EBE0),
+    (0x2EBF0, 0x2EE5F),
+    (0x2F800, 0x2FA1F),
+    (0x30000, 0x3134A),
+    (0x31350, 0x323AF),
+)
+
+
+def is_han_char(text: str) -> bool:
+    if len(text) != 1:
+        return False
+    cp = ord(text)
+    return any(start <= cp <= end for start, end in HAN_RANGES)
+
+
+def is_extended_cjk(text: str) -> bool:
+    """判断是否会被 librime 默认 charset_filter 视为扩展汉字。"""
+    if len(text) != 1:
+        return False
+    cp = ord(text)
+    return (
+        (0x3400 <= cp <= 0x4DBF)
+        or (0x20000 <= cp <= 0x2A6DF)
+        or (0x2A700 <= cp <= 0x2B73F)
+        or (0x2B740 <= cp <= 0x2B81F)
+        or (0x2B820 <= cp <= 0x2CEAF)
+        or (0x2CEB0 <= cp <= 0x2EBEF)
+        or (0x30000 <= cp <= 0x3134F)
+        or (0x31350 <= cp <= 0x323AF)
+        or (0x2EBF0 <= cp <= 0x2EE5F)
+        or (0x323B0 <= cp <= 0x3347F)
+        or (0xF900 <= cp <= 0xFAFF)
+        or (0x2F800 <= cp <= 0x2FA1F)
+    )
+
+
+def is_common_han_char(text: str) -> bool:
+    """判断是否为 Rime extended_charset 关闭时可见的常用汉字。"""
+    if not is_han_char(text):
+        return False
+    return not is_extended_cjk(text)
+
+
+def gb2312_level(text: str) -> int | None:
+    """返回 GB2312 汉字级别：1=一级字，2=二级字，None=非 GB2312 汉字。"""
+    if len(text) != 1 or not ("\u4e00" <= text <= "\u9fa5"):
+        return None
+    try:
+        encoded = text.encode("gb2312")
+    except UnicodeEncodeError:
+        return None
+    if len(encoded) != 2:
+        return None
+
+    row = encoded[0] - 0xA0
+    if 16 <= row <= 55:
+        return 1
+    if 56 <= row <= 87:
+        return 2
+    return None
+
+
+def is_gb2312(text: str) -> bool:
+    """判断是否为 GB2312 汉字区内的汉字。"""
+    return gb2312_level(text) is not None
+
+
+def is_gbk(text: str) -> bool:
+    """判断是否可用 GBK 编码。"""
+    try:
+        text.encode("gbk")
+    except UnicodeEncodeError:
+        return False
+    return True
+
+
+def suffix_structure_charset_allows(text: str, charset: str) -> bool:
+    """结构后缀候选字集过滤。"""
+    if charset == "all":
+        return True
+    if charset == "gbk":
+        return is_gbk(text)
+    if charset == "gb2312":
+        return is_gb2312(text)
+    raise ValueError("--suffix-structure-charset 只能是 all、gbk 或 gb2312")
+
+
+def is_han_text(text: str) -> bool:
+    return bool(text) and all(is_han_char(char) for char in text)
