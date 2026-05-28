@@ -34,13 +34,13 @@ from core.cangjie_builder import (
     FREQ_WEIGHTS
 )
 
-LETTERS = "abcdefghijklmnopqrstuvwxy"
+LETTERS = "abcdefghijklmnopqrstuvwxyz"
 
 ORIGINAL_RADICALS = {
     'a': '日', 'b': '月', 'c': '金', 'd': '木', 'e': '水', 'f': '火', 'g': '土',
     'h': '竹', 'i': '戈', 'j': '十', 'k': '大', 'l': '中', 'm': '一', 'n': '弓',
     'o': '人', 'p': '心', 'q': '手', 'r': '口', 's': '尸', 't': '廿', 'u': '山',
-    'v': '女', 'w': '田', 'x': '难', 'y': '卜'
+    'v': '女', 'w': '田', 'x': '难', 'y': '卜', 'z': '重'
 }
 
 
@@ -48,6 +48,7 @@ def get_one_codes(freq_path, char_codes, chars_by_freq, frequencies):
     """纯算法：基于单一字频表，通过阶梯权重机制为每个键位分配一简字。"""
     one_codes = {}
     used_chars = set()
+    char_ranks = {char: rank for rank, char in enumerate(chars_by_freq, start=1)}
 
     for letter in LETTERS:
         orig_char = ORIGINAL_RADICALS.get(letter)
@@ -60,7 +61,7 @@ def get_one_codes(freq_path, char_codes, chars_by_freq, frequencies):
         for char in chars_by_freq:
             if char in used_chars or char == orig_char:
                 continue
-            char_rank = chars_by_freq.index(char) + 1
+            char_rank = char_ranks[char]
             is_start = False
             for code in char_codes[char]:
                 if code.startswith(letter):
@@ -78,7 +79,7 @@ def get_one_codes(freq_path, char_codes, chars_by_freq, frequencies):
         for char in chars_by_freq:
             if char in used_chars or char == orig_char or char == best_char:
                 continue
-            char_rank = chars_by_freq.index(char) + 1
+            char_rank = char_ranks[char]
             if char_rank > 100:
                 break
             is_contained = False
@@ -282,15 +283,7 @@ def main():
             f.write(f"| {key} | {char} | {code} | {int(score)} | {int(benefit)} | {notes[key]} |\n")
     print(f"对比结果已保存至: {output_path}")
 
-    # 同时更新实际的一简方案文件
-    one_code_path = ONE_CODE_PATH
-    with open(one_code_path, "w", encoding="utf-8", newline="\n") as f:
-        f.write("# 一简\n")
-        for letter in LETTERS:
-            elite = final_version.get(letter, "")
-            if elite:
-                f.write(f"{elite}\t{letter}\n")
-    print(f"一简方案已更新: {one_code_path}")
+    print("一简方案原型不自动更新；如需定稿，请人工修改 one_code.txt")
 
 
 if __name__ == "__main__":
