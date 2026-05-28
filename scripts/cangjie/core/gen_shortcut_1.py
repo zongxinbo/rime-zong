@@ -1,288 +1,503 @@
 """
-Sicang5 一简（One-Code）方案设计脚本
+一简（One-Code）方案设计脚本。
 
-本脚本用于对比不同字频表下的一简分配方案，并生成建议稿。
+本脚本只生成设计报告，不自动覆盖 `one_code.txt`。一简属于人工定稿层：
+算法负责给出候选、收益和替换理由，最终是否采用由人工确认。
 
-算法核心逻辑：
-1. get_one_codes (纯算法):
-   - 基于单一语料库（字频表）计算。
-   - Tier 1 (StartsWith): 优先寻找以该字母开头的最高频汉字。
-   - Tier 2 (Contains): 如果 Top 100 高频字中存在包含该字母的字，且频次超过首码匹配字的 1.8 倍，则允许抢位。
-
-2. get_final_version (最终版):
-   - 以“Dialogue”（口语语料）为基底，确保口语常用字绝对优先。
-   - 权重分配: Dialogue(6), Subtlex(5), Zhihu(4), BLCU(2), Essay(1)。
-   - 修正机制：
-     a) 加权修正: 若任一其他语料推荐的字，其加权总分超过基底字的倍数阈值，则修正。
-     b) 首码保护: 若基底字是首码匹配而修正字不是，则需 2.5 倍频次差才允许替换；否则为 1.2 倍。
-     c) 校准保护: 对低收益两码字抢高价值字根位的情况，按频率倍数、省码收益和字根位代价人工校准。
+当前策略：
+1. 频率权重使用简繁平衡 sc60/tc40：
+   - 知乎 33%，北语 27%，台标 22%，古籍 18%。
+2. 普通位先出，`x/z` 只有带参数时才追加到报告末尾：
+   - 字根字/首码匹配优先，高频且全码包含该键时允许作为跨位候选；
+   - 普通简码难覆盖的长码字会加权；
+   - 当前码长为 2、同码候选数 >= 3、且不是首选的字会加权。
+3. 简码可得性只看 Cangjie5 源码表：
+   - 如果候选字的二码/三码前缀被源码表中的高频原生字占据，说明普通简码更难抢到；
+   - 这类字在同频率、同省键收益下优先级更高。
 """
 
+from __future__ import annotations
+
 import sys
-from pathlib import Path
 from collections import defaultdict
+from dataclasses import dataclass
+from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 from core.cangjie_builder import (
+    BLCU_CHAR_FREQ_PATH,
     CANGJIE5_DICT_PATH,
+    GUJI_CHAR_FREQ_PATH,
     ONE_CODE_PATH,
     ONE_CODE_REPORT_PATH,
+    TAIWAN_CHAR_FREQ_PATH,
+    ZHIHU_CHAR_FREQ_PATH,
+    is_han_char,
     parse_cangjie_dict,
     parse_frequency_file,
-    is_han_char,
-    FREQ_PATHS,
-    FREQ_WEIGHTS
 )
 
-LETTERS = "abcdefghijklmnopqrstuvwxyz"
+
+DEFAULT_LETTERS = "abcdefghijklmnopqrstuvwy"
+SPECIAL_LETTERS = "xz"
+TOP_CANDIDATES_PER_KEY = 8
 
 ORIGINAL_RADICALS = {
-    'a': '日', 'b': '月', 'c': '金', 'd': '木', 'e': '水', 'f': '火', 'g': '土',
-    'h': '竹', 'i': '戈', 'j': '十', 'k': '大', 'l': '中', 'm': '一', 'n': '弓',
-    'o': '人', 'p': '心', 'q': '手', 'r': '口', 's': '尸', 't': '廿', 'u': '山',
-    'v': '女', 'w': '田', 'x': '难', 'y': '卜', 'z': '重'
+    "a": "日", "b": "月", "c": "金", "d": "木", "e": "水", "f": "火", "g": "土",
+    "h": "竹", "i": "戈", "j": "十", "k": "大", "l": "中", "m": "一", "n": "弓",
+    "o": "人", "p": "心", "q": "手", "r": "口", "s": "尸", "t": "廿", "u": "山",
+    "v": "女", "w": "田", "x": "难", "y": "卜", "z": "重",
+}
+
+FREQ_SOURCES = {
+    "Zhihu": ZHIHU_CHAR_FREQ_PATH,
+    "BLCU": BLCU_CHAR_FREQ_PATH,
+    "Taiwan": TAIWAN_CHAR_FREQ_PATH,
+    "Guji": GUJI_CHAR_FREQ_PATH,
+}
+
+FREQ_WEIGHTS_SC60 = {
+    "Zhihu": 0.33,
+    "BLCU": 0.27,
+    "Taiwan": 0.22,
+    "Guji": 0.18,
 }
 
 
-def get_one_codes(freq_path, char_codes, chars_by_freq, frequencies):
-    """纯算法：基于单一字频表，通过阶梯权重机制为每个键位分配一简字。"""
-    one_codes = {}
-    used_chars = set()
-    char_ranks = {char: rank for rank, char in enumerate(chars_by_freq, start=1)}
-
-    for letter in LETTERS:
-        orig_char = ORIGINAL_RADICALS.get(letter)
-        orig_freq = frequencies.get(orig_char, 0) if orig_char else 0
-
-        best_char = orig_char
-        current_threshold = orig_freq * 1.5
-
-        # Tier 1: StartsWith — 寻找首码匹配的最高频字
-        for char in chars_by_freq:
-            if char in used_chars or char == orig_char:
-                continue
-            char_rank = char_ranks[char]
-            is_start = False
-            for code in char_codes[char]:
-                if code.startswith(letter):
-                    if len(code) <= 3 or char_rank <= 100:
-                        is_start = True
-                        break
-            if is_start:
-                char_freq = frequencies.get(char, 0)
-                if char_freq > current_threshold:
-                    best_char = char
-                    current_threshold = char_freq
-                break
-
-        # Tier 2: Contains (Top 100) — 允许包含该字母的超高频字跨级抢位
-        for char in chars_by_freq:
-            if char in used_chars or char == orig_char or char == best_char:
-                continue
-            char_rank = char_ranks[char]
-            if char_rank > 100:
-                break
-            is_contained = False
-            for code in char_codes[char]:
-                if letter in code:
-                    if len(code) <= 3 or char_rank <= 100:
-                        is_contained = True
-                        break
-            if is_contained:
-                char_freq = frequencies.get(char, 0)
-                if char_freq > current_threshold * 1.8:
-                    best_char = char
-                    current_threshold = char_freq
-                break
-
-        if best_char:
-            one_codes[letter] = best_char
-            used_chars.add(best_char)
-    return one_codes
+@dataclass(frozen=True)
+class Candidate:
+    text: str
+    code: str
+    score: float
+    base_score: float
+    saved_keys: int
+    kind: str
+    note: str
+    blockage: str
 
 
-def get_shortest_code(char_codes, char):
-    codes = char_codes.get(char, [])
+def load_current_one_codes() -> dict[str, str]:
+    current: dict[str, str] = {}
+    if not ONE_CODE_PATH.exists():
+        return current
+    for line in ONE_CODE_PATH.read_text(encoding="utf-8").splitlines():
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split("\t")
+        if len(parts) == 2:
+            current[parts[1]] = parts[0]
+    return current
+
+
+def load_scores() -> tuple[dict[str, float], dict[str, dict[str, float]]]:
+    normalized: dict[str, dict[str, float]] = {}
+    for name, path in FREQ_SOURCES.items():
+        raw, _ = parse_frequency_file(path)
+        total = sum(raw.values())
+        normalized[name] = {
+            text: value / total
+            for text, value in raw.items()
+            if total and is_han_char(text)
+        }
+
+    scores: dict[str, float] = defaultdict(float)
+    for name, freqs in normalized.items():
+        weight = FREQ_WEIGHTS_SC60[name]
+        for text, value in freqs.items():
+            scores[text] += value * weight
+    return dict(scores), normalized
+
+
+def build_code_maps() -> tuple[dict[str, list[str]], dict[str, list[str]]]:
+    char_codes: dict[str, list[str]] = defaultdict(list)
+    code_chars: dict[str, list[str]] = defaultdict(list)
+    for entry in parse_cangjie_dict(CANGJIE5_DICT_PATH):
+        if not is_han_char(entry.text) or entry.code.startswith(("x", "z")):
+            continue
+        char_codes[entry.text].append(entry.code)
+        if entry.text not in code_chars[entry.code]:
+            code_chars[entry.code].append(entry.text)
+    return char_codes, code_chars
+
+
+def shortest_code(char_codes: dict[str, list[str]], text: str) -> str:
+    codes = char_codes.get(text, [])
     if not codes:
         return ""
     return min(codes, key=lambda code: (len(code), code))
 
 
-def get_score(char_scores, char):
-    return char_scores.get(char, 0)
+def code_position(code_chars: dict[str, list[str]], text: str, code: str) -> int:
+    chars = code_chars.get(code, [])
+    if text not in chars:
+        return 0
+    return chars.index(text) + 1
 
 
-def one_code_benefit(char_scores, char_codes, char):
-    code = get_shortest_code(char_codes, char)
-    return get_score(char_scores, char) * max(len(code) - 1, 0)
+def prefix_blockage(
+    text: str,
+    code: str,
+    code_chars: dict[str, list[str]],
+    scores: dict[str, float],
+) -> tuple[float, str]:
+    """基于 Cangjie5 源码表判断普通二三简是否容易被原生字占据。"""
+    blocks: list[str] = []
+    factor = 1.0
+    text_score = scores.get(text, 0.0)
 
-
-def apply_protected_map(elite, protected_map, char_codes):
-    """把明确校准位写入 elite，并保证同字只出现一次。"""
-    for key, value in protected_map.items():
-        if value not in char_codes:
+    for prefix_len in (2, 3):
+        if len(code) <= prefix_len:
             continue
-        old_key = next((k for k, v in elite.items() if v == value), None)
-        if old_key:
-            elite.pop(old_key)
-        elite[key] = value
-    return elite
+        prefix = code[:prefix_len]
+        chars = code_chars.get(prefix, [])
+        if not chars:
+            continue
+        native = chars[0]
+        if native == text:
+            continue
+        native_score = scores.get(native, 0.0)
+        # 源码表中的原生字只要有实际频率，就会增加普通简码抢位难度；
+        # 放大强度再按相对频率缩放，避免冷字占位过度影响排序。
+        if native_score > 0:
+            blocks.append(f"{prefix}:{native}")
+            relative = min(max(native_score / max(text_score, 1e-12), 0.20), 1.50)
+            base = 0.28 if prefix_len == 2 else 0.18
+            factor += base * relative
+
+    return factor, "；".join(blocks)
 
 
-def get_final_version(char_codes, all_freqs, results):
-    """最终版：以口语语料（Dialogue）为基底，利用多源加权总分进行修正。"""
-
-    weights = FREQ_WEIGHTS
-
-    char_scores = {}
-    for char in char_codes:
-        score = sum(all_freqs[src].get(char, 0) * w for src, w in weights.items() if src in all_freqs)
-        if score > 0:
-            char_scores[char] = score
-
-    # 强制保护/优先分配。
-    # g/l/p/r 是按“频率倍数 + 省码收益 + 字根位代价”从原表校准：
-    #   g: 去 -> 地；l: 个 -> 中；p: 也 -> 心；r: 只 -> 和。
-    protected_map = {
-        'a': '是', 'd': '来', 't': '着', 'g': '地',
-        'k': '在', 'f': '你', 'h': '的', 'i': '我',
-        'l': '中', 'm': '一', 'o': '人', 'p': '心',
-        'r': '和', 'v': '好', 'x': '以'
+def build_rank(scores: dict[str, float]) -> dict[str, int]:
+    return {
+        text: rank
+        for rank, text in enumerate(sorted(scores, key=scores.get, reverse=True), start=1)
     }
 
-    # 默认以最高权重的纯口语语料结果为基底
-    elite = dict(results["Dialogue"])
-    elite = apply_protected_map(elite, protected_map, char_codes)
 
-    used_chars = set(elite.values())
+def shortcut_pressure(
+    text: str,
+    code: str,
+    code_chars: dict[str, list[str]],
+) -> tuple[float, str]:
+    if len(code) > 3:
+        return 1.18, "长码普通简码压力"
+    if len(code) == 2:
+        group = code_chars.get(code, [])
+        pos = code_position(code_chars, text, code)
+        if len(group) >= 3 and pos >= 2:
+            factor = 1.14 if pos >= 3 else 1.08
+            return factor, f"{code} 第 {pos}/{len(group)} 候选"
+    return 1.0, ""
 
-    # 综合得分修正
-    for letter in LETTERS:
-        # 保护位不参与被抢占
-        if letter in protected_map:
+
+def one_key_candidates(
+    letter: str,
+    char_codes: dict[str, list[str]],
+    scores: dict[str, float],
+    used_chars: set[str],
+    excluded_chars: set[str],
+    ranks: dict[str, int],
+    current_text: str,
+    code_chars: dict[str, list[str]],
+    *,
+    allow_current: bool,
+) -> list[Candidate]:
+    candidates: list[Candidate] = []
+    radical = ORIGINAL_RADICALS.get(letter)
+
+    for text, codes in char_codes.items():
+        if text in excluded_chars or (text in used_chars and text != current_text):
+            continue
+        base = scores.get(text, 0.0)
+        if base <= 0:
             continue
 
-        base_char = elite.get(letter, "")
-        base_score = char_scores.get(base_char, 0)
+        code = shortest_code(char_codes, text)
+        if not code:
+            continue
 
-        candidates = set()
-        for src, res in results.items():
-            c = res.get(letter, "")
-            # 过滤掉一些不适合做一简的语气词（可选）
-            if c == '哈' and letter == 'r':
-                continue
-            if c and c != base_char and c not in protected_map.values():
-                candidates.add(c)
-
-        for cand in sorted(candidates, key=lambda c: char_scores.get(c, 0), reverse=True):
-            cand_score = char_scores.get(cand, 0)
-
-            base_starts = any(code.startswith(letter) for code in char_codes.get(base_char, []))
-            cand_starts = any(code.startswith(letter) for code in char_codes.get(cand, []))
-
-            threshold = 1.2 if (cand_starts or not base_starts) else 2.5
-
-            if cand_score > base_score * threshold:
-                if cand not in used_chars:
-                    used_chars.discard(base_char)
-                    elite[letter] = cand
-                    used_chars.add(cand)
-                    break
-                else:
-                    # 换位逻辑：增加有效性检查
-                    other_key = next((k for k, v in elite.items() if v == cand), None)
-                    if other_key and other_key not in protected_map:
-                        # 检查 base_char 是否能放在 other_key
-                        base_valid_for_other = False
-                        for code in char_codes.get(base_char, []):
-                            if other_key in code:
-                                base_valid_for_other = True
-                                break
-
-                        if base_valid_for_other:
-                            elite[letter] = cand
-                            elite[other_key] = base_char
-                            break
-
-    return elite, char_scores, protected_map
-
-
-def main():
-    source = CANGJIE5_DICT_PATH
-    freq_paths = FREQ_PATHS
-
-    raw_entries = parse_cangjie_dict(source)
-    char_codes = defaultdict(list)
-    for entry in raw_entries:
-        if is_han_char(entry.text) and not entry.code.startswith('z'):
-            char_codes[entry.text].append(entry.code)
-
-    results = {}
-    all_freqs = {}
-    for name, path in freq_paths.items():
-        if path.exists():
-            freqs, _ = parse_frequency_file(path)
-            all_freqs[name] = freqs
-            chars_by_freq = sorted(char_codes.keys(), key=lambda c: freqs.get(c, 0), reverse=True)
-            results[name] = get_one_codes(path, char_codes, chars_by_freq, freqs)
+        starts = any(item.startswith(letter) for item in codes)
+        ends = any(item.endswith(letter) for item in codes)
+        contains = any(letter in item for item in codes)
+        is_radical = text == radical
+        is_current = allow_current and text == current_text
+        saved = max(len(code) - 1, 0)
+        pressure_factor, pressure_note = shortcut_pressure(text, code, code_chars)
+        if is_current:
+            kind = "当前"
+            anchor_factor = 1.12
+            note = "当前人工定稿"
+        elif is_radical:
+            kind = "字根"
+            anchor_factor = 1.30
+            note = "键名字根"
+        elif starts or ends:
+            kind = "首码" if starts else "末码"
+            anchor_factor = 1.15
+            note = "全码首/末键匹配"
+        elif contains and ranks.get(text, 999999) <= 120:
+            kind = "包含"
+            anchor_factor = 0.72
+            note = "高频跨位，编码含该键"
         else:
-            print(f"Warning: {path} not found.")
+            continue
 
-    current_codes = {}
-    current_path = ONE_CODE_PATH
-    if current_path.exists():
-        with open(current_path, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if not line or line.startswith("#"):
-                    continue
-                parts = line.split("\t")
-                if len(parts) == 2:
-                    current_codes[parts[1]] = parts[0]
+        saved_factor = max(saved, 1)
+        blockage_factor, blockage = prefix_blockage(text, code, code_chars, scores)
+        note_parts = [note]
+        if pressure_note:
+            note_parts.append(pressure_note)
+        candidates.append(
+            Candidate(
+                text=text,
+                code=code,
+                score=base * saved_factor * anchor_factor * blockage_factor * pressure_factor,
+                base_score=base,
+                saved_keys=saved,
+                kind=kind,
+                note="；".join(note_parts),
+                blockage=blockage,
+            )
+        )
 
-    if "Dialogue" in results:
-        final_version, char_scores, protected_map = get_final_version(char_codes, all_freqs, results)
-    else:
-        final_version, char_scores, protected_map = {}, {}, {}
-        print("Error: Required Dialogue frequencies missing.")
+    candidates.sort(key=lambda item: (-item.score, item.code, item.text))
+    top = candidates[:TOP_CANDIDATES_PER_KEY]
+    if current_text and all(item.text != current_text for item in top):
+        current = next((item for item in candidates if item.text == current_text), None)
+        if current is not None:
+            top = top[:-1] + [current]
+    return top
 
-    output_path = ONE_CODE_REPORT_PATH
-    with open(output_path, "w", encoding="utf-8", newline="\n") as f:
-        f.write("# 一简方案分配对比表\n\n")
-        f.write("本表对比了：\n")
-        f.write("1. **纯算法**：基于五份字频表各自独立计算。\n")
-        f.write("2. **当前正式版**：当前使用的校准方案。\n")
-        f.write("3. **最终版**：以最高权重的口语语料(Dialogue)为基底，当其他语料出现综合加权更高分的字时触发自动修正，支持换位策略。\n\n")
 
-        f.write("| 键位 | Dialogue (纯算法) | Subtlex (纯算法) | Zhihu (纯算法) | BLCU (纯算法) | Essay (纯算法) | 当前正式版 | **最终版** |\n")
-        f.write("|---|---|---|---|---|---|---|---|\n")
-        for letter in LETTERS:
-            d = results.get("Dialogue", {}).get(letter, "")
-            s = results.get("Subtlex", {}).get(letter, "")
-            z = results.get("Zhihu", {}).get(letter, "")
-            b = results.get("BLCU", {}).get(letter, "")
-            e = results.get("Essay", {}).get(letter, "")
-            curr = current_codes.get(letter, "")
-            elite = final_version.get(letter, "")
-            f.write(f"| {letter} | {d} | {s} | {z} | {b} | {e} | {curr} | **{elite}** |\n")
+def global_key_candidates(
+    char_codes: dict[str, list[str]],
+    code_chars: dict[str, list[str]],
+    scores: dict[str, float],
+    excluded_chars: set[str],
+) -> list[Candidate]:
+    candidates: list[Candidate] = []
+    for text in char_codes:
+        if text in excluded_chars:
+            continue
+        base = scores.get(text, 0.0)
+        if base <= 0:
+            continue
+        code = shortest_code(char_codes, text)
+        if not code:
+            continue
+        pressure_factor, pressure_note = shortcut_pressure(text, code, code_chars)
+        if not pressure_note:
+            continue
+        saved = max(len(code) - 1, 1)
+        blockage_factor, blockage = prefix_blockage(text, code, code_chars, scores)
+        candidates.append(
+            Candidate(
+                text=text,
+                code=code,
+                score=base * saved * 0.90 * blockage_factor * pressure_factor,
+                base_score=base,
+                saved_keys=saved,
+                kind="全局",
+                note=pressure_note,
+                blockage=blockage,
+            )
+        )
+    candidates.sort(key=lambda item: (-item.score, item.code, item.text))
+    return candidates[:TOP_CANDIDATES_PER_KEY]
 
-        f.write("\n## 校准位说明\n\n")
-        f.write("| 键位 | 字 | 全码 | 综合字频 | 省键收益 | 说明 |\n")
-        f.write("|---|---|---|---:|---:|---|\n")
-        notes = {
-            'g': '去/地频率差距仅 1.36x，但地多省一键，综合收益更高。',
-            'l': '个只省一键，且对中只有 2.84x 频率优势，不足以稳定抢位。',
-            'p': '也只省一键，且对心只有 1.95x 频率优势，不足以稳定抢位。',
-            'r': '和比只更高频，且全码更长，省码收益明显更高。',
-        }
-        for key in ['g', 'l', 'p', 'r']:
-            char = protected_map[key]
-            code = get_shortest_code(char_codes, char)
-            score = get_score(char_scores, char)
-            benefit = one_code_benefit(char_scores, char_codes, char)
-            f.write(f"| {key} | {char} | {code} | {int(score)} | {int(benefit)} | {notes[key]} |\n")
-    print(f"对比结果已保存至: {output_path}")
 
+def select_one_key_candidate(candidates: list[Candidate], current_text: str) -> Candidate | None:
+    if not candidates:
+        return None
+    if current_text:
+        current = next((item for item in candidates if item.text == current_text), None)
+        if current is not None:
+            return current
+
+    anchors = [item for item in candidates if item.kind in {"字根", "首码"}]
+    contains = [item for item in candidates if item.kind == "包含"]
+
+    selected = anchors[0] if anchors else candidates[0]
+    if anchors and anchors[0].score > selected.score * 1.15:
+        selected = anchors[0]
+    if contains and contains[0].score > selected.score * 2.20:
+        selected = contains[0]
+    return selected
+
+
+def choose_proposal(
+    char_codes: dict[str, list[str]],
+    code_chars: dict[str, list[str]],
+    scores: dict[str, float],
+    current_one: dict[str, str],
+    *,
+    append_special_xz: bool,
+) -> tuple[dict[str, Candidate], dict[str, list[Candidate]]]:
+    ranks = build_rank(scores)
+    used_chars: set[str] = set()
+    proposal: dict[str, Candidate] = {}
+    candidates_by_key: dict[str, list[Candidate]] = {}
+    default_excluded_chars = {
+        current_one.get(letter, "")
+        for letter in DEFAULT_LETTERS
+        if current_one.get(letter, "")
+    }
+
+    for letter in DEFAULT_LETTERS:
+        candidates = one_key_candidates(
+            letter,
+            char_codes,
+            scores,
+            used_chars,
+            set(),
+            ranks,
+            current_one.get(letter, ""),
+            code_chars,
+            allow_current=True,
+        )
+        candidates_by_key[letter] = candidates
+        selected = select_one_key_candidate(candidates, current_one.get(letter, ""))
+        if selected:
+            proposal[letter] = selected
+            used_chars.add(selected.text)
+
+    if append_special_xz:
+        for letter in SPECIAL_LETTERS:
+            candidates = global_key_candidates(
+                char_codes,
+                code_chars,
+                scores,
+                default_excluded_chars | used_chars,
+            )
+            candidates_by_key[letter] = candidates
+            selected = select_one_key_candidate(candidates, current_one.get(letter, ""))
+            if selected:
+                proposal[letter] = selected
+                used_chars.add(selected.text)
+
+    return proposal, candidates_by_key
+
+
+def format_candidate(candidate: Candidate | None) -> str:
+    if candidate is None:
+        return ""
+    return f"{candidate.text} `{candidate.code}` {candidate.kind}"
+
+
+def write_report(
+    current_one: dict[str, str],
+    proposal: dict[str, Candidate],
+    candidates_by_key: dict[str, list[Candidate]],
+    *,
+    append_special_xz: bool,
+) -> None:
+    lines = [
+        "# 一简方案分配对比表",
+        "",
+        "本表只输出算法建议，不自动覆盖 `one_code.txt`。",
+        "",
+        "## 策略",
+        "",
+        "- 权重：知乎 33%，北语 27%，台标 22%，古籍 18%。",
+        "- 默认先出普通位，`x/z` 仅在追加模式下放到报告末尾。",
+        "- 普通位统一按简繁混合频率、省键收益、按键记忆锚点、源码表前缀占位和多候选二码压力评分。",
+        "- 字根字/首码匹配优先；高频包含键位可跨位；普通简码难覆盖的字获得加权。",
+        "- 简码可得性：只看 `cangjie5.dict.yaml` 源码表；二码/三码前缀若被高频原生字占据，则提高候选优先级。",
+        "- 当前正式版来自 `one_code.txt`，最终是否采用建议仍需人工定稿。",
+        "",
+        "## 总览",
+        "",
+        "| 键位 | 字根 | 当前正式版 | 建议 | 变化 |",
+        "|---|---|---|---|---|",
+    ]
+
+    for letter in DEFAULT_LETTERS:
+        current = current_one.get(letter, "")
+        cand = proposal.get(letter)
+        suggested = cand.text if cand else ""
+        change = "" if current == suggested else f"{current or '-'} -> {suggested or '-'}"
+        lines.append(
+            f"| {letter} | {ORIGINAL_RADICALS.get(letter, '')} | {current} | "
+            f"{format_candidate(cand)} | {change} |"
+        )
+
+    lines.extend(["", "## 候选明细", ""])
+
+    for letter in DEFAULT_LETTERS:
+        lines.extend([
+            f"### {letter}",
+            "",
+            "| Rank | 字 | 当前码 | Score | 频率分 | 省键 | 类型 | 前缀占位 | 说明 |",
+            "|---:|---|---|---:|---:|---:|---|---|---|",
+        ])
+        for rank, candidate in enumerate(candidates_by_key.get(letter, []), start=1):
+            lines.append(
+                f"| {rank} | {candidate.text} | `{candidate.code}` | "
+                f"{candidate.score:.8g} | {candidate.base_score:.8g} | "
+                f"{candidate.saved_keys} | {candidate.kind} | {candidate.blockage} | {candidate.note} |"
+            )
+        lines.append("")
+
+    if append_special_xz:
+        lines.extend([
+            "",
+            "## 追加位",
+            "",
+            "| 键位 | 字根 | 当前正式版 | 建议 | 变化 |",
+            "|---|---|---|---|---|",
+        ])
+        for letter in SPECIAL_LETTERS:
+            current = current_one.get(letter, "")
+            cand = proposal.get(letter)
+            suggested = cand.text if cand else ""
+            change = "" if current == suggested else f"{current or '-'} -> {suggested or '-'}"
+            lines.append(
+                f"| {letter} | {ORIGINAL_RADICALS.get(letter, '')} | {current} | "
+                f"{format_candidate(cand)} | {change} |"
+            )
+        lines.append("")
+        for letter in SPECIAL_LETTERS:
+            lines.extend([
+                f"### {letter}",
+                "",
+                "| Rank | 字 | 当前码 | Score | 频率分 | 省键 | 类型 | 前缀占位 | 说明 |",
+                "|---:|---|---|---:|---:|---:|---|---|---|",
+            ])
+            for rank, candidate in enumerate(candidates_by_key.get(letter, []), start=1):
+                lines.append(
+                    f"| {rank} | {candidate.text} | `{candidate.code}` | "
+                    f"{candidate.score:.8g} | {candidate.base_score:.8g} | "
+                    f"{candidate.saved_keys} | {candidate.kind} | {candidate.blockage} | {candidate.note} |"
+                )
+            lines.append("")
+
+    ONE_CODE_REPORT_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
+
+
+def main() -> None:
+    import argparse
+
+    parser = argparse.ArgumentParser(description="生成一简设计报告")
+    parser.add_argument("--append-xz", action="store_true", help="将 x/z 追加到报告末尾")
+    args = parser.parse_args()
+
+    current_one = load_current_one_codes()
+    scores, _ = load_scores()
+    char_codes, code_chars = build_code_maps()
+    proposal, candidates_by_key = choose_proposal(
+        char_codes,
+        code_chars,
+        scores,
+        current_one,
+        append_special_xz=args.append_xz,
+    )
+    write_report(
+        current_one,
+        proposal,
+        candidates_by_key,
+        append_special_xz=args.append_xz,
+    )
+    print(f"一简设计报告已保存: {ONE_CODE_REPORT_PATH}")
     print("一简方案原型不自动更新；如需定稿，请人工修改 one_code.txt")
 
 
