@@ -44,7 +44,6 @@ from .dict_builder import (
 )
 from .frequency import (
     FREQ_PATHS,
-    FREQ_WEIGHTS,
     get_weighted_frequencies,
     parse_frequency_file,
 )
@@ -53,6 +52,8 @@ from .io import display_path, normalize_prefixes, parse_cangjie_dict
 from .legacy_generator import build_output, run_generator
 from .models import Entry, FrequencyEntry, OutputEntry
 from .paths import (
+    SC_FREQ_WEIGHTS,
+    SC_BALANCED_FREQ_WEIGHTS,
     BLCU_CHAR_FREQ_PATH,
     CANGJIE5_DICT_PATH,
     CANGJIE_DIR,
@@ -97,7 +98,8 @@ __all__ = [
     "ESSAY_ZH_HANS_PATH",
     "Entry",
     "FREQ_PATHS",
-    "FREQ_WEIGHTS",
+    "SC_FREQ_WEIGHTS",
+    "SC_BALANCED_FREQ_WEIGHTS",
     "FOUR_CODE_PATH",
     "FrequencyEntry",
     "HAN_RANGES",
