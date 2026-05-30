@@ -19,6 +19,7 @@ from core.cangjie_builder import (
     DEFAULT_FULLCODE_YIELD_MIN_SCORE,
     FOUR_CODE_PATH,
     ONE_CODE_PATH,
+    FIXED_PREFIX_CODE_PATH,
     THREE_CODE_PATH,
     TWO_CODE_PATH,
     WUCANG5_DICT_PATH,
@@ -99,6 +100,7 @@ def main():
 
     shortcut_paths = {
         1: ONE_CODE_PATH,
+        "fixed_prefix": FIXED_PREFIX_CODE_PATH,
         2: TWO_CODE_PATH,
         3: THREE_CODE_PATH,
         'z': Z_CODE_PATH,

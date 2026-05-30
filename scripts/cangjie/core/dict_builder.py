@@ -13,12 +13,12 @@ from .io import parse_cangjie_dict
 from .paths import DEFAULT_FULLCODE_YIELD_MIN_SCORE
 
 
-def load_shortcut_entries(shortcut_paths: dict) -> tuple[list[tuple[str, str, int]], set[str]]:
+def load_shortcut_entries(shortcut_paths: dict) -> tuple[list[tuple[str, str, int | float]], set[str]]:
     """加载 Z/S1/S2/S3/S4 简码原型。"""
-    shortcut_entries: list[tuple[str, str, int]] = []
+    shortcut_entries: list[tuple[str, str, int | float]] = []
     z_root_chars: set[str] = set()
 
-    def load_shortcut(path: Path | None, priority: int) -> None:
+    def load_shortcut(path: Path | None, priority: int | float) -> None:
         if not path or not path.exists():
             return
         with open(path, "r", encoding="utf-8") as f:
@@ -32,6 +32,7 @@ def load_shortcut_entries(shortcut_paths: dict) -> tuple[list[tuple[str, str, in
 
     load_shortcut(shortcut_paths.get("z"), 0)
     load_shortcut(shortcut_paths.get(1), 1)
+    load_shortcut(shortcut_paths.get("fixed_prefix"), 1.5)
     load_shortcut(shortcut_paths.get(2), 2)
     load_shortcut(shortcut_paths.get(3), 3)
     load_shortcut(shortcut_paths.get(4), 4)
@@ -78,12 +79,12 @@ def build_fullcode_entries(
 
 
 def build_base_entries(
-    shortcut_entries: list[tuple[str, str, int]],
+    shortcut_entries: list[tuple[str, str, int | float]],
     fullcode_entries: list[tuple[str, str, int]],
     *,
     char_freqs: dict[str, int],
     fullcode_yield_min_score: float,
-) -> list[tuple[str, int, int, int, str]]:
+) -> list[tuple[str, int | float, int, int, str]]:
     all_entries: list[tuple[str, int, int, int, str]] = []
     shortcut_chars = {char for char, _, priority in shortcut_entries if priority >= 1}
     fullcode_order = build_fullcode_yield_order(
