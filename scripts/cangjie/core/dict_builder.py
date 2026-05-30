@@ -122,14 +122,16 @@ def build_z_suffix_entries(
     max_code_length: int,
 ) -> list[tuple[str, int, int, int, str]]:
     suffix_entries: list[tuple[str, int, int, int, str]] = []
+    z_suffix_count = 0   # 传统后缀：code+z
+    zx_prefix_count = 0  # 新式前缀：z??/x??/z???/x???
     code_groups: dict[str, list[tuple[str, int, int, int, str]]] = defaultdict(list)
     for entry in all_entries:
         code_groups[entry[0]].append(entry)
 
+    occupied_codes = {entry[0] for entry in all_entries}
+
     for code, entries in code_groups.items():
-        if code.startswith("z"):
-            continue
-        if len(code) >= max_code_length:
+        if code.startswith("z") or code.startswith("x"):
             continue
 
         seen_entries = unique_seen_entries(entries)
@@ -138,12 +140,66 @@ def build_z_suffix_entries(
             char2 = entry2[4]
             if char2 in shortcut_leader_chars:
                 continue
-            new_code_z = code + "z"
-            if (char2, new_code_z) not in used_text_code:
-                freq2 = char_freqs.get(char2, 0)
-                suffix_entries.append((new_code_z, 1, 0, -freq2, char2))
-                used_text_code.add((char2, new_code_z))
-    return suffix_entries
+
+            freq2 = char_freqs.get(char2, 0)
+
+            if len(code) >= max_code_length:
+                # 4 码重码字：只用最直觉的两条路径
+                # 1优先：z??  = prefix + 全码前2键（族(ysok)→zys或xys）
+                # 2备用：z??? = prefix + 全码前3键（族(ysok)→zyso或xyso）
+                allocated = False
+
+                for prefix in ("z", "x"):
+                    if allocated:
+                        break
+                    # 优先：3码直达 (prefix + 前2键)
+                    c3 = prefix + code[0] + code[1]
+                    if c3 not in occupied_codes and (char2, c3) not in used_text_code:
+                        suffix_entries.append((c3, 1, 0, -freq2, char2))
+                        used_text_code.add((char2, c3))
+                        occupied_codes.add(c3)
+                        zx_prefix_count += 1
+                        allocated = True
+                        break
+                    # 备用：4码直达 (prefix + 前3键)
+                    c4 = prefix + code[0] + code[1] + code[2]
+                    if c4 not in occupied_codes and (char2, c4) not in used_text_code:
+                        suffix_entries.append((c4, 1, 0, -freq2, char2))
+                        used_text_code.add((char2, c4))
+                        occupied_codes.add(c4)
+                        zx_prefix_count += 1
+                        allocated = True
+                        break
+
+                # 极端兜底：z???/x??? 全量扫描
+                if not allocated:
+                    letters = "zyxwvqpasdfghjklmnboiutrec"
+                    for prefix in ("z", "x"):
+                        if allocated:
+                            break
+                        for c1 in letters:
+                            if allocated:
+                                break
+                            for c2 in letters:
+                                if allocated:
+                                    break
+                                for c3 in letters:
+                                    candidate = prefix + c1 + c2 + c3
+                                    if candidate not in occupied_codes and (char2, candidate) not in used_text_code:
+                                        suffix_entries.append((candidate, 1, 0, -freq2, char2))
+                                        used_text_code.add((char2, candidate))
+                                        occupied_codes.add(candidate)
+                                        zx_prefix_count += 1
+                                        allocated = True
+                                        break
+            else:
+                new_code_z = code + "z"
+                if new_code_z not in occupied_codes and (char2, new_code_z) not in used_text_code:
+                    suffix_entries.append((new_code_z, 1, 0, -freq2, char2))
+                    used_text_code.add((char2, new_code_z))
+                    occupied_codes.add(new_code_z)
+                    z_suffix_count += 1
+    return suffix_entries, z_suffix_count, zx_prefix_count
 
 
 def build_structure_suffix_entries(
@@ -306,7 +362,7 @@ def generate_dict(
 
     suffix_count = 0
     if suffix_z:
-        suffix_entries = build_z_suffix_entries(
+        suffix_entries, z_suffix_count, zx_prefix_count = build_z_suffix_entries(
             all_entries,
             used_text_code=used_text_code,
             shortcut_leader_chars=shortcut_leader_chars,
@@ -316,9 +372,11 @@ def generate_dict(
         suffix_count = len(suffix_entries)
         all_entries.extend(suffix_entries)
         all_entries.sort()
-    print(f"后缀消重：生成 {suffix_count} 个 z 后缀条目")
+    print(f"后缀消重：生成 {z_suffix_count} 个 z后缀条目, {zx_prefix_count} 个 zx前缀条目")
 
     structure_suffix_count = 0
+    z_suffix_count = z_suffix_count if suffix_z else 0
+    zx_prefix_count = zx_prefix_count if suffix_z else 0
     if suffix_structure:
         structure_suffix_entries = build_structure_suffix_entries(
             all_entries,
@@ -348,7 +406,7 @@ def generate_dict(
     fc_count = len(fullcode_entries)
     print(
         f"完成：简码={sc_count} 全码={fc_count}"
-        f" z后缀={suffix_count} 结构后缀={structure_suffix_count}"
+        f" z后缀={z_suffix_count} zx前缀={zx_prefix_count} 结构后缀={structure_suffix_count}"
         f" 全码让位门槛={fullcode_yield_min_score:g}"
         f" 总计={len(all_entries)} 输出={output_path}"
     )

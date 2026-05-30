@@ -43,8 +43,8 @@ def main():
     parser.add_argument("--s3-count", type=int, default=800, help="三简：固定输出数量")
     parser.add_argument("--s3-coverage", type=float, default=0, help="三简：按累计字频覆盖率自动决定数量")
     parser.add_argument("--protect-native", action=argparse.BooleanOptionalAction, default=True, help="保护高频 GB2312 原生二三码位")
-    parser.add_argument("--protect-native-min-score", type=float, default=100000, help="综合字频门槛：原生二三码字达到该值才受保护，长码字达到该值才可入选简码")
-    parser.add_argument("--fullcode-yield-min-score", type=float, default=DEFAULT_FULLCODE_YIELD_MIN_SCORE, help="全码简码让位：可顶位字的最低综合字频")
+    parser.add_argument("--protect-native-min-score", type=float, default=5000, help="综合字频门槛：原生二三码字达到该值才受保护，长码字达到该值才可入选简码")
+    parser.add_argument("--fullcode-yield-min-score", type=float, default=5000, help="全码简码让位：可顶位字的最低综合字频")
     parser.add_argument("--suffix-z", action=argparse.BooleanOptionalAction, default=True, help="是否为无首选简码的第二候选生成 z 后缀直达码（默认开启）")
     parser.add_argument("--s4", action=argparse.BooleanOptionalAction, default=False, help="四简：是否生成 GB2312 五码字四简（默认关闭，可用 --s4 开启）")
     parser.add_argument("--s4-mode", choices=["safe", "balanced", "aggressive"], default="balanced",
