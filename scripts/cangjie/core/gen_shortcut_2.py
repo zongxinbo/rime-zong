@@ -67,6 +67,23 @@ def generate_shortcut_2(
         char_scores = get_weighted_frequencies()
 
     raw_entries = parse_cangjie_dict(source_dict)
+    
+    # 统计重码桶与候选深度
+    code_to_chars = defaultdict(list)
+    for entry in raw_entries:
+        if not is_common_han_char(entry.text):
+            continue
+        if entry.code.startswith(("z", "x")):
+            continue
+        if entry.text not in code_to_chars[entry.code]:
+            code_to_chars[entry.code].append(entry.text)
+            
+    char_depths = {}
+    for code, chars in code_to_chars.items():
+        sorted_chars = sorted(chars, key=lambda c: char_scores.get(c, 0), reverse=True)
+        for index, char in enumerate(sorted_chars):
+            char_depths[char] = index + 1
+            
     char_codes = {}
     for e in raw_entries:
         if not is_common_han_char(e.text) or e.code.startswith('z') or e.code.startswith('x'): continue
@@ -113,7 +130,16 @@ def generate_shortcut_2(
             saved_keys = full_len - 2
             if saved_keys <= 0:
                 continue
-            net_score = long_score * saved_keys - native_penalty
+                
+            depth = char_depths.get(long_char, 1)
+            if depth >= 2:
+                # 4 码重码字无法通过 Z 后缀消重，是终极最绝望重码，给予更高的避重增益
+                gain_multiplier = 6 if full_len == 4 else 3
+                collision_gain = long_score * (depth - 1) * gain_multiplier
+            else:
+                collision_gain = 0
+                
+            net_score = (long_score * saved_keys) + collision_gain - native_penalty
             if net_score <= 0:
                 continue
             item = (long_char, code2, long_score, net_score, saved_keys)
