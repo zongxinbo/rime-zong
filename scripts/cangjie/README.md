@@ -27,6 +27,14 @@ python scripts/cangjie/core/shortcut_gain.py --layer fixed-prefix --code xp --ch
 
 `gen_shortcut_1.py` 默认每键重放静态 Top 8。需要扩大深扫范围时使用 `--gain-candidates-per-key`，耗时近似线性增长。
 
+`SC_FREQ_WEIGHTS` 使用现代简体日用语料共识自动优化。重算比例：
+
+```powershell
+python scripts/cangjie/core/optimize_sc_weights.py
+```
+
+脚本将口语、字幕、知乎和北语字频各自归一化后等权作为目标，以平均 Jensen-Shannon 距离最小化搜索混合比例。`Essay` 可参与候选混合，但当前最优解会将其剔除为零权重。
+
 ## 2. 生成 Wucang5
 
 默认构建参数：

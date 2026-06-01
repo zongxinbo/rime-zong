@@ -49,13 +49,15 @@ FREQ_PATHS = {
     "Guji": GUJI_CHAR_FREQ_PATH,
     "Essay": ESSAY_ZH_HANS_PATH,
 }
-SC_FREQ_WEIGHTS = {"Dialogue": 6, "Subtlex": 5, "Zhihu": 4, "BLCU": 2, "Essay": 1}
+SC_FREQ_WEIGHTS = {
+    "Dialogue": 0.207475789,
+    "Subtlex": 0.275685250,
+    "Zhihu": 0.279235620,
+    "BLCU": 0.237603341
+}
 SC_BALANCED_FREQ_WEIGHTS = {
-    "Dialogue": 0,
-    "Subtlex": 0,
     "Zhihu": 0.33,
     "BLCU": 0.27,
     "Taiwan": 0.22,
-    "Guji": 0.18,
-    "Essay": 0,
+    "Guji": 0.18
 }

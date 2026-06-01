@@ -570,7 +570,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="生成一简设计报告")
     parser.add_argument("--append-xz", action="store_true", help="将 x/z 追加到报告末尾")
     parser.add_argument("--weights", choices=("sc", "sc_balanced"), default="sc",
-                        help="权重模式：sc=日常简体优先，sc_balanced=简繁平衡；默认 sc")
+                        help="权重模式：sc=现代简体日用优化，sc_balanced=简繁平衡；默认 sc")
     parser.add_argument("--gain-candidates-per-key", type=int, default=8,
                         help="每键进入真实 S2/S3 重放的静态候选数；默认 8，调大可深扫但耗时线性增加")
     args = parser.parse_args()
