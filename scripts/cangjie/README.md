@@ -8,6 +8,8 @@
 
 ```powershell
 python scripts/cangjie/core/gen_shortcut_1.py --weights sc
+# 盲测：不让当前人工定稿影响候选保底或主推荐排序，并避免覆盖常规报告
+python scripts/cangjie/core/gen_shortcut_1.py --weights sc --blind --output _tmp/one_code_report_blind.md
 python scripts/cangjie/core/gen_shortcut_2.py
 python scripts/cangjie/core/gen_shortcut_3.py
 python scripts/cangjie/core/gen_shortcut_4.py
@@ -26,6 +28,8 @@ python scripts/cangjie/core/shortcut_gain.py --layer fixed-prefix --code xp --ch
 `gen_shortcut_1.py` 先静态初筛，再调用 `shortcut_gain.py` 核心重放真实 S2/S3。单独使用 `shortcut_gain.py` 时，会按 `root_code -> one_code -> fixed_prefix_code -> S2 -> S3 -> 全码` 顺序重建后续层，并分别输出直接收益与 S2/S3 联动收益。详细算法见 [CANGJIE_SPEC.md](CANGJIE_SPEC.md) 9.3。
 
 `gen_shortcut_1.py` 默认每键重放静态 Top 8。需要扩大深扫范围时使用 `--gain-candidates-per-key`，耗时近似线性增长。
+
+`gen_shortcut_1.py --blind` 用于检验人工定稿是否会由算法自然浮现。盲测仍以当前正式版计算替换净收益并输出对照，但不会让当前字获得候选保底或主推荐参选特权。建议配合 `--output` 写入单独报告。
 
 `SC_FREQ_WEIGHTS` 使用现代简体日用语料共识自动优化。重算比例：
 
