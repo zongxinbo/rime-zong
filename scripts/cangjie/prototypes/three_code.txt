@@ -61,6 +61,7 @@
 爷	cks
 尊	cmw
 卻	crs
+概	dai
 刺	dbl
 禁	ddm
 楚	ddn
@@ -90,6 +91,7 @@
 校	dyc
 核	dyv
 温	eab
+混	eap
 漫	eaw
 滑	ebb
 深	ebc
@@ -119,6 +121,7 @@
 灣	evf
 滾	eyc
 涉	eyl
+液	eyo
 游	eys
 觉	fbb
 尝	fbm
@@ -176,6 +179,7 @@
 積	hdq
 程	hdr
 科	hdy
+盤	heb
 务	hek
 等	hgd
 先	hgh
@@ -312,12 +316,11 @@
 定	jmy
 卖	jny
 寧	jpb
-密	jph
 克	jrh
 官	jrl
 额	jrm
 故	jro
-塞	jtc
+寒	jtc
 狠	kha
 猶	khc
 疼	khe
@@ -334,6 +337,7 @@
 獄	khy
 雄	kio
 爽	kkk
+希	kkl
 奈	kmm
 奇	kmn
 病	kmo
@@ -403,7 +407,6 @@
 亏	mmv
 殊	mnh
 殖	mnj
-列	mnl
 顶	mnm
 裂	mny
 破	mrd
@@ -528,6 +531,7 @@
 创	oul
 個	owj
 偶	owl
+每	owy
 依	oyh
 企	oyl
 信	oym
@@ -572,7 +576,6 @@
 掉	qya
 抗	qyh
 據	qyp
-搞	qyr
 喝	rap
 嗣	rbs
 响	rhb
@@ -613,7 +616,6 @@
 聊	sjh
 聘	sjl
 联	sjt
-聯	sjv
 職	sjy
 欧	skn
 臨	slo
@@ -632,7 +634,6 @@
 改	suo
 蘭	tan
 劳	tbk
-蒙	tbm
 散	tbo
 营	tbr
 斯	tch
@@ -645,7 +646,6 @@
 對	tgd
 藝	tgi
 歡	tgn
-董	thj
 带	tjb
 鞋	tjg
 勒	tjk
@@ -664,7 +664,6 @@
 荷	tom
 難	too
 葉	tpt
-翔	tqs
 瓶	ttm
 藥	tvi
 蔣	tvm
@@ -795,7 +794,8 @@
 龄	yuo
 競	yuy
 雍	yvh
-遇	ywl
+還	ywl
+衰	ywm
 適	yyc
 這	yym
 遊	yys

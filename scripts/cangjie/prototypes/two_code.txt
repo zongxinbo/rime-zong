@@ -29,18 +29,19 @@
 銅	cb
 歉	cc
 銷	cf
+鑄	cg
 鋒	ch
 鎮	cj
 益	cm
 弟	cn
 谷	co
+錶	cq
 欲	cr
 分	cs
 錯	ct
 錄	cv
 单	cw
 鐘	cy
-概	da
 相	db
 松	dc
 整	dk
@@ -51,7 +52,6 @@
 框	ds
 样	dt
 機	dv
-混	ea
 沉	eb
 梁	ec
 消	ef
@@ -90,6 +90,7 @@
 坏	gm
 场	gn
 起	go
+敖	gs
 鼓	gt
 賣	gw
 走	gy
@@ -130,7 +131,6 @@
 宿	jo
 害	jq
 宦	js
-寒	jt
 實	jw
 实	jy
 痕	ka
@@ -138,7 +138,6 @@
 殺	kc
 獨	kh
 奔	kj
-希	kk
 存	kl
 疾	ko
 帶	kp
@@ -148,6 +147,7 @@
 書	lg
 衫	lh
 门	li
+褚	lj
 非	lm
 費	ln
 複	lo
@@ -158,7 +158,6 @@
 雨	me
 动	mi
 更	ml
-两	mo
 武	mp
 牙	mv
 面	mw
@@ -181,11 +180,11 @@
 保	or
 無	ot
 似	ov
-每	ow
 懼	pb
 悦	pc
 怪	pe
 悄	pf
+恃	pg
 慎	pj
 疑	pk
 怀	pm
@@ -255,6 +254,8 @@
 岸	um
 岁	un
 嶺	uo
+嶷	up
+岂	us
 豔	ut
 幽	uv
 嵩	uy
@@ -265,12 +266,12 @@
 經	vf
 裝	vg
 鄉	vh
-始	vi
 妹	vj
 姨	vk
 收	vl
 经	vm
 妈	vn
+蠡	vo
 她	vp
 媽	vs
 媒	vt
@@ -298,4 +299,3 @@
 些	yp
 逝	yq
 离	yu
-還	yw

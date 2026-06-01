@@ -2,7 +2,8 @@
 """仓颉构建兼容入口。
 
 具体职责已拆分到同目录模块：
-- `dict_builder.py`：生产字典构建、全码让位、后缀消重
+- `dict_builder.py`：生产字典构建和全码让位
+- `dedup.py`：z 后缀和自然 z/x 前缀消重
 - `legacy_generator.py`：旧投影生成器 CLI
 - `charset.py`：汉字/GB2312/GBK 判定
 - `frequency.py`：频率文件读取和加权频率
@@ -35,13 +36,13 @@ from .dict_builder import (
     build_base_entries,
     build_fullcode_entries,
     build_structure_suffix_entries,
-    build_z_suffix_entries,
     collect_char_full_codes,
     generate_dict,
     load_shortcut_entries,
     unique_seen_entries,
     write_final_dict,
 )
+from .dedup import build_dedup_prefix_entries, build_z_suffix_entries
 from .frequency import (
     FREQ_PATHS,
     get_weighted_frequencies,
@@ -122,6 +123,7 @@ __all__ = [
     "build_base_entries",
     "build_fullcode_entries",
     "build_fullcode_yield_order",
+    "build_dedup_prefix_entries",
     "build_output",
     "build_shortcut_leader_chars",
     "build_structure_suffix_entries",
