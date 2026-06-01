@@ -17,6 +17,7 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 from core.cangjie_builder import (
     CANGJIE5_DICT_PATH,
     FOUR_CODE_PATH,
+    FIXED_PREFIX_CODE_PATH,
     ONE_CODE_PATH,
     parse_cangjie_dict,
     get_weighted_frequencies,
@@ -24,7 +25,7 @@ from core.cangjie_builder import (
     is_han_char,
     THREE_CODE_PATH,
     TWO_CODE_PATH,
-    Z_CODE_PATH,
+    ROOT_CODE_PATH,
 )
 
 BALANCED_NATIVE4_RATIO = 3.0
@@ -34,7 +35,7 @@ DEFAULT_LEVEL2_MIN_SCORE = 1000
 def _load_excluded_chars() -> set[str]:
     """加载已经获得更短码的字，四简不再重复发放。"""
     excluded_chars = set()
-    for p in [Z_CODE_PATH, ONE_CODE_PATH, TWO_CODE_PATH, THREE_CODE_PATH]:
+    for p in [ROOT_CODE_PATH, ONE_CODE_PATH, FIXED_PREFIX_CODE_PATH, TWO_CODE_PATH, THREE_CODE_PATH]:
         if not p.exists():
             continue
         with open(p, "r", encoding="utf-8") as f:

@@ -20,6 +20,7 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 from core.cangjie_builder import (
     CANGJIE5_DICT_PATH,
     ONE_CODE_PATH,
+    FIXED_PREFIX_CODE_PATH,
     PROTOTYPES_DIR,
     parse_cangjie_dict,
     parse_frequency_file,
@@ -28,7 +29,7 @@ from core.cangjie_builder import (
     is_common_han_char,
     shortcut_charset_allows,
     TWO_CODE_PATH,
-    Z_CODE_PATH,
+    ROOT_CODE_PATH,
 )
 
 NATIVE_2_PENALTY_RATIO = 1.5
@@ -38,7 +39,7 @@ def _load_excluded_chars_and_occupied_codes() -> tuple[set[str], set[str]]:
     """加载已有更短简码字，并保护同长度的既有码位。"""
     excluded_chars = set()
     occupied_codes = set()
-    for p in [Z_CODE_PATH, ONE_CODE_PATH]:
+    for p in [ROOT_CODE_PATH, ONE_CODE_PATH, FIXED_PREFIX_CODE_PATH]:
         if p.exists():
             with open(p, "r", encoding="utf-8") as f:
                 for line in f:
