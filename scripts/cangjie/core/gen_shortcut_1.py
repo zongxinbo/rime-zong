@@ -61,6 +61,15 @@ class Candidate:
     actual_gain: int | float | None = None
 
 
+ANCHOR_PRIORITIES = {
+    "字根": 3,
+    "首码": 2,
+    "末码": 1,
+    "包含": 0,
+    "全局": -1,
+}
+
+
 def load_current_one_codes() -> dict[str, str]:
     current: dict[str, str] = {}
     if not ONE_CODE_PATH.exists():
@@ -197,17 +206,17 @@ def one_key_candidates(
         is_current = allow_current and text == current_text
         saved = max(len(code) - 1, 0)
         pressure_factor, pressure_note = shortcut_pressure(text, code, code_chars)
-        if is_current:
-            kind = "当前"
-            anchor_factor = 1.12
-            note = "当前人工定稿"
-        elif is_radical:
+        if is_radical:
             kind = "字根"
             anchor_factor = 1.30
             note = "键名字根"
-        elif starts or ends:
-            kind = "首码" if starts else "末码"
+        elif starts:
+            kind = "首码"
             anchor_factor = 1.15
+            note = "全码首/末键匹配"
+        elif ends:
+            kind = "末码"
+            anchor_factor = 1.05
             note = "全码首/末键匹配"
         elif contains and ranks.get(text, 999999) <= 120:
             kind = "包含"
@@ -215,6 +224,9 @@ def one_key_candidates(
             note = "高频跨位，编码含该键"
         else:
             continue
+
+        if is_current:
+            note = f"当前人工定稿；{note}"
 
         saved_factor = max(saved, 1)
         blockage_factor, blockage = prefix_blockage(text, code, code_chars, scores)
@@ -390,20 +402,29 @@ def select_gain_proposal(
     current_one: dict[str, str],
     candidates_by_key: dict[str, list[Candidate]],
 ) -> dict[str, Candidate]:
-    """优先建议真实净收益为正的候选，否则保留当前人工定稿。"""
+    """按记忆锚点等级、日常频率、真实净收益顺序生成保守建议。"""
     proposal: dict[str, Candidate] = {}
     used_chars: set[str] = set()
     for letter, candidates in candidates_by_key.items():
-        positive = next(
-            (item for item in candidates if (item.actual_gain or 0) > 0 and item.text not in used_chars),
-            None,
+        eligible = [
+            item
+            for item in candidates
+            if item.text not in used_chars
+            and (
+                item.text == current_one.get(letter, "")
+                or (item.actual_gain or 0) > 0
+            )
+        ]
+        selected = max(
+            eligible,
+            key=lambda item: (
+                ANCHOR_PRIORITIES.get(item.kind, -2),
+                item.base_score,
+                item.actual_gain or 0,
+                item.score,
+            ),
+            default=None,
         )
-        current = next(
-            (item for item in candidates if item.text == current_one.get(letter, "") and item.text not in used_chars),
-            None,
-        )
-        fallback = next((item for item in candidates if item.text not in used_chars), None)
-        selected = positive or current or fallback
         if selected is not None:
             proposal[letter] = selected
             used_chars.add(selected.text)
@@ -427,6 +448,7 @@ def write_report(
         "",
         f"- 权重模式：`{weights}`。{describe_weight_profile(weights)}。",
         f"- 每键先按静态规则保留 {GAIN_CANDIDATES_PER_KEY} 个候选，再调用 `shortcut_gain.py` 重放真实 S2/S3，按实际净收益排序输出前 {TOP_CANDIDATES_PER_KEY} 个。",
+        "- 总览建议采用一简专用决策层：锚点等级优先，同级内按日常频率优先，真实净收益只作为可行性门槛和辅助信息。等级为 `字根 > 首码 > 尾码 > 包含码`；当前正式版以收益 `0` 作为基线参与比较。",
         "- 默认先出普通位，`x/z` 仅在追加模式下放到报告末尾。",
         "- 普通位统一按简繁混合频率、省键收益、按键记忆锚点、源码表前缀占位和多候选二码压力评分。",
         "- 字根字/首码匹配优先；高频包含键位可跨位；普通简码难覆盖的字获得加权。",
