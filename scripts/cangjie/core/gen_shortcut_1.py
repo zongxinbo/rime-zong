@@ -402,19 +402,42 @@ def select_gain_proposal(
     current_one: dict[str, str],
     candidates_by_key: dict[str, list[Candidate]],
 ) -> dict[str, Candidate]:
-    """按记忆锚点等级、日常频率、真实净收益顺序生成保守建议。"""
+    """跨键分配唯一主推荐，避免同一个字同时占据多个 Rank 1。"""
     proposal: dict[str, Candidate] = {}
+    used_keys: set[str] = set()
     used_chars: set[str] = set()
-    for letter, candidates in candidates_by_key.items():
-        eligible = [
-            item
-            for item in candidates
-            if item.text not in used_chars
-            and (
+    placements = [
+        (letter, item)
+        for letter, candidates in candidates_by_key.items()
+        for item in candidates
+        if (
                 item.text == current_one.get(letter, "")
                 or (item.actual_gain or 0) > 0
-            )
-        ]
+        )
+    ]
+    placements.sort(
+        key=lambda placement: (
+            -ANCHOR_PRIORITIES.get(placement[1].kind, -2),
+            -placement[1].base_score,
+            -(placement[1].actual_gain or 0),
+            -placement[1].score,
+            placement[0],
+            placement[1].text,
+        )
+    )
+
+    for letter, item in placements:
+        if letter in used_keys or item.text in used_chars:
+            continue
+        proposal[letter] = item
+        used_keys.add(letter)
+        used_chars.add(item.text)
+
+    # 某些键的高分候选可能已在更合理的键位被占用；为这些键补上剩余最佳候选。
+    for letter, candidates in candidates_by_key.items():
+        if letter in used_keys:
+            continue
+        eligible = [item for item in candidates if item.text not in used_chars]
         selected = max(
             eligible,
             key=lambda item: (
@@ -427,8 +450,24 @@ def select_gain_proposal(
         )
         if selected is not None:
             proposal[letter] = selected
+            used_keys.add(letter)
             used_chars.add(selected.text)
     return proposal
+
+
+def rank_report_candidates(
+    candidates_by_key: dict[str, list[Candidate]],
+    proposal: dict[str, Candidate],
+) -> dict[str, list[Candidate]]:
+    """把全局唯一主推荐移动到 Rank 1，其余候选保留原有相对顺序。"""
+    ranked: dict[str, list[Candidate]] = {}
+    for letter, candidates in candidates_by_key.items():
+        selected = proposal.get(letter)
+        if selected is None:
+            ranked[letter] = candidates
+            continue
+        ranked[letter] = [selected] + [item for item in candidates if item.text != selected.text]
+    return ranked
 
 
 def write_report(
@@ -448,7 +487,8 @@ def write_report(
         "",
         f"- 权重模式：`{weights}`。{describe_weight_profile(weights)}。",
         f"- 每键先按静态规则保留 {GAIN_CANDIDATES_PER_KEY} 个候选，再调用 `shortcut_gain.py` 重放真实 S2/S3，按实际净收益排序输出前 {TOP_CANDIDATES_PER_KEY} 个。",
-        "- 总览建议采用一简专用决策层：锚点等级优先，同级内按日常频率优先，真实净收益只作为可行性门槛和辅助信息。等级为 `字根 > 首码 > 尾码 > 包含码`；当前正式版以收益 `0` 作为基线参与比较。",
+        "- 总览建议采用一简专用决策层：跨键全局分配唯一主推荐；锚点等级优先，同级内按日常频率优先，真实净收益只作为可行性门槛和辅助信息。等级为 `字根 > 首码 > 尾码 > 包含码`；当前正式版以收益 `0` 作为基线参与比较。",
+        "- 同一个字只能在最合理的键位占据一次 `Rank 1`；它仍可保留在其他键位的 `Rank 2+`，供人工比较。",
         "- 默认先出普通位，`x/z` 仅在追加模式下放到报告末尾。",
         "- 普通位统一按简繁混合频率、省键收益、按键记忆锚点、源码表前缀占位和多候选二码压力评分。",
         "- 字根字/首码匹配优先；高频包含键位可跨位；普通简码难覆盖的字获得加权。",
@@ -552,6 +592,7 @@ def main() -> None:
     analyzer = ShortcutGainAnalyzer(weights=args.weights)
     candidates_by_key = add_actual_gains(candidates_by_key, analyzer, current_one)
     proposal = select_gain_proposal(current_one, candidates_by_key)
+    candidates_by_key = rank_report_candidates(candidates_by_key, proposal)
     write_report(
         current_one,
         proposal,
