@@ -85,6 +85,19 @@ def is_gbk(text: str) -> bool:
     return True
 
 
+def shortcut_charset_allows(text: str, charset: str, *, score: int | float) -> bool:
+    """判断字符是否属于简码策略指定的候选字集。"""
+    if charset == "all":
+        return True
+    if charset == "frequency":
+        return score > 0
+    if charset == "gbk":
+        return is_gbk(text)
+    if charset == "gb2312":
+        return is_gb2312(text)
+    raise ValueError("简码字集只能是 all、frequency、gbk 或 gb2312")
+
+
 def suffix_structure_charset_allows(text: str, charset: str) -> bool:
     """结构后缀候选字集过滤。"""
     if charset == "all":

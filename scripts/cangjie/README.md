@@ -17,8 +17,8 @@ python scripts/cangjie/core/gen_shortcut_4.py
 
 默认构建参数：
 
-- 二简：上限 `300` 个；默认保护高频 GB2312 原生二码位，综合字频门槛 `3000`
-- 三简：固定 `800` 个；默认保护高频 GB2312 原生三码位，综合字频门槛 `3000`
+- 二简：上限 `300` 个；默认保护高频 GBK 原生二码位，综合字频门槛 `3000`
+- 三简：固定 `800` 个；默认保护高频 GBK 原生三码位，综合字频门槛 `3000`
 - 二简、三简候选池按 Rime 默认 `extended_charset=常用` 状态过滤；长码候选也需达到综合字频门槛才可入选
 - 四简：默认关闭，可用 `--s4` 开启 `balanced` 模式，给 GB2312 五码字生成四简
 - 四简数量：启用后默认上限 `1000` 个；GB2312 二级字需达到综合字频 `1000` 才可进入
@@ -59,6 +59,9 @@ python scripts/cangjie/gen_wucang5.py --no-protect-native
 # 分别调整二三简原生码位保护与长码候选入选门槛
 python scripts/cangjie/gen_wucang5.py --protect-native-min-score 3000 --shortcut-candidate-min-score 3000
 
+# 调整二三简原生码位保护字集
+python scripts/cangjie/gen_wucang5.py --protect-native-charset gbk
+
 # 调整全码简码让位的顶位门槛
 python scripts/cangjie/gen_wucang5.py --fullcode-yield-min-score 1000
 
@@ -73,6 +76,13 @@ python scripts/cangjie/gen_sicang5.py --no-dedup-prefix
 # 调整 z/x 前缀候选字集和最低综合字频
 python scripts/cangjie/gen_sicang5.py --dedup-prefix-charset gbk --dedup-prefix-min-score 1
 ```
+
+`--protect-native-charset` 支持：
+
+- `gbk`：默认值，保护 GBK 可编码字符，兼顾常见繁简字。
+- `gb2312`：仅保护 GB2312 汉字。
+- `frequency`：仅保护当前综合字频中出现的字。
+- `all`：不限制汉字范围，适合实验。
 
 `z` 后缀和 `z/x` 前缀覆盖互补场景：
 
