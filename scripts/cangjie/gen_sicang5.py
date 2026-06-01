@@ -62,7 +62,7 @@ def main():
                         help="结构类别后缀键，按 左右/上下/包围/独体 顺序给 4 个小写字母；默认 zxwa")
     parser.add_argument("--only-first-full-code", action=argparse.BooleanOptionalAction, default=False, help="仅取第一个全码（用于去重）")
     parser.add_argument("--weights", choices=["sc_balanced", "sc"], default="sc_balanced",
-                        help="字频权重模式：sc_balanced=简体均衡优先权重 (SC_BALANCED_FREQ_WEIGHTS), sc=简体绝对优先频数权重 (SC_FREQ_WEIGHTS)")
+                        help="字频权重模式：sc_balanced=简繁均衡权重 (SC_BALANCED_FREQ_WEIGHTS), sc=现代简体日用优化权重 (SC_FREQ_WEIGHTS)")
     args = parser.parse_args()
 
     # 0. 预加载加权字频

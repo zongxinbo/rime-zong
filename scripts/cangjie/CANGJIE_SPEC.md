@@ -450,7 +450,7 @@ python scripts/cangjie/core/shortcut_gain.py --layer fixed-prefix --code xp --ch
 
 权重通过 `--weights` 显式选择：
 
-- `sc`：日常简体优先，使用口语、字幕、知乎、北语和 Essay；`gen_shortcut_1.py` 与 `shortcut_gain.py --layer one` 默认使用该模式。
+- `sc`：现代简体日用优化，使用口语 20.75%、字幕 27.57%、知乎 27.92%、北语 23.76%；比例由 `core/optimize_sc_weights.py` 最小化现代简体语料共识的平均 Jensen-Shannon 距离得到。`gen_shortcut_1.py` 与 `shortcut_gain.py --layer one` 默认使用该模式。
 - `sc_balanced`：简繁平衡，使用知乎 33%、北语 27%、台标 22%、古籍 18%；`shortcut_gain.py --layer fixed-prefix` 默认使用该模式，普通二三简生产构建也默认使用该模式。
 
 一简不直接套用普通二三简的简繁平衡排序。一简位数量少、日常曝光高，候选报告应以 `sc` 日常频率作为默认初筛与重放口径，再由一简决策层按 `字根 > 首码 > 尾码 > 包含码` 的锚点等级筛选；同级内优先保留日常频率更高的字。跨键分配时，同一个字只能在最合理的键位占据一次 `Rank 1`，在其他键位只能作为 `Rank 2+` 备选。真实净收益用于排除负收益替换和展示效率上限，不直接压过更强锚点或更高日常频率。`z?` 简繁补位和 `x?` 重码救援继续使用 `sc_balanced`。
