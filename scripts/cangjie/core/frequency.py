@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import sys
-from collections import defaultdict
+from math import fsum
 from pathlib import Path
 
 from .charset import is_han_char, is_han_text
@@ -9,8 +9,9 @@ from .models import FrequencyEntry
 from .paths import (
     FREQ_PATHS,
     SC_FREQ_WEIGHTS,
-    SC_BALANCED_FREQ_WEIGHTS
 )
+
+FREQUENCY_SCORE_SCALE = 10**9
 
 
 def parse_frequency_file(path: Path) -> tuple[dict[str, int], list[FrequencyEntry]]:
@@ -51,17 +52,14 @@ def parse_frequency_file(path: Path) -> tuple[dict[str, int], list[FrequencyEntr
 
 
 def get_weighted_frequencies(weights: dict[str, float] | None = None) -> dict[str, int]:
-    """计算多份语料库的加权得分并返回合并后的字典（采用相对频率归一化算法）。"""
+    """按语料相对频率和来源权重计算固定分制的综合字频。"""
     if weights is None:
         weights = SC_FREQ_WEIGHTS
 
-    # 1. 提取权重为正的活跃语料
+    # 仅使用成功读取的非空语料，避免缺失来源改变综合分的量级。
     active_sources = {name: w for name, w in weights.items() if w > 0}
-
-    # 2. 读入各语料并进行相对频率归一化
-    normalized_freqs = {}
-    allowed_chars = set()
-
+    normalized_freqs: dict[str, dict[str, float]] = {}
+    allowed_chars: set[str] = set()
     for name in active_sources:
         path = FREQ_PATHS.get(name)
         if path and path.exists():
@@ -70,16 +68,26 @@ def get_weighted_frequencies(weights: dict[str, float] | None = None) -> dict[st
             if total > 0:
                 normalized_freqs[name] = {k: v / total for k, v in freqs.items()}
                 allowed_chars.update(freqs.keys())
+            else:
+                print(f"Warning: Frequency file is empty for {name}: {path}", file=sys.stderr)
         else:
             print(f"Warning: Frequency file not found for {name}", file=sys.stderr)
 
-    # 3. 合并加权并放大至 10^9 比例
+    usable_weights = {
+        name: weight
+        for name, weight in active_sources.items()
+        if name in normalized_freqs
+    }
+    total_weight = fsum(usable_weights.values())
+    if total_weight <= 0:
+        return {}
+
     char_scores = {}
     for char in allowed_chars:
-        score = 0.0
-        for name, w in active_sources.items():
-            if name in normalized_freqs:
-                score += w * normalized_freqs[name].get(char, 0.0)
-        char_scores[char] = int(score * 10**9)
+        score = fsum(
+            weight * normalized_freqs[name].get(char, 0.0)
+            for name, weight in usable_weights.items()
+        )
+        char_scores[char] = round(score / total_weight * FREQUENCY_SCORE_SCALE)
 
     return char_scores
