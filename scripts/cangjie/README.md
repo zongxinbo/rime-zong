@@ -7,11 +7,25 @@
 核心脚本会读取仓颉五码源表与加权字频，生成 `prototypes/` 下的简码原型文件。
 
 ```powershell
-python scripts/cangjie/core/gen_shortcut_1.py
+python scripts/cangjie/core/gen_shortcut_1.py --weights sc
 python scripts/cangjie/core/gen_shortcut_2.py
 python scripts/cangjie/core/gen_shortcut_3.py
 python scripts/cangjie/core/gen_shortcut_4.py
 ```
+
+人工复核固定简码时，使用真实后续分层重放脚本计算净码长收益：
+
+```powershell
+# 一简替换
+python scripts/cangjie/core/shortcut_gain.py --layer one --code t --char 其 --weights sc
+
+# z?/x? 固定二码新增或替换
+python scripts/cangjie/core/shortcut_gain.py --layer fixed-prefix --code xp --char 恐 --weights sc_balanced
+```
+
+`gen_shortcut_1.py` 先静态初筛，再调用 `shortcut_gain.py` 核心重放真实 S2/S3。单独使用 `shortcut_gain.py` 时，会按 `root_code -> one_code -> fixed_prefix_code -> S2 -> S3 -> 全码` 顺序重建后续层，并分别输出直接收益与 S2/S3 联动收益。详细算法见 [CANGJIE_SPEC.md](CANGJIE_SPEC.md) 9.3。
+
+`gen_shortcut_1.py` 默认每键重放静态 Top 8。需要扩大深扫范围时使用 `--gain-candidates-per-key`，耗时近似线性增长。
 
 ## 2. 生成 Wucang5
 

@@ -5,8 +5,7 @@
 算法负责给出候选、收益和替换理由，最终是否采用由人工确认。
 
 当前策略：
-1. 频率权重使用简繁平衡 sc60/tc40：
-   - 知乎 33%，北语 27%，台标 22%，古籍 18%。
+1. 权重可通过 `--weights` 选择；一简默认使用日常简体优先 `sc`。
 2. 普通位先出，`x/z` 只有带参数时才追加到报告末尾：
    - 字根字/首码匹配优先，高频且全码包含该键时允许作为跨位候选；
    - 普通简码难覆盖的长码字会加权；
@@ -20,27 +19,27 @@ from __future__ import annotations
 
 import sys
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 from core.cangjie_builder import (
-    BLCU_CHAR_FREQ_PATH,
     CANGJIE5_DICT_PATH,
-    GUJI_CHAR_FREQ_PATH,
     ONE_CODE_PATH,
     ONE_CODE_REPORT_PATH,
-    TAIWAN_CHAR_FREQ_PATH,
-    ZHIHU_CHAR_FREQ_PATH,
+    get_weighted_frequencies,
     is_han_char,
     parse_cangjie_dict,
-    parse_frequency_file,
 )
+from core.frequency import FREQUENCY_SCORE_SCALE
+from core.shortcut_gain import ShortcutGainAnalyzer
+from core.weight_profiles import describe_weight_profile, get_weight_profile
 
 
 DEFAULT_LETTERS = "abcdefghijklmnopqrstuvwy"
 SPECIAL_LETTERS = "xz"
 TOP_CANDIDATES_PER_KEY = 8
+GAIN_CANDIDATES_PER_KEY = 8
 
 ORIGINAL_RADICALS = {
     "a": "日", "b": "月", "c": "金", "d": "木", "e": "水", "f": "火", "g": "土",
@@ -48,21 +47,6 @@ ORIGINAL_RADICALS = {
     "o": "人", "p": "心", "q": "手", "r": "口", "s": "尸", "t": "廿", "u": "山",
     "v": "女", "w": "田", "x": "难", "y": "卜", "z": "重",
 }
-
-FREQ_SOURCES = {
-    "Zhihu": ZHIHU_CHAR_FREQ_PATH,
-    "BLCU": BLCU_CHAR_FREQ_PATH,
-    "Taiwan": TAIWAN_CHAR_FREQ_PATH,
-    "Guji": GUJI_CHAR_FREQ_PATH,
-}
-
-FREQ_WEIGHTS_SC60 = {
-    "Zhihu": 0.33,
-    "BLCU": 0.27,
-    "Taiwan": 0.22,
-    "Guji": 0.18,
-}
-
 
 @dataclass(frozen=True)
 class Candidate:
@@ -74,6 +58,7 @@ class Candidate:
     kind: str
     note: str
     blockage: str
+    actual_gain: int | float | None = None
 
 
 def load_current_one_codes() -> dict[str, str]:
@@ -89,23 +74,12 @@ def load_current_one_codes() -> dict[str, str]:
     return current
 
 
-def load_scores() -> tuple[dict[str, float], dict[str, dict[str, float]]]:
-    normalized: dict[str, dict[str, float]] = {}
-    for name, path in FREQ_SOURCES.items():
-        raw, _ = parse_frequency_file(path)
-        total = sum(raw.values())
-        normalized[name] = {
-            text: value / total
-            for text, value in raw.items()
-            if total and is_han_char(text)
-        }
-
-    scores: dict[str, float] = defaultdict(float)
-    for name, freqs in normalized.items():
-        weight = FREQ_WEIGHTS_SC60[name]
-        for text, value in freqs.items():
-            scores[text] += value * weight
-    return dict(scores), normalized
+def load_scores(weights: str = "sc") -> tuple[dict[str, float], dict[str, dict[str, float]]]:
+    scores = get_weighted_frequencies(get_weight_profile(weights))
+    return {
+        text: score / FREQUENCY_SCORE_SCALE
+        for text, score in scores.items()
+    }, {}
 
 
 def build_code_maps() -> tuple[dict[str, list[str]], dict[str, list[str]]]:
@@ -261,7 +235,7 @@ def one_key_candidates(
         )
 
     candidates.sort(key=lambda item: (-item.score, item.code, item.text))
-    top = candidates[:TOP_CANDIDATES_PER_KEY]
+    top = candidates[:GAIN_CANDIDATES_PER_KEY]
     if current_text and all(item.text != current_text for item in top):
         current = next((item for item in candidates if item.text == current_text), None)
         if current is not None:
@@ -384,12 +358,65 @@ def format_candidate(candidate: Candidate | None) -> str:
     return f"{candidate.text} `{candidate.code}` {candidate.kind}"
 
 
+def add_actual_gains(
+    candidates_by_key: dict[str, list[Candidate]],
+    analyzer: ShortcutGainAnalyzer,
+    current_one: dict[str, str],
+) -> dict[str, list[Candidate]]:
+    """对静态候选短名单重放真实 S2/S3，并按实际净收益重排。"""
+    result: dict[str, list[Candidate]] = {}
+    for letter, candidates in candidates_by_key.items():
+        evaluated = []
+        for candidate in candidates:
+            if candidate.text == current_one.get(letter, ""):
+                evaluated.append(replace(candidate, actual_gain=0))
+                continue
+            evaluated.append(
+                replace(
+                    candidate,
+                    actual_gain=analyzer.evaluate_assignment(
+                        code=letter,
+                        text=candidate.text,
+                        layer="one",
+                    ).total_gain,
+                )
+            )
+        evaluated.sort(key=lambda item: (-(item.actual_gain or 0), -item.score, item.code, item.text))
+        result[letter] = evaluated[:TOP_CANDIDATES_PER_KEY]
+    return result
+
+
+def select_gain_proposal(
+    current_one: dict[str, str],
+    candidates_by_key: dict[str, list[Candidate]],
+) -> dict[str, Candidate]:
+    """优先建议真实净收益为正的候选，否则保留当前人工定稿。"""
+    proposal: dict[str, Candidate] = {}
+    used_chars: set[str] = set()
+    for letter, candidates in candidates_by_key.items():
+        positive = next(
+            (item for item in candidates if (item.actual_gain or 0) > 0 and item.text not in used_chars),
+            None,
+        )
+        current = next(
+            (item for item in candidates if item.text == current_one.get(letter, "") and item.text not in used_chars),
+            None,
+        )
+        fallback = next((item for item in candidates if item.text not in used_chars), None)
+        selected = positive or current or fallback
+        if selected is not None:
+            proposal[letter] = selected
+            used_chars.add(selected.text)
+    return proposal
+
+
 def write_report(
     current_one: dict[str, str],
     proposal: dict[str, Candidate],
     candidates_by_key: dict[str, list[Candidate]],
     *,
     append_special_xz: bool,
+    weights: str,
 ) -> None:
     lines = [
         "# 一简方案分配对比表",
@@ -398,7 +425,8 @@ def write_report(
         "",
         "## 策略",
         "",
-        "- 权重：知乎 33%，北语 27%，台标 22%，古籍 18%。",
+        f"- 权重模式：`{weights}`。{describe_weight_profile(weights)}。",
+        f"- 每键先按静态规则保留 {GAIN_CANDIDATES_PER_KEY} 个候选，再调用 `shortcut_gain.py` 重放真实 S2/S3，按实际净收益排序输出前 {TOP_CANDIDATES_PER_KEY} 个。",
         "- 默认先出普通位，`x/z` 仅在追加模式下放到报告末尾。",
         "- 普通位统一按简繁混合频率、省键收益、按键记忆锚点、源码表前缀占位和多候选二码压力评分。",
         "- 字根字/首码匹配优先；高频包含键位可跨位；普通简码难覆盖的字获得加权。",
@@ -427,13 +455,13 @@ def write_report(
         lines.extend([
             f"### {letter}",
             "",
-            "| Rank | 字 | 当前码 | Score | 频率分 | 省键 | 类型 | 前缀占位 | 说明 |",
-            "|---:|---|---|---:|---:|---:|---|---|---|",
+            "| Rank | 字 | 当前码 | 实际净收益 | 静态 Score | 频率分 | 省键 | 类型 | 前缀占位 | 说明 |",
+            "|---:|---|---|---:|---:|---:|---:|---|---|---|",
         ])
         for rank, candidate in enumerate(candidates_by_key.get(letter, []), start=1):
             lines.append(
                 f"| {rank} | {candidate.text} | `{candidate.code}` | "
-                f"{candidate.score:.8g} | {candidate.base_score:.8g} | "
+                f"{candidate.actual_gain or 0:+g} | {candidate.score:.8g} | {candidate.base_score:.8g} | "
                 f"{candidate.saved_keys} | {candidate.kind} | {candidate.blockage} | {candidate.note} |"
             )
         lines.append("")
@@ -460,13 +488,13 @@ def write_report(
             lines.extend([
                 f"### {letter}",
                 "",
-                "| Rank | 字 | 当前码 | Score | 频率分 | 省键 | 类型 | 前缀占位 | 说明 |",
-                "|---:|---|---|---:|---:|---:|---|---|---|",
+                "| Rank | 字 | 当前码 | 实际净收益 | 静态 Score | 频率分 | 省键 | 类型 | 前缀占位 | 说明 |",
+                "|---:|---|---|---:|---:|---:|---:|---|---|---|",
             ])
             for rank, candidate in enumerate(candidates_by_key.get(letter, []), start=1):
                 lines.append(
                     f"| {rank} | {candidate.text} | `{candidate.code}` | "
-                    f"{candidate.score:.8g} | {candidate.base_score:.8g} | "
+                    f"{candidate.actual_gain or 0:+g} | {candidate.score:.8g} | {candidate.base_score:.8g} | "
                     f"{candidate.saved_keys} | {candidate.kind} | {candidate.blockage} | {candidate.note} |"
                 )
             lines.append("")
@@ -479,23 +507,35 @@ def main() -> None:
 
     parser = argparse.ArgumentParser(description="生成一简设计报告")
     parser.add_argument("--append-xz", action="store_true", help="将 x/z 追加到报告末尾")
+    parser.add_argument("--weights", choices=("sc", "sc_balanced"), default="sc",
+                        help="权重模式：sc=日常简体优先，sc_balanced=简繁平衡；默认 sc")
+    parser.add_argument("--gain-candidates-per-key", type=int, default=8,
+                        help="每键进入真实 S2/S3 重放的静态候选数；默认 8，调大可深扫但耗时线性增加")
     args = parser.parse_args()
+    if args.gain_candidates_per_key <= 0:
+        parser.error("--gain-candidates-per-key 必须大于 0")
+    global GAIN_CANDIDATES_PER_KEY
+    GAIN_CANDIDATES_PER_KEY = args.gain_candidates_per_key
 
     current_one = load_current_one_codes()
-    scores, _ = load_scores()
+    scores, _ = load_scores(args.weights)
     char_codes, code_chars = build_code_maps()
-    proposal, candidates_by_key = choose_proposal(
+    _, candidates_by_key = choose_proposal(
         char_codes,
         code_chars,
         scores,
         current_one,
         append_special_xz=args.append_xz,
     )
+    analyzer = ShortcutGainAnalyzer(weights=args.weights)
+    candidates_by_key = add_actual_gains(candidates_by_key, analyzer, current_one)
+    proposal = select_gain_proposal(current_one, candidates_by_key)
     write_report(
         current_one,
         proposal,
         candidates_by_key,
         append_special_xz=args.append_xz,
+        weights=args.weights,
     )
     print(f"一简设计报告已保存: {ONE_CODE_REPORT_PATH}")
     print("一简方案原型不自动更新；如需定稿，请人工修改 one_code.txt")
