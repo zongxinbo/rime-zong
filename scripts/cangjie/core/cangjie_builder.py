@@ -25,6 +25,7 @@ from .charset import (
     is_gbk,
     is_han_char,
     is_han_text,
+    shortcut_charset_allows,
     suffix_structure_charset_allows,
 )
 from .code_utils import (
@@ -146,6 +147,7 @@ __all__ = [
     "parse_frequency_file",
     "project_code",
     "run_generator",
+    "shortcut_charset_allows",
     "suffix_structure_charset_allows",
     "unique_seen_entries",
     "write_final_dict",

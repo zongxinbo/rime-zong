@@ -37,7 +37,9 @@ def main():
     parser.add_argument("--s3-prefix", action=argparse.BooleanOptionalAction, default=True, help="三简：提取规则取前三码（而非前两码+末码）")
     parser.add_argument("--s3-count", type=int, default=800, help="三简：固定输出数量")
     parser.add_argument("--s3-coverage", type=float, default=0, help="三简：按累计字频覆盖率自动决定数量")
-    parser.add_argument("--protect-native", action=argparse.BooleanOptionalAction, default=True, help="保护高频 GB2312 原生二三码位")
+    parser.add_argument("--protect-native", action=argparse.BooleanOptionalAction, default=True, help="保护指定字集内的高频原生二三码位")
+    parser.add_argument("--protect-native-charset", choices=("all", "frequency", "gbk", "gb2312"), default="gbk",
+                        help="原生二三码位保护字集：all=不限，frequency=仅综合字频中出现的字，gbk=常见繁简字，gb2312=简体常用字")
     parser.add_argument("--protect-native-min-score", type=float, default=3000, help="综合字频门槛：原生二三码字达到该值才受保护")
     parser.add_argument("--shortcut-candidate-min-score", type=float, default=3000, help="综合字频门槛：长码字达到该值才可入选二三简")
     parser.add_argument("--fullcode-yield-min-score", type=float, default=1000, help="全码简码让位：可顶位字的最低综合字频")
@@ -76,6 +78,7 @@ def main():
         auto_coverage=args.s2_coverage,
         char_scores=char_scores,
         protect_native=args.protect_native,
+        protect_native_charset=args.protect_native_charset,
         protect_native_min_score=args.protect_native_min_score,
         shortcut_candidate_min_score=args.shortcut_candidate_min_score,
     )
@@ -87,6 +90,7 @@ def main():
         auto_coverage=args.s3_coverage,
         char_scores=char_scores,
         protect_native=args.protect_native,
+        protect_native_charset=args.protect_native_charset,
         protect_native_min_score=args.protect_native_min_score,
         shortcut_candidate_min_score=args.shortcut_candidate_min_score,
     )

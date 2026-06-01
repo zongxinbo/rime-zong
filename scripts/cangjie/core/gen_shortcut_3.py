@@ -2,10 +2,11 @@
 """
 Wucang5 三简方案生成脚本
 支持两种模式：
-1. 原生码位保护模式（默认）：保护高频 GB2312 原生三码字，其他原生三码位按净收益竞争。
+1. 原生码位保护模式（默认）：保护指定字集内的高频原生三码字，默认字集为 GBK。
 2. GB2312 保护模式 (gb_only=True): 仅 GB2312 汉字有资格，且仅占据空槽（无 GB2312 原主）。
 3. 关闭保护时：允许长码字与“原主字”(全码=3)竞争，按省码收益扣除原主代价后排序。
 
+`protect_native_charset` 控制原生三码位保护字集。
 `protect_native_min_score` 控制原生三码位保护门槛。
 `shortcut_candidate_min_score` 控制长码字最低入选得分，避免低频冷字填满尾部空槽。
 """
@@ -24,6 +25,7 @@ from core.cangjie_builder import (
     get_weighted_frequencies,
     is_gb2312,
     is_common_han_char,
+    shortcut_charset_allows,
     THREE_CODE_PATH,
     TWO_CODE_PATH,
     Z_CODE_PATH,
@@ -55,6 +57,7 @@ def generate_shortcut_3(
     auto_coverage: float = 0.90,
     char_scores: dict[str, int] = None,
     protect_native: bool = True,
+    protect_native_charset: str = "gbk",
     protect_native_min_score: int | float = 3000,
     shortcut_candidate_min_score: int | float | None = 3000,
 ):
@@ -123,7 +126,11 @@ def generate_shortcut_3(
         native_penalty = 0
         if data["orig"]:
             orig_char, orig_score = data["orig"]
-            if gb_only or (protect_native and is_gb2312(orig_char) and orig_score >= protect_native_min_score):
+            if gb_only or (
+                protect_native
+                and shortcut_charset_allows(orig_char, protect_native_charset, score=orig_score)
+                and orig_score >= protect_native_min_score
+            ):
                 continue
             else:
                 native_penalty = orig_score * NATIVE_3_PENALTY_RATIO
@@ -185,7 +192,9 @@ def main():
     parser.add_argument("--count", type=int, default=0)
     parser.add_argument("--auto-coverage", type=float, default=0.90)
     parser.add_argument("--protect-native", action=argparse.BooleanOptionalAction, default=True,
-                        help="保护高频 GB2312 原生三码位，不让长码字抢位")
+                        help="保护指定字集内的高频原生三码位，不让长码字抢位")
+    parser.add_argument("--protect-native-charset", choices=("all", "frequency", "gbk", "gb2312"), default="gbk",
+                        help="原生三码位保护字集：all=不限，frequency=仅综合字频中出现的字，gbk=常见繁简字，gb2312=简体常用字")
     parser.add_argument("--protect-native-min-score", type=float, default=3000,
                         help="综合字频门槛：原生三码字达到该值才受保护")
     parser.add_argument("--shortcut-candidate-min-score", type=float, default=3000,
@@ -197,6 +206,7 @@ def main():
         count=args.count,
         auto_coverage=args.auto_coverage,
         protect_native=args.protect_native,
+        protect_native_charset=args.protect_native_charset,
         protect_native_min_score=args.protect_native_min_score,
         shortcut_candidate_min_score=args.shortcut_candidate_min_score,
     )
