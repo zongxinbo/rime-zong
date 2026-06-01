@@ -437,7 +437,17 @@ def select_gain_proposal(
     for letter, candidates in candidates_by_key.items():
         if letter in used_keys:
             continue
-        eligible = [item for item in candidates if item.text not in used_chars]
+        eligible = [
+            item
+            for item in candidates
+            if (
+                item.text not in used_chars
+                and (
+                    item.text == current_one.get(letter, "")
+                    or (item.actual_gain or 0) > 0
+                )
+            )
+        ]
         selected = max(
             eligible,
             key=lambda item: (
@@ -477,6 +487,8 @@ def write_report(
     *,
     append_special_xz: bool,
     weights: str,
+    blind: bool,
+    output_path: Path,
 ) -> None:
     lines = [
         "# 一简方案分配对比表",
@@ -486,6 +498,9 @@ def write_report(
         "## 策略",
         "",
         f"- 权重模式：`{weights}`。{describe_weight_profile(weights)}。",
+        f"- 决策模式：`{'blind replacement audit' if blind else 'calibration'}`。"
+        + ("当前正式版仅作为逐键替换收益基线和报告对照，不参与候选保底或主推荐排序；空白建议表示没有正收益替换。"
+           if blind else "当前正式版作为收益基线，并保留校准候选资格。"),
         f"- 每键先按静态规则保留 {GAIN_CANDIDATES_PER_KEY} 个候选，再调用 `shortcut_gain.py` 重放真实 S2/S3，按实际净收益排序输出前 {TOP_CANDIDATES_PER_KEY} 个。",
         "- 总览建议采用一简专用决策层：跨键全局分配唯一主推荐；锚点等级优先，同级内按日常频率优先，真实净收益只作为可行性门槛和辅助信息。等级为 `字根 > 首码 > 尾码 > 包含码`；当前正式版以收益 `0` 作为基线参与比较。",
         "- 同一个字只能在最合理的键位占据一次 `Rank 1`；它仍可保留在其他键位的 `Rank 2+`，供人工比较。",
@@ -505,7 +520,10 @@ def write_report(
         current = current_one.get(letter, "")
         cand = proposal.get(letter)
         suggested = cand.text if cand else ""
-        change = "" if current == suggested else f"{current or '-'} -> {suggested or '-'}"
+        if blind and cand is None:
+            change = "无正收益替换"
+        else:
+            change = "" if current == suggested else f"{current or '-'} -> {suggested or '-'}"
         lines.append(
             f"| {letter} | {ORIGINAL_RADICALS.get(letter, '')} | {current} | "
             f"{format_candidate(cand)} | {change} |"
@@ -520,7 +538,8 @@ def write_report(
             "| Rank | 字 | 当前码 | 实际净收益 | 静态 Score | 频率分 | 省键 | 类型 | 前缀占位 | 说明 |",
             "|---:|---|---|---:|---:|---:|---:|---|---|---|",
         ])
-        for rank, candidate in enumerate(candidates_by_key.get(letter, []), start=1):
+        rank_start = 1 if letter in proposal else 2
+        for rank, candidate in enumerate(candidates_by_key.get(letter, []), start=rank_start):
             lines.append(
                 f"| {rank} | {candidate.text} | `{candidate.code}` | "
                 f"{candidate.actual_gain or 0:+g} | {candidate.score:.8g} | {candidate.base_score:.8g} | "
@@ -540,7 +559,10 @@ def write_report(
             current = current_one.get(letter, "")
             cand = proposal.get(letter)
             suggested = cand.text if cand else ""
-            change = "" if current == suggested else f"{current or '-'} -> {suggested or '-'}"
+            if blind and cand is None:
+                change = "无正收益替换"
+            else:
+                change = "" if current == suggested else f"{current or '-'} -> {suggested or '-'}"
             lines.append(
                 f"| {letter} | {ORIGINAL_RADICALS.get(letter, '')} | {current} | "
                 f"{format_candidate(cand)} | {change} |"
@@ -553,7 +575,8 @@ def write_report(
                 "| Rank | 字 | 当前码 | 实际净收益 | 静态 Score | 频率分 | 省键 | 类型 | 前缀占位 | 说明 |",
                 "|---:|---|---|---:|---:|---:|---:|---|---|---|",
             ])
-            for rank, candidate in enumerate(candidates_by_key.get(letter, []), start=1):
+            rank_start = 1 if letter in proposal else 2
+            for rank, candidate in enumerate(candidates_by_key.get(letter, []), start=rank_start):
                 lines.append(
                     f"| {rank} | {candidate.text} | `{candidate.code}` | "
                     f"{candidate.actual_gain or 0:+g} | {candidate.score:.8g} | {candidate.base_score:.8g} | "
@@ -561,7 +584,7 @@ def write_report(
                 )
             lines.append("")
 
-    ONE_CODE_REPORT_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
+    output_path.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
 
 
 def main() -> None:
@@ -573,6 +596,10 @@ def main() -> None:
                         help="权重模式：sc=现代简体日用优化，sc_balanced=简繁平衡；默认 sc")
     parser.add_argument("--gain-candidates-per-key", type=int, default=8,
                         help="每键进入真实 S2/S3 重放的静态候选数；默认 8，调大可深扫但耗时线性增加")
+    parser.add_argument("--blind", action="store_true",
+                        help="盲测模式：当前正式版仅作为收益基线和报告对照，不参与候选保底或主推荐排序")
+    parser.add_argument("--output", type=Path, default=ONE_CODE_REPORT_PATH,
+                        help=f"报告输出路径；默认 {ONE_CODE_REPORT_PATH}")
     args = parser.parse_args()
     if args.gain_candidates_per_key <= 0:
         parser.error("--gain-candidates-per-key 必须大于 0")
@@ -580,18 +607,19 @@ def main() -> None:
     GAIN_CANDIDATES_PER_KEY = args.gain_candidates_per_key
 
     current_one = load_current_one_codes()
+    decision_current = {} if args.blind else current_one
     scores, _ = load_scores(args.weights)
     char_codes, code_chars = build_code_maps()
     _, candidates_by_key = choose_proposal(
         char_codes,
         code_chars,
         scores,
-        current_one,
+        decision_current,
         append_special_xz=args.append_xz,
     )
     analyzer = ShortcutGainAnalyzer(weights=args.weights)
-    candidates_by_key = add_actual_gains(candidates_by_key, analyzer, current_one)
-    proposal = select_gain_proposal(current_one, candidates_by_key)
+    candidates_by_key = add_actual_gains(candidates_by_key, analyzer, decision_current)
+    proposal = select_gain_proposal(decision_current, candidates_by_key)
     candidates_by_key = rank_report_candidates(candidates_by_key, proposal)
     write_report(
         current_one,
@@ -599,8 +627,10 @@ def main() -> None:
         candidates_by_key,
         append_special_xz=args.append_xz,
         weights=args.weights,
+        blind=args.blind,
+        output_path=args.output,
     )
-    print(f"一简设计报告已保存: {ONE_CODE_REPORT_PATH}")
+    print(f"一简设计报告已保存: {args.output}")
     print("一简方案原型不自动更新；如需定稿，请人工修改 one_code.txt")
 
 
