@@ -6,7 +6,8 @@ Wucang5 三简方案生成脚本
 2. GB2312 保护模式 (gb_only=True): 仅 GB2312 汉字有资格，且仅占据空槽（无 GB2312 原主）。
 3. 关闭保护时：允许长码字与“原主字”(全码=3)竞争，按省码收益扣除原主代价后排序。
 
-`protect_native_min_score` 同时作为三简长码字最低入选得分，避免低频冷字填满尾部空槽。
+`protect_native_min_score` 控制原生三码位保护门槛。
+`shortcut_candidate_min_score` 控制长码字最低入选得分，避免低频冷字填满尾部空槽。
 """
 
 import sys
@@ -54,7 +55,8 @@ def generate_shortcut_3(
     auto_coverage: float = 0.90,
     char_scores: dict[str, int] = None,
     protect_native: bool = True,
-    protect_native_min_score: int | float = 100000,
+    protect_native_min_score: int | float = 3000,
+    shortcut_candidate_min_score: int | float | None = 3000,
 ):
     source_dict = CANGJIE5_DICT_PATH
     output_path = THREE_CODE_PATH
@@ -65,6 +67,8 @@ def generate_shortcut_3(
     # 2. 获取加权得分
     if char_scores is None:
         char_scores = get_weighted_frequencies()
+    if shortcut_candidate_min_score is None:
+        shortcut_candidate_min_score = protect_native_min_score
 
     raw_entries = parse_cangjie_dict(source_dict)
     
@@ -103,7 +107,7 @@ def generate_shortcut_3(
                     candidates_by_code[full_code]["orig"] = (char, score)
         elif len(full_code) > 3:
             score = char_scores.get(char, 0)
-            if score < protect_native_min_score: continue
+            if score < shortcut_candidate_min_score: continue
             if gb_only and not is_gb2312(char): continue
             code3 = full_code[:3] if prefix else full_code[0] + full_code[1] + full_code[-1]
             candidates_by_code[code3]["long"].append((char, score, len(full_code)))
@@ -182,8 +186,10 @@ def main():
     parser.add_argument("--auto-coverage", type=float, default=0.90)
     parser.add_argument("--protect-native", action=argparse.BooleanOptionalAction, default=True,
                         help="保护高频 GB2312 原生三码位，不让长码字抢位")
-    parser.add_argument("--protect-native-min-score", type=float, default=100000,
-                        help="综合字频门槛：原生三码字达到该值才受保护，长码字达到该值才可入选三简")
+    parser.add_argument("--protect-native-min-score", type=float, default=3000,
+                        help="综合字频门槛：原生三码字达到该值才受保护")
+    parser.add_argument("--shortcut-candidate-min-score", type=float, default=3000,
+                        help="综合字频门槛：长码字达到该值才可入选三简")
     args = parser.parse_args()
     generate_shortcut_3(
         gb_only=args.gb_only,
@@ -192,6 +198,7 @@ def main():
         auto_coverage=args.auto_coverage,
         protect_native=args.protect_native,
         protect_native_min_score=args.protect_native_min_score,
+        shortcut_candidate_min_score=args.shortcut_candidate_min_score,
     )
 
 if __name__ == "__main__":
