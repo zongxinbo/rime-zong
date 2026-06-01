@@ -14,9 +14,9 @@ from .paths import DEFAULT_FULLCODE_YIELD_MIN_SCORE
 
 
 def load_shortcut_entries(shortcut_paths: dict) -> tuple[list[tuple[str, str, int | float]], set[str]]:
-    """加载 Z/S1/S2/S3/S4 简码原型。"""
+    """加载字根码和 S1/S2/S3/S4 简码原型。"""
     shortcut_entries: list[tuple[str, str, int | float]] = []
-    z_root_chars: set[str] = set()
+    root_chars: set[str] = set()
 
     def load_shortcut(path: Path | None, priority: int | float) -> None:
         if not path or not path.exists():
@@ -28,15 +28,15 @@ def load_shortcut_entries(shortcut_paths: dict) -> tuple[list[tuple[str, str, in
                     char, code = parts[0], parts[1]
                     shortcut_entries.append((char, code, priority))
                     if priority == 0:
-                        z_root_chars.add(char)
+                        root_chars.add(char)
 
-    load_shortcut(shortcut_paths.get("z"), 0)
+    load_shortcut(shortcut_paths.get("root"), 0)
     load_shortcut(shortcut_paths.get(1), 1)
     load_shortcut(shortcut_paths.get("fixed_prefix"), 1.5)
     load_shortcut(shortcut_paths.get(2), 2)
     load_shortcut(shortcut_paths.get(3), 3)
     load_shortcut(shortcut_paths.get(4), 4)
-    return shortcut_entries, z_root_chars
+    return shortcut_entries, root_chars
 
 
 def collect_char_full_codes(
@@ -59,14 +59,14 @@ def collect_char_full_codes(
 def build_fullcode_entries(
     char_full_codes: dict[str, list[str]],
     *,
-    z_root_chars: set[str],
+    root_chars: set[str],
     used_text_code: set[tuple[str, str]],
     char_freqs: dict[str, int],
     max_code_length: int,
 ) -> list[tuple[str, str, int]]:
     fullcode_entries: list[tuple[str, str, int]] = []
     for char, full_codes in char_full_codes.items():
-        if char in z_root_chars:
+        if char in root_chars:
             full_codes = [code for code in full_codes if len(code) != 1]
         freq = char_freqs.get(char, 0)
         for full_code in full_codes:
@@ -241,7 +241,7 @@ def generate_dict(
     )
 
     print("正在加载简码规则...")
-    shortcut_entries, z_root_chars = load_shortcut_entries(shortcut_paths)
+    shortcut_entries, root_chars = load_shortcut_entries(shortcut_paths)
 
     print("正在生成单字...")
     if char_freqs is None:
@@ -252,7 +252,7 @@ def generate_dict(
     used_text_code = {(char, code) for char, code, _ in shortcut_entries}
     fullcode_entries = build_fullcode_entries(
         char_full_codes,
-        z_root_chars=z_root_chars,
+        root_chars=root_chars,
         used_text_code=used_text_code,
         char_freqs=char_freqs,
         max_code_length=max_code_length,

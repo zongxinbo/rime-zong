@@ -22,7 +22,7 @@ WUCANG5_DICT_PATH = CANGJIE_SCHEMAS_DIR / "wucang5" / "wucang5.dict.yaml"
 
 CANGJIE_DIR = REPO_ROOT / "scripts" / "cangjie"
 PROTOTYPES_DIR = CANGJIE_DIR / "prototypes"
-Z_CODE_PATH = PROTOTYPES_DIR / "z_code.txt"
+ROOT_CODE_PATH = PROTOTYPES_DIR / "root_code.txt"
 ONE_CODE_PATH = PROTOTYPES_DIR / "one_code.txt"
 ONE_CODE_REPORT_PATH = PROTOTYPES_DIR / "one_code_report.md"
 FIXED_PREFIX_CODE_PATH = PROTOTYPES_DIR / "fixed_prefix_code.txt"

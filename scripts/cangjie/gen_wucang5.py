@@ -23,7 +23,7 @@ from core.cangjie_builder import (
     THREE_CODE_PATH,
     TWO_CODE_PATH,
     WUCANG5_DICT_PATH,
-    Z_CODE_PATH,
+    ROOT_CODE_PATH,
     generate_dict,
     get_weighted_frequencies,
     SC_FREQ_WEIGHTS,
@@ -103,7 +103,7 @@ def main():
         "fixed_prefix": FIXED_PREFIX_CODE_PATH,
         2: TWO_CODE_PATH,
         3: THREE_CODE_PATH,
-        'z': Z_CODE_PATH,
+        "root": ROOT_CODE_PATH,
     }
     s4_count_text = "不限制" if args.s4_count == 0 else str(args.s4_count)
     s4_level2_text = "不过滤" if args.s4_level2_min_score == 0 else str(args.s4_level2_min_score)
