@@ -457,7 +457,9 @@ python scripts/cangjie/core/shortcut_gain.py --layer fixed-prefix --code xp --ch
 
 需要执行无人工定稿偏置的逐键替换审计时，运行 `gen_shortcut_1.py --blind --output <path>`。盲测仍以当前正式版作为替换净收益基线和报告对照，但当前字不再获得静态候选保底、零收益参选资格或主推荐排序优待。该模式不是从空白状态独立生成完整一简方案；空白建议表示没有正收益替换。
 
-同一 Unicode 字可能因地区字形存在多个普通仓颉码。大陆字形首选码表 `data/sc_glyph_preferred_code.txt` 只处理 GBK 范围内的一字多码汉字，并排除最终结果中的 `x/z` 前缀编码：先从 `data/cj5-90000.txt` 与 Cangjie5 源码表的唯一普通码交集离线提取，再通过 `core/fetch_sc_glyph_preferred_codes.py` 分批查询教育大学汉语多功能字库中带 `GBK` 的字形记录补齐剩余项。在线结果优先采用唯一 GBK 普通码；若 GBK 码带 `x/xx...` 前缀，则先尝试去掉前缀后直接命中源码候选，再尝试将其唯一展开为以该缩略码开头的源码候选。仍无法唯一判断的字写入 `data/sc_glyph_unresolved_code.txt` 供人工确认，不应自动选择最短兼容码作为大陆字形退路。`--sort-by-code` 是独立的纯排序操作，只整理现有输出文件，不读取码表、合并缓存或访问网络。
+同一 Unicode 字可能因地区字形存在多个普通仓颉码。所有简码生成器和 `shortcut_gain.py` 在分析一字多码时，都先按当前 `--weights` 模式名经过 `core/glyph_codes.py` 过滤：模式名包含 `sc` 时加载 `data/sc_glyph_preferred_code.txt`，否则模式名包含 `tc` 时加载 `data/tc_glyph_preferred_code.txt`。例如 `sc_balanced` 虽然混入繁体语料，仍按 `sc` 大陆字形处理。尚未建立的区域表按空表处理。最终字典仍保留兼容全码，但自动 `z` 后缀、自然 `z/x` 前缀和结构后缀只从过滤后的地区字形视图派生。
+
+大陆字形首选码表 `data/sc_glyph_preferred_code.txt` 只处理 GBK 范围内的一字多码汉字，并排除最终结果中的 `x/z` 前缀编码：先从 `data/cj5-90000.txt` 与 Cangjie5 源码表的唯一普通码交集离线提取，再通过 `core/fetch_sc_glyph_preferred_codes.py` 分批查询教育大学汉语多功能字库中带 `GBK` 的字形记录补齐剩余项。在线结果优先采用唯一 GBK 普通码；若 GBK 码带 `x/xx...` 前缀，则先尝试去掉前缀后直接命中源码候选，再尝试将其唯一展开为以该缩略码开头的源码候选。仍无法唯一判断的字写入 `data/sc_glyph_unresolved_code.txt` 供人工确认，不应自动选择最短兼容码作为大陆字形退路。`--sort-by-code` 是独立的纯排序操作，只整理现有输出文件，不读取码表、合并缓存或访问网络。
 
 该重放算法衡量的是码长层面的净收益，用于排除明显低效方案；最终定稿仍需结合键位联想、简繁展开方式和 `summary.py` 的五个动态选重指标。
 

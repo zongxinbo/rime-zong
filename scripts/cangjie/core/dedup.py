@@ -23,6 +23,7 @@ def unique_seen_entries(entries: list[DictEntry]) -> list[DictEntry]:
 def build_z_suffix_entries(
     all_entries: list[DictEntry],
     *,
+    occupied_entries: list[DictEntry] | None = None,
     used_text_code: set[tuple[str, str]],
     shortcut_leader_chars: set[str],
     char_freqs: dict[str, int],
@@ -34,7 +35,8 @@ def build_z_suffix_entries(
     for entry in all_entries:
         code_groups[entry[0]].append(entry)
 
-    occupied_codes = {entry[0] for entry in all_entries}
+    occupied_source = all_entries if occupied_entries is None else occupied_entries
+    occupied_codes = {entry[0] for entry in occupied_source}
     for code, entries in code_groups.items():
         if code.startswith(("z", "x")) or len(code) >= max_code_length:
             continue
@@ -89,6 +91,7 @@ def natural_dedup_prefix_codes(code: str) -> tuple[str, ...]:
 def build_dedup_prefix_entries(
     all_entries: list[DictEntry],
     *,
+    occupied_entries: list[DictEntry] | None = None,
     used_text_code: set[tuple[str, str]],
     shortcut_leader_chars: set[str],
     char_freqs: dict[str, int],
@@ -124,7 +127,8 @@ def build_dedup_prefix_entries(
     candidates.sort(key=lambda item: (-item[0], item[1], item[2], item[3]))
 
     prefix_entries: list[DictEntry] = []
-    occupied_codes = {entry[0] for entry in all_entries}
+    occupied_source = all_entries if occupied_entries is None else occupied_entries
+    occupied_codes = {entry[0] for entry in occupied_source}
     allocated_chars = set()
     for score, _, source_code, char in candidates:
         if char in allocated_chars:

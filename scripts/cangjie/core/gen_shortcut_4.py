@@ -27,6 +27,8 @@ from core.cangjie_builder import (
     TWO_CODE_PATH,
     ROOT_CODE_PATH,
 )
+from core.glyph_codes import filter_glyph_preferred_entries
+from core.weight_profiles import WEIGHT_PROFILES, get_weight_profile
 
 BALANCED_NATIVE4_RATIO = 3.0
 DEFAULT_LEVEL2_MIN_SCORE = 1000
@@ -51,6 +53,7 @@ def generate_shortcut_4(
     count: int = 0,
     level2_min_score: int | float = DEFAULT_LEVEL2_MIN_SCORE,
     char_scores: dict[str, int | float] | None = None,
+    weights: str = "sc",
 ):
     source_dict = CANGJIE5_DICT_PATH
     output_path = FOUR_CODE_PATH
@@ -64,9 +67,12 @@ def generate_shortcut_4(
 
     excluded_chars = _load_excluded_chars()
     if char_scores is None:
-        char_scores = get_weighted_frequencies()
+        char_scores = get_weighted_frequencies(get_weight_profile(weights))
 
-    raw_entries = parse_cangjie_dict(source_dict)
+    raw_entries = filter_glyph_preferred_entries(
+        parse_cangjie_dict(source_dict),
+        weights,
+    )
 
     native4_chars = defaultdict(set)
     for e in raw_entries:
@@ -176,11 +182,14 @@ def main():
     parser.add_argument("--s4-count", type=int, default=0, help="四简数量限制；0 表示不限制")
     parser.add_argument("--s4-level2-min-score", type=float, default=DEFAULT_LEVEL2_MIN_SCORE,
                         help="GB2312 二级字进入四简的最低综合字频；0 表示不过滤二级字")
+    parser.add_argument("--weights", choices=tuple(WEIGHT_PROFILES), default="sc",
+                        help="字频权重模式；默认 sc")
     args = parser.parse_args()
     generate_shortcut_4(
         mode=args.s4_mode,
         count=args.s4_count,
         level2_min_score=args.s4_level2_min_score,
+        weights=args.weights,
     )
 
 

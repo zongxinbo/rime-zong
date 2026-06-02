@@ -2,11 +2,12 @@
 # encoding: utf-8
 """
 纯算法生成 z?/x? 固定二简避重码表 (fixed_prefix_code.txt)
-根据 SC_BALANCED_FREQ_WEIGHTS 归一化字频挑选 52 个最需要救援的繁简常用字，
+根据可选权重模式归一化字频挑选 52 个最需要救援的繁简常用字，
 并根据用户的多级直觉流（首键优先 -> 尾键其次 -> 包含键第三 -> 兜底第四）进行键位智能映射。
 """
 
 import sys
+import argparse
 from pathlib import Path
 from collections import defaultdict
 
@@ -15,13 +16,14 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 from core.cangjie_builder import (
     CANGJIE5_DICT_PATH,
     ONE_CODE_PATH,
-    Z_CODE_PATH,
+    ROOT_CODE_PATH,
     FIXED_PREFIX_CODE_PATH,
-    SC_BALANCED_FREQ_WEIGHTS,
     get_weighted_frequencies,
     parse_cangjie_dict,
     is_han_char,
 )
+from core.glyph_codes import filter_glyph_preferred_entries
+from core.weight_profiles import WEIGHT_PROFILES, get_weight_profile
 
 def load_excluded_chars() -> set[str]:
     """加载需要排除的一简字和字根字。"""
@@ -37,8 +39,8 @@ def load_excluded_chars() -> set[str]:
                     excluded.add(parts[0])
                     
     # 2. 字根字/特殊键本体字
-    if Z_CODE_PATH.exists():
-        for line in Z_CODE_PATH.read_text(encoding="utf-8").splitlines():
+    if ROOT_CODE_PATH.exists():
+        for line in ROOT_CODE_PATH.read_text(encoding="utf-8").splitlines():
             line = line.strip()
             if line and not line.startswith("#"):
                 parts = line.split("\t")
@@ -50,8 +52,8 @@ def load_excluded_chars() -> set[str]:
 def load_excluded_codes() -> set[str]:
     """加载已被占用的 z? 或 x? 二码编码。"""
     excluded = set()
-    if Z_CODE_PATH.exists():
-        for line in Z_CODE_PATH.read_text(encoding="utf-8").splitlines():
+    if ROOT_CODE_PATH.exists():
+        for line in ROOT_CODE_PATH.read_text(encoding="utf-8").splitlines():
             line = line.strip()
             if line and not line.startswith("#"):
                 parts = line.split("\t")
@@ -62,12 +64,18 @@ def load_excluded_codes() -> set[str]:
     return excluded
 
 def main():
+    parser = argparse.ArgumentParser(description="生成 z?/x? 固定二简避重码表")
+    parser.add_argument("--weights", choices=tuple(WEIGHT_PROFILES), default="sc_balanced",
+                        help="字频权重模式；默认 sc_balanced")
+    args = parser.parse_args()
+
     print("==================================================")
     print("开始生成算法版 z?/x? 避重简码...")
     
     # 1. 加载归一化字频模型
-    print("正在加载归一化加权字频 (sc_balanced)...")
-    char_freqs = get_weighted_frequencies(SC_BALANCED_FREQ_WEIGHTS)
+    print(f"正在加载归一化加权字频 ({args.weights})...")
+    weights = get_weight_profile(args.weights)
+    char_freqs = get_weighted_frequencies(weights)
     
     # 2. 读取排他字集
     excluded = load_excluded_chars()
@@ -77,7 +85,7 @@ def main():
     
     # 3. 解析原始仓颉全码字典，计算重码组与候选深度
     print(f"正在读取原始全码字典: {CANGJIE5_DICT_PATH} ...")
-    entries = parse_cangjie_dict(CANGJIE5_DICT_PATH)
+    entries = filter_glyph_preferred_entries(parse_cangjie_dict(CANGJIE5_DICT_PATH), args.weights)
     
     # 统计每个字对应的全码（取第一个/最短的全码用来做联想映射）
     char_to_code = {}
@@ -89,7 +97,7 @@ def main():
         # 排除以 z 或 x 开头的特种编码
         if entry.code.startswith(("z", "x")):
             continue
-        if entry.text not in char_to_code:
+        if entry.text not in char_to_code or len(entry.code) < len(char_to_code[entry.text]):
             char_to_code[entry.text] = entry.code
         # 归纳到重码桶中
         if entry.text not in code_to_chars[entry.code]:

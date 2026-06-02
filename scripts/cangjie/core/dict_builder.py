@@ -8,6 +8,7 @@ from .charset import is_common_han_char, is_han_char, suffix_structure_charset_a
 from .code_utils import build_fullcode_yield_order, build_shortcut_leader_chars, project_code
 from .dedup import build_dedup_prefix_entries, build_z_suffix_entries, unique_seen_entries
 from .frequency import parse_frequency_file
+from .glyph_codes import get_glyph_preferred_codes
 from .ids import load_ids_structure_map
 from .io import parse_cangjie_dict
 from .paths import DEFAULT_FULLCODE_YIELD_MIN_SCORE
@@ -107,6 +108,7 @@ def build_base_entries(
 def build_structure_suffix_entries(
     all_entries: list[tuple[str, int, int, int, str]],
     *,
+    occupied_entries: list[tuple[str, int, int, int, str]] | None = None,
     used_text_code: set[tuple[str, str]],
     shortcut_leader_chars: set[str],
     char_freqs: dict[str, int],
@@ -129,7 +131,8 @@ def build_structure_suffix_entries(
     for entry in all_entries:
         code_groups_struct[entry[0]].append(entry)
 
-    occupied_codes = {entry[0] for entry in all_entries}
+    occupied_source = all_entries if occupied_entries is None else occupied_entries
+    occupied_codes = {entry[0] for entry in occupied_source}
     protected_codes: set[str] = set()
     if suffix_structure_occupied_policy == "protect-min-score":
         for code, entries in code_groups_struct.items():
@@ -231,6 +234,7 @@ def generate_dict(
     suffix_structure_occupied_policy: str = "protect-min-score",
     suffix_structure_protect_min_score: float = 100000,
     suffix_structure_keymap: str = "zxwa",
+    weights: str | None = None,
 ):
     """生成最终字典。"""
     print(f"正在解析原始仓颉编码: {source_dict}...")
@@ -264,11 +268,25 @@ def generate_dict(
         fullcode_yield_min_score=fullcode_yield_min_score,
     )
     shortcut_leader_chars = build_shortcut_leader_chars(all_entries)
+    shortcut_source_entries = list(all_entries)
+    if weights is not None:
+        preferred_codes = {
+            text: project_code(code, max_code_length)
+            for text, code in get_glyph_preferred_codes(weights).items()
+        }
+        shortcut_source_entries = [
+            entry
+            for entry in all_entries
+            if entry[1] < 5
+            or entry[4] not in preferred_codes
+            or entry[0] == preferred_codes[entry[4]]
+        ]
 
     z_suffix_count = 0
     if suffix_z:
         suffix_entries = build_z_suffix_entries(
-            all_entries,
+            shortcut_source_entries,
+            occupied_entries=all_entries,
             used_text_code=used_text_code,
             shortcut_leader_chars=shortcut_leader_chars,
             char_freqs=char_freqs,
@@ -277,12 +295,15 @@ def generate_dict(
         z_suffix_count = len(suffix_entries)
         all_entries.extend(suffix_entries)
         all_entries.sort()
+        shortcut_source_entries.extend(suffix_entries)
+        shortcut_source_entries.sort()
     print(f"z 后缀消重：生成 {z_suffix_count} 个条目")
 
     dedup_prefix_count = 0
     if dedup_prefix:
         dedup_prefix_entries = build_dedup_prefix_entries(
-            all_entries,
+            shortcut_source_entries,
+            occupied_entries=all_entries,
             used_text_code=used_text_code,
             shortcut_leader_chars=shortcut_leader_chars,
             char_freqs=char_freqs,
@@ -293,6 +314,8 @@ def generate_dict(
         dedup_prefix_count = len(dedup_prefix_entries)
         all_entries.extend(dedup_prefix_entries)
         all_entries.sort()
+        shortcut_source_entries.extend(dedup_prefix_entries)
+        shortcut_source_entries.sort()
     print(
         f"z/x 前缀消重：生成 {dedup_prefix_count} 个条目"
         f" 字集={dedup_prefix_charset} 最低分={dedup_prefix_min_score:g}"
@@ -301,7 +324,8 @@ def generate_dict(
     structure_suffix_count = 0
     if suffix_structure:
         structure_suffix_entries = build_structure_suffix_entries(
-            all_entries,
+            shortcut_source_entries,
+            occupied_entries=all_entries,
             used_text_code=used_text_code,
             shortcut_leader_chars=shortcut_leader_chars,
             char_freqs=char_freqs,
