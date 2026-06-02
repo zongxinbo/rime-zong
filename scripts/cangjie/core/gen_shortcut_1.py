@@ -8,11 +8,8 @@
 1. 权重可通过 `--weights` 选择；一简默认使用日常简体优先 `sc`。
 2. 普通位先出，`x/z` 只有带参数时才追加到报告末尾：
    - 字根字/首码匹配优先，高频且全码包含该键时允许作为跨位候选；
-   - 普通简码难覆盖的长码字会加权；
-   - 当前码长为 2、同码候选数 >= 3、且不是首选的字会加权。
-3. 简码可得性只看 Cangjie5 源码表：
-   - 如果候选字的二码/三码前缀被源码表中的高频原生字占据，说明普通简码更难抢到；
-   - 这类字在同频率、同省键收益下优先级更高。
+   - `a-z` 一简只按日常字频和记忆锚点评分，不加入码长、重码或前缀占位救援权重；
+   - `x/z` 没有普通仓颉锚点，追加时按日常字频生成全局候选。
 """
 
 from __future__ import annotations
@@ -210,7 +207,6 @@ def one_key_candidates(
         is_radical = text == radical
         is_current = allow_current and text == current_text
         saved = max(len(code) - 1, 0)
-        pressure_factor, pressure_note = shortcut_pressure(text, code, code_chars)
         if is_radical:
             kind = "字根"
             anchor_factor = 1.30
@@ -233,20 +229,16 @@ def one_key_candidates(
         if is_current:
             note = f"当前人工定稿；{note}"
 
-        saved_factor = max(saved, 1)
-        blockage_factor, blockage = prefix_blockage(text, code, code_chars, scores)
-        note_parts = [note]
-        if pressure_note:
-            note_parts.append(pressure_note)
+        _, blockage = prefix_blockage(text, code, code_chars, scores)
         candidates.append(
             Candidate(
                 text=text,
                 code=code,
-                score=base * saved_factor * anchor_factor * blockage_factor * pressure_factor,
+                score=base * anchor_factor,
                 base_score=base,
                 saved_keys=saved,
                 kind=kind,
-                note="；".join(note_parts),
+                note=note,
                 blockage=blockage,
             )
         )
@@ -260,7 +252,7 @@ def one_key_candidates(
     return top
 
 
-def global_key_candidates(
+def global_frequency_candidates(
     char_codes: dict[str, list[str]],
     code_chars: dict[str, list[str]],
     scores: dict[str, float],
@@ -276,20 +268,17 @@ def global_key_candidates(
         code = shortest_code(char_codes, text)
         if not code:
             continue
-        pressure_factor, pressure_note = shortcut_pressure(text, code, code_chars)
-        if not pressure_note:
-            continue
-        saved = max(len(code) - 1, 1)
-        blockage_factor, blockage = prefix_blockage(text, code, code_chars, scores)
+        saved = max(len(code) - 1, 0)
+        _, blockage = prefix_blockage(text, code, code_chars, scores)
         candidates.append(
             Candidate(
                 text=text,
                 code=code,
-                score=base * saved * 0.90 * blockage_factor * pressure_factor,
+                score=base,
                 base_score=base,
                 saved_keys=saved,
                 kind="全局",
-                note=pressure_note,
+                note="无普通仓颉锚点，按日常频率",
                 blockage=blockage,
             )
         )
@@ -354,7 +343,7 @@ def choose_proposal(
 
     if append_special_xz:
         for letter in SPECIAL_LETTERS:
-            candidates = global_key_candidates(
+            candidates = global_frequency_candidates(
                 char_codes,
                 code_chars,
                 scores,
@@ -504,15 +493,15 @@ def write_report(
         "",
         f"- 权重模式：`{weights}`。{describe_weight_profile(weights)}。",
         f"- 决策模式：`{'blind replacement audit' if blind else 'calibration'}`。"
-        + ("当前正式版仅作为逐键替换收益基线和报告对照，不参与候选保底或主推荐排序；空白建议表示没有正收益替换。"
+        + ("当前正式版不参与候选保底；若凭自身频率和锚点自然进入短名单，则以收益 `0` 的基线正常参与主推荐排序。"
            if blind else "当前正式版作为收益基线，并保留校准候选资格。"),
         f"- 每键先按静态规则保留 {GAIN_CANDIDATES_PER_KEY} 个候选，再调用 `shortcut_gain.py` 重放真实 S2/S3，按实际净收益排序输出前 {TOP_CANDIDATES_PER_KEY} 个。",
         "- 总览建议采用一简专用决策层：跨键全局分配唯一主推荐；锚点等级优先，同级内按日常频率优先，真实净收益只作为可行性门槛和辅助信息。等级为 `字根 > 首码 > 尾码 > 包含码`；当前正式版以收益 `0` 作为基线参与比较。",
         "- 同一个字只能在最合理的键位占据一次 `Rank 1`；它仍可保留在其他键位的 `Rank 2+`，供人工比较。",
         "- 默认先出普通位，`x/z` 仅在追加模式下放到报告末尾。",
-        "- 普通位统一按简繁混合频率、省键收益、按键记忆锚点、源码表前缀占位和多候选二码压力评分。",
-        "- 字根字/首码匹配优先；高频包含键位可跨位；普通简码难覆盖的字获得加权。",
-        "- 简码可得性：只看 `cangjie5.dict.yaml` 源码表；二码/三码前缀若被高频原生字占据，则提高候选优先级。",
+        "- `a-z` 一简只按日常字频和按键记忆锚点评分，不加入码长、重码或前缀占位救援权重。",
+        "- 字根字/首码匹配优先；高频包含键位可跨位。真实 S2/S3 重放仍用于展示副作用和排除负收益替换。",
+        "- `x/z` 没有普通仓颉锚点，追加时按日常字频生成全局候选；普通二三四简和自动消重层不受影响。",
         "- 当前正式版来自 `one_code.txt`，最终是否采用建议仍需人工定稿。",
         "",
         "## 总览",
@@ -623,8 +612,27 @@ def main() -> None:
         append_special_xz=args.append_xz,
     )
     analyzer = ShortcutGainAnalyzer(weights=args.weights)
-    candidates_by_key = add_actual_gains(candidates_by_key, analyzer, decision_current)
-    proposal = select_gain_proposal(decision_current, candidates_by_key)
+    candidates_by_key = add_actual_gains(candidates_by_key, analyzer, current_one)
+    proposal = select_gain_proposal(
+        current_one,
+        {
+            letter: candidates_by_key[letter]
+            for letter in DEFAULT_LETTERS
+            if letter in candidates_by_key
+        },
+    )
+    if args.append_xz:
+        used_chars = {candidate.text for candidate in proposal.values()}
+        special_candidates = {
+            letter: [
+                candidate
+                for candidate in candidates_by_key.get(letter, [])
+                if candidate.text not in used_chars
+            ]
+            for letter in SPECIAL_LETTERS
+        }
+        candidates_by_key.update(special_candidates)
+        proposal.update(select_gain_proposal(current_one, special_candidates))
     candidates_by_key = rank_report_candidates(candidates_by_key, proposal)
     write_report(
         current_one,
