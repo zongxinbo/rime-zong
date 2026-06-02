@@ -20,6 +20,7 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from core.charset import is_common_han_char, shortcut_charset_allows
 from core.frequency import get_weighted_frequencies
+from core.glyph_codes import filter_glyph_preferred_entries
 from core.io import parse_cangjie_dict
 from core.paths import (
     CANGJIE5_DICT_PATH,
@@ -101,7 +102,11 @@ class ShortcutGainAnalyzer:
 
         self.shortest_full_codes: dict[str, str] = {}
         self.full_code_chars: dict[str, list[str]] = defaultdict(list)
-        for entry in parse_cangjie_dict(CANGJIE5_DICT_PATH):
+        entries = filter_glyph_preferred_entries(
+            parse_cangjie_dict(CANGJIE5_DICT_PATH),
+            weights,
+        )
+        for entry in entries:
             if not is_common_han_char(entry.text) or entry.code.startswith(("x", "z")):
                 continue
             if entry.text not in self.full_code_chars[entry.code]:

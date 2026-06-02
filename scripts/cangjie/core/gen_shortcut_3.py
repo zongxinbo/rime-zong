@@ -31,6 +31,8 @@ from core.cangjie_builder import (
     TWO_CODE_PATH,
     ROOT_CODE_PATH,
 )
+from core.glyph_codes import filter_glyph_preferred_entries
+from core.weight_profiles import WEIGHT_PROFILES, get_weight_profile
 
 NATIVE_3_PENALTY_RATIO = 1.2
 
@@ -61,6 +63,7 @@ def generate_shortcut_3(
     protect_native_charset: str = "gbk",
     protect_native_min_score: int | float = 3000,
     shortcut_candidate_min_score: int | float | None = 3000,
+    weights: str = "sc",
 ):
     source_dict = CANGJIE5_DICT_PATH
     output_path = THREE_CODE_PATH
@@ -70,11 +73,14 @@ def generate_shortcut_3(
 
     # 2. 获取加权得分
     if char_scores is None:
-        char_scores = get_weighted_frequencies()
+        char_scores = get_weighted_frequencies(get_weight_profile(weights))
     if shortcut_candidate_min_score is None:
         shortcut_candidate_min_score = protect_native_min_score
 
-    raw_entries = parse_cangjie_dict(source_dict)
+    raw_entries = filter_glyph_preferred_entries(
+        parse_cangjie_dict(source_dict),
+        weights,
+    )
     
     # 统计重码桶与候选深度
     code_to_chars = defaultdict(list)
@@ -200,6 +206,8 @@ def main():
                         help="综合字频门槛：原生三码字达到该值才受保护")
     parser.add_argument("--shortcut-candidate-min-score", type=float, default=3000,
                         help="综合字频门槛：长码字达到该值才可入选三简")
+    parser.add_argument("--weights", choices=tuple(WEIGHT_PROFILES), default="sc",
+                        help="字频权重模式；默认 sc")
     args = parser.parse_args()
     generate_shortcut_3(
         gb_only=args.gb_only,
@@ -210,6 +218,7 @@ def main():
         protect_native_charset=args.protect_native_charset,
         protect_native_min_score=args.protect_native_min_score,
         shortcut_candidate_min_score=args.shortcut_candidate_min_score,
+        weights=args.weights,
     )
 
 if __name__ == "__main__":

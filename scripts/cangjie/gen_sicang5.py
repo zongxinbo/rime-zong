@@ -82,6 +82,7 @@ def main():
         protect_native_charset=args.protect_native_charset,
         protect_native_min_score=args.protect_native_min_score,
         shortcut_candidate_min_score=args.shortcut_candidate_min_score,
+        weights=args.weights,
     )
 
     print("正在生成三简原型...")
@@ -94,6 +95,7 @@ def main():
         protect_native_charset=args.protect_native_charset,
         protect_native_min_score=args.protect_native_min_score,
         shortcut_candidate_min_score=args.shortcut_candidate_min_score,
+        weights=args.weights,
     )
 
     print("=" * 50)
@@ -122,6 +124,7 @@ def main():
         suffix_structure_occupied_policy=args.suffix_structure_occupied_policy,
         suffix_structure_protect_min_score=args.suffix_structure_protect_min_score,
         suffix_structure_keymap=args.suffix_structure_keymap,
+        weights=args.weights,
     )
 
 if __name__ == "__main__":

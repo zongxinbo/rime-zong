@@ -84,6 +84,7 @@ def main():
         protect_native_charset=args.protect_native_charset,
         protect_native_min_score=args.protect_native_min_score,
         shortcut_candidate_min_score=args.shortcut_candidate_min_score,
+        weights=args.weights,
     )
 
     print("正在生成三简原型...")
@@ -96,6 +97,7 @@ def main():
         protect_native_charset=args.protect_native_charset,
         protect_native_min_score=args.protect_native_min_score,
         shortcut_candidate_min_score=args.shortcut_candidate_min_score,
+        weights=args.weights,
     )
 
     shortcut_paths = {
@@ -114,6 +116,7 @@ def main():
             count=args.s4_count,
             level2_min_score=args.s4_level2_min_score,
             char_scores=char_scores,
+            weights=args.weights,
         )
         shortcut_paths[4] = FOUR_CODE_PATH
     else:
@@ -140,6 +143,7 @@ def main():
         dedup_prefix=args.dedup_prefix,
         dedup_prefix_charset=args.dedup_prefix_charset,
         dedup_prefix_min_score=args.dedup_prefix_min_score,
+        weights=args.weights,
     )
 
 if __name__ == "__main__":

@@ -32,6 +32,7 @@ from core.cangjie_builder import (
     parse_cangjie_dict,
 )
 from core.frequency import FREQUENCY_SCORE_SCALE
+from core.glyph_codes import filter_glyph_preferred_entries
 from core.shortcut_gain import ShortcutGainAnalyzer
 from core.weight_profiles import describe_weight_profile, get_weight_profile
 
@@ -91,10 +92,14 @@ def load_scores(weights: str = "sc") -> tuple[dict[str, float], dict[str, dict[s
     }, {}
 
 
-def build_code_maps() -> tuple[dict[str, list[str]], dict[str, list[str]]]:
+def build_code_maps(weights: str = "sc") -> tuple[dict[str, list[str]], dict[str, list[str]]]:
     char_codes: dict[str, list[str]] = defaultdict(list)
     code_chars: dict[str, list[str]] = defaultdict(list)
-    for entry in parse_cangjie_dict(CANGJIE5_DICT_PATH):
+    entries = filter_glyph_preferred_entries(
+        parse_cangjie_dict(CANGJIE5_DICT_PATH),
+        weights,
+    )
+    for entry in entries:
         if not is_han_char(entry.text) or entry.code.startswith(("x", "z")):
             continue
         char_codes[entry.text].append(entry.code)
@@ -609,7 +614,7 @@ def main() -> None:
     current_one = load_current_one_codes()
     decision_current = {} if args.blind else current_one
     scores, _ = load_scores(args.weights)
-    char_codes, code_chars = build_code_maps()
+    char_codes, code_chars = build_code_maps(args.weights)
     _, candidates_by_key = choose_proposal(
         char_codes,
         code_chars,
