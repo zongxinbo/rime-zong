@@ -64,3 +64,6 @@ SC_BALANCED_FREQ_WEIGHTS = {
     "Taiwan": 0.22,
     "Guji": 0.18
 }
+TC_FREQ_WEIGHTS = {
+    "Taiwan": 1.0,
+}

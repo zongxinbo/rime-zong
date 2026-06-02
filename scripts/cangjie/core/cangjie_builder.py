@@ -56,6 +56,7 @@ from .models import Entry, FrequencyEntry, OutputEntry
 from .paths import (
     SC_FREQ_WEIGHTS,
     SC_BALANCED_FREQ_WEIGHTS,
+    TC_FREQ_WEIGHTS,
     BLCU_CHAR_FREQ_PATH,
     CANGJIE5_DICT_PATH,
     CANGJIE_DIR,
@@ -105,6 +106,7 @@ __all__ = [
     "FREQ_PATHS",
     "SC_FREQ_WEIGHTS",
     "SC_BALANCED_FREQ_WEIGHTS",
+    "TC_FREQ_WEIGHTS",
     "FOUR_CODE_PATH",
     "FrequencyEntry",
     "GUJI_CHAR_FREQ_PATH",
