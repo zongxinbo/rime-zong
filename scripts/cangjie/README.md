@@ -29,7 +29,7 @@ python scripts/cangjie/core/shortcut_gain.py --layer fixed-prefix --code xp --ch
 
 `gen_shortcut_1.py` 默认每键重放静态 Top 8。需要扩大深扫范围时使用 `--gain-candidates-per-key`，耗时近似线性增长。
 
-`gen_shortcut_1.py --blind` 用于检验人工定稿是否会由算法自然浮现。盲测仍以当前正式版计算替换净收益并输出对照，但不会让当前字获得候选保底或主推荐参选特权。建议配合 `--output` 写入单独报告。
+`gen_shortcut_1.py --blind` 用于执行无人工定稿偏置的逐键替换审计。盲测仍以当前正式版计算替换净收益并输出对照，但不会让当前字获得候选保底或主推荐参选特权。它不是从空白状态独立生成完整一简方案；空白建议表示没有正收益替换。建议配合 `--output` 写入单独报告。
 
 `SC_FREQ_WEIGHTS` 使用现代简体日用语料共识自动优化。重算比例：
 
@@ -38,6 +38,24 @@ python scripts/cangjie/core/optimize_sc_weights.py
 ```
 
 脚本将口语、字幕、知乎和北语字频各自归一化后等权作为目标，以平均 Jensen-Shannon 距离最小化搜索混合比例。`Essay` 可参与候选混合，但当前最优解会将其剔除为零权重。
+
+同一 Unicode 字可能因地区字形存在多个仓颉码。生成大陆字形首选码表时，先从 `data/cj5-90000.txt` 离线提取可唯一匹配的普通码，再通过教育大学汉语多功能字库中带 `GBK` 的字形记录补齐剩余歧义字：
+
+```powershell
+# 第一步：只读取本地码表，不访问网络
+python scripts/cangjie/core/fetch_sc_glyph_preferred_codes.py --offline-only
+
+# 第二步：每次最多查询 150 个剩余歧义字；换 VPN 节点后重复运行
+python scripts/cangjie/core/fetch_sc_glyph_preferred_codes.py --workers 2 --delay 1 --limit 150
+
+# 全部确认后仅整理现有文件顺序，不读取码表、不合并缓存、不访问网络
+python scripts/cangjie/core/fetch_sc_glyph_preferred_codes.py --sort-by-code
+
+# 小批量验证
+python scripts/cangjie/core/fetch_sc_glyph_preferred_codes.py --chars 着,的,真 --limit 3
+```
+
+脚本仅处理 GBK 范围内的一字多普通码汉字，并排除最终结果中的 `x/z` 前缀编码。离线码表与源码表的普通码交集恰好唯一时直接采用；其余字通过系统 `curl` 请求字库页面。在线结果优先采用唯一 GBK 普通码；若 GBK 码带 `x/xx...` 前缀，则先尝试去掉前缀后直接命中源码候选，再尝试将其唯一展开为以该缩略码开头的源码候选。在线缓存位于 `_tmp/chidic_glyph_cache.json`，每字落盘；空页面不会视为成功缓存。仍无法唯一判断的字会写入 `data/sc_glyph_unresolved_code.txt`，供人工确认。`--sort-by-code` 是独立的纯排序操作，只整理现有输出文件，不会读取码表、合并缓存或访问网络。
 
 ## 2. 生成 Wucang5
 
