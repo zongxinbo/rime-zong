@@ -32,6 +32,7 @@ from core.cangjie_builder import (
 from core.gen_shortcut_2 import generate_shortcut_2
 from core.gen_shortcut_3 import generate_shortcut_3
 from core.gen_shortcut_4 import DEFAULT_LEVEL2_MIN_SCORE, generate_shortcut_4
+from core.dedup import parse_rank_suffixes
 
 def main():
     parser = argparse.ArgumentParser(description="Wucang5 生产构建脚本 (五码方案·纯单字流)")
@@ -49,9 +50,22 @@ def main():
     parser.add_argument("--protect-native-min-score", type=float, default=3000, help="综合字频门槛：原生二三码字达到该值才受保护")
     parser.add_argument("--shortcut-candidate-min-score", type=float, default=3000, help="综合字频门槛：长码字达到该值才可入选二三简")
     parser.add_argument("--fullcode-yield-min-score", type=float, default=1000, help="全码简码让位：可顶位字的最低综合字频")
-    parser.add_argument("--suffix-z", action=argparse.BooleanOptionalAction, default=True, help="是否为无首选简码的第二候选生成 z 后缀直达码（默认开启）")
+    parser.add_argument("--fixed-prefix", action=argparse.BooleanOptionalAction, default=False,
+                        help="是否加载 fixed_prefix_code.txt 中的 z?/x? 固定前缀码（默认关闭）")
+    parser.add_argument("--suffix-z", action=argparse.BooleanOptionalAction, default=True, help="是否为无首选简码的短码候选生成 z/x 后缀直达码（默认开启）")
+    parser.add_argument("--suffix-z-charset", choices=("all", "frequency", "gbk", "gb2312"), default="frequency",
+                        help="z/x 后缀候选字集：all=不限，frequency=仅综合字频中出现的字，gbk=常见繁简字，gb2312=简体常用字")
+    parser.add_argument("--suffix-z-min-score", type=float, default=1,
+                        help="z/x 后缀候选最低综合字频；默认 1")
+    parser.add_argument("--suffix-z-ranks", default="2:z,3:x",
+                        help="z/x 后缀候选位规则，格式如 2:z,3:x；Wucang5 默认第 2 候选补 z、第 3 候选补 x")
+    parser.add_argument("--suffix-z-max-source-length", type=int, default=4,
+                        help="z/x 后缀只处理不超过该长度的源码；Wucang5 默认 4")
+    parser.add_argument("--suffix-z-occupied-policy", choices=("strict", "ignore-nonfrequency-or-shortcut"),
+                        default="ignore-nonfrequency-or-shortcut",
+                        help="z/x 后缀目标码占用策略：strict=任意占用即跳过；ignore-nonfrequency-or-shortcut=忽略字集外或已有普通简码的占用")
     parser.add_argument("--dedup-prefix", action=argparse.BooleanOptionalAction, default=False,
-                        help="是否为满码长重码字生成自然 z/x 前缀直达码（默认开启）")
+                        help="是否为满码长重码字生成自然 z/x 前缀直达码（默认关闭）")
     parser.add_argument("--dedup-prefix-charset", choices=("all", "frequency", "gbk", "gb2312"), default="frequency",
                         help="z/x 前缀候选字集：all=不限，frequency=仅综合字频中出现的字，gbk=常见繁简字，gb2312=简体常用字")
     parser.add_argument("--dedup-prefix-min-score", type=float, default=1,
@@ -66,6 +80,7 @@ def main():
     parser.add_argument("--weights", choices=["sc_balanced", "sc"], default="sc_balanced",
                         help="字频权重模式：sc_balanced=简繁均衡权重 (SC_BALANCED_FREQ_WEIGHTS), sc=现代简体日用优化权重 (SC_FREQ_WEIGHTS)")
     args = parser.parse_args()
+    suffix_z_rank_suffixes = parse_rank_suffixes(args.suffix_z_ranks)
 
     # 0. 预加载加权字频（统一语料库得分）
     weights = SC_FREQ_WEIGHTS if args.weights == "sc" else SC_BALANCED_FREQ_WEIGHTS
@@ -102,7 +117,7 @@ def main():
 
     shortcut_paths = {
         1: ONE_CODE_PATH,
-        "fixed_prefix": FIXED_PREFIX_CODE_PATH,
+        "fixed_prefix": FIXED_PREFIX_CODE_PATH if args.fixed_prefix else None,
         2: TWO_CODE_PATH,
         3: THREE_CODE_PATH,
         "root": ROOT_CODE_PATH,
@@ -140,6 +155,11 @@ def main():
         only_first_full_code=args.only_first_full_code,
         fullcode_yield_min_score=args.fullcode_yield_min_score,
         suffix_z=args.suffix_z,
+        suffix_z_charset=args.suffix_z_charset,
+        suffix_z_min_score=args.suffix_z_min_score,
+        suffix_z_rank_suffixes=suffix_z_rank_suffixes,
+        suffix_z_max_source_length=args.suffix_z_max_source_length,
+        suffix_z_occupied_policy=args.suffix_z_occupied_policy,
         dedup_prefix=args.dedup_prefix,
         dedup_prefix_charset=args.dedup_prefix_charset,
         dedup_prefix_min_score=args.dedup_prefix_min_score,
