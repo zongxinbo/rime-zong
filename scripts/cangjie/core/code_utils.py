@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
+from .charset import is_common_han_char
 from .paths import DEFAULT_FULLCODE_YIELD_MIN_SCORE
 
 
@@ -13,7 +14,7 @@ def project_code(code: str, max_code_length: int) -> str:
 
 def build_fullcode_yield_order(
     entries: list[tuple[str, str, int]],
-    shortcut_chars: set[str],
+    shortcut_entries: list[tuple[str, str, int | float]],
     min_promote_score: float = DEFAULT_FULLCODE_YIELD_MIN_SCORE,
 ) -> dict[tuple[str, str], int]:
     """计算全码候选位次：有简码的首选让位给未获简码的常用字。"""
@@ -22,18 +23,35 @@ def build_fullcode_yield_order(
     for entry in entries:
         code_groups[entry[1]].append(entry)
 
+    yielding_shortcuts: dict[str, list[str]] = defaultdict(list)
+    for char, shortcut_code, priority in shortcut_entries:
+        # fixed_prefix(z?/x?) 是重码救援层，不影响原全码候选顺序。
+        if priority >= 1 and priority != 1.5:
+            yielding_shortcuts[char].append(shortcut_code)
+
+    def has_related_shortcut(char: str, full_code: str) -> bool:
+        for shortcut_code in yielding_shortcuts.get(char, []):
+            if len(shortcut_code) >= len(full_code):
+                continue
+            if len(shortcut_code) == 1:
+                return True
+            if full_code.startswith(shortcut_code):
+                return True
+        return False
+
     order: dict[tuple[str, str], int] = {}
     for group in code_groups.values():
         yielded = sorted(group, key=lambda entry: (-entry[2], entry[0]))
-        if yielded and yielded[0][0] in shortcut_chars:
-            promoted_idx = -1
-            for index, entry in enumerate(yielded[1:], start=1):
-                if entry[0] not in shortcut_chars and entry[2] >= min_promote_score:
-                    promoted_idx = index
-                    break
-            if promoted_idx > 0:
-                promoted = yielded.pop(promoted_idx)
-                yielded.insert(0, promoted)
+        if any(has_related_shortcut(char, code) for char, code, _ in yielded):
+            yielded = sorted(
+                yielded,
+                key=lambda entry: (
+                    not is_common_han_char(entry[0]),
+                    has_related_shortcut(entry[0], entry[1]),
+                    -entry[2],
+                    entry[0],
+                ),
+            )
 
         for rank, (char, code, _) in enumerate(yielded):
             order[(char, code)] = rank

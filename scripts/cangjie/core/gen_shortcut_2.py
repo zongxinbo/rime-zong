@@ -149,15 +149,7 @@ def generate_shortcut_2(
             if saved_keys <= 0:
                 continue
                 
-            depth = char_depths.get(long_char, 1)
-            if depth >= 2:
-                # 4 码重码字无法通过 Z 后缀消重，是终极最绝望重码，给予更高的避重增益
-                gain_multiplier = 6 if full_len == 4 else 3
-                collision_gain = long_score * (depth - 1) * gain_multiplier
-            else:
-                collision_gain = 0
-                
-            net_score = (long_score * saved_keys) + collision_gain - native_penalty
+            net_score = (long_score * saved_keys) - native_penalty
             if net_score <= 0:
                 continue
             item = (long_char, code2, long_score, net_score, saved_keys)

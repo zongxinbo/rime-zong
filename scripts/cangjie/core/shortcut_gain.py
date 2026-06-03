@@ -179,12 +179,7 @@ class ShortcutGainAnalyzer:
             best: tuple[str, str, int | float] | None = None
             for text, score, full_length in long_items:
                 saved_keys = full_length - length
-                depth = self.char_depths.get(text, 1)
-                collision_gain = 0
-                if depth >= 2:
-                    multiplier = 6 if full_length == 4 else 3
-                    collision_gain = score * (depth - 1) * multiplier
-                net_gain = score * saved_keys + collision_gain - native_penalty
+                net_gain = score * saved_keys - native_penalty
                 if net_gain > 0 and (best is None or net_gain > best[2]):
                     best = (text, code, net_gain)
             if best is not None:

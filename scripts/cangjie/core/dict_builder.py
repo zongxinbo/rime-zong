@@ -87,10 +87,9 @@ def build_base_entries(
     fullcode_yield_min_score: float,
 ) -> list[tuple[str, int | float, int, int, str]]:
     all_entries: list[tuple[str, int, int, int, str]] = []
-    shortcut_chars = {char for char, _, priority in shortcut_entries if priority >= 1}
     fullcode_order = build_fullcode_yield_order(
         fullcode_entries,
-        shortcut_chars,
+        shortcut_entries,
         min_promote_score=fullcode_yield_min_score,
     )
 
