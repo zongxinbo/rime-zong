@@ -225,6 +225,11 @@ def generate_dict(
     char_freqs: dict[str, int] = None,
     fullcode_yield_min_score: float = DEFAULT_FULLCODE_YIELD_MIN_SCORE,
     suffix_z: bool = True,
+    suffix_z_charset: str = "all",
+    suffix_z_min_score: float = 0,
+    suffix_z_rank_suffixes: tuple[tuple[int, str], ...] = ((2, "z"),),
+    suffix_z_max_source_length: int | None = None,
+    suffix_z_occupied_policy: str = "strict",
     dedup_prefix: bool = True,
     dedup_prefix_charset: str = "frequency",
     dedup_prefix_min_score: float = 1,
@@ -290,13 +295,24 @@ def generate_dict(
             shortcut_leader_chars=shortcut_leader_chars,
             char_freqs=char_freqs,
             max_code_length=max_code_length,
+            charset=suffix_z_charset,
+            min_score=suffix_z_min_score,
+            rank_suffixes=suffix_z_rank_suffixes,
+            max_source_length=suffix_z_max_source_length,
+            occupied_policy=suffix_z_occupied_policy,
         )
         z_suffix_count = len(suffix_entries)
         all_entries.extend(suffix_entries)
         all_entries.sort()
         shortcut_source_entries.extend(suffix_entries)
         shortcut_source_entries.sort()
-    print(f"z 后缀消重：生成 {z_suffix_count} 个条目")
+    print(
+        f"z/x 后缀消重：生成 {z_suffix_count} 个条目"
+        f" 字集={suffix_z_charset} 最低分={suffix_z_min_score:g}"
+        f" 位次={','.join(f'{rank}:{suffix}' for rank, suffix in suffix_z_rank_suffixes)}"
+        f" 源码最长={suffix_z_max_source_length if suffix_z_max_source_length is not None else max_code_length - 1}"
+        f" 占用策略={suffix_z_occupied_policy}"
+    )
 
     dedup_prefix_count = 0
     if dedup_prefix:
@@ -351,7 +367,7 @@ def generate_dict(
     fc_count = len(fullcode_entries)
     print(
         f"完成：简码={sc_count} 全码={fc_count}"
-        f" z后缀={z_suffix_count} zx前缀={dedup_prefix_count} 结构后缀={structure_suffix_count}"
+        f" zx后缀={z_suffix_count} zx前缀={dedup_prefix_count} 结构后缀={structure_suffix_count}"
         f" 全码让位门槛={fullcode_yield_min_score:g}"
         f" 总计={len(all_entries)} 输出={output_path}"
     )
