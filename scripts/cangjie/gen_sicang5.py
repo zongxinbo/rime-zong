@@ -22,13 +22,12 @@ from core.cangjie_builder import (
     ROOT_CODE_PATH,
     generate_dict,
     get_weighted_frequencies,
-    SC_FREQ_WEIGHTS,
-    SC_BALANCED_FREQ_WEIGHTS,
     SUFFIX_CODE_SICANG5_PATH,
 )
 from core.gen_shortcut_2 import generate_shortcut_2
 from core.gen_shortcut_3 import generate_shortcut_3
 from core.dedup import parse_prefix_levels, parse_rank_suffixes
+from core.weight_profiles import get_weight_profile
 
 def main():
     parser = argparse.ArgumentParser(description="Sicang5 生产构建脚本 (四码方案·纯单字流)")
@@ -78,12 +77,12 @@ def main():
                         help="第 3 候选及以后进入前缀短码层时的痛点倍率；默认 1.5")
     parser.add_argument("--dedup-prefix-source-max-code-length", type=int, default=4,
                         help="z/x 前缀生成使用的投影基线码长；默认 4，保证 Sicang5/Wucang5 前缀码一致")
-    parser.add_argument("--dedup-prefix-level2-weights", choices=["sc_balanced", "sc"], default="sc",
+    parser.add_argument("--dedup-prefix-level2-weights", choices=["sc", "sc_daily", "sc_balanced"], default="sc",
                         help="z?/x? 二码前缀权重；默认 sc，对标普通一码")
-    parser.add_argument("--dedup-prefix-level3-weights", choices=["sc_balanced", "sc"], default="sc_balanced",
-                        help="z??/x?? 三码前缀权重；默认 sc_balanced，对标普通二码")
-    parser.add_argument("--dedup-prefix-full-weights", choices=["sc_balanced", "sc"], default="sc_balanced",
-                        help="z???/x??? 四码前缀权重；默认 sc_balanced，对标普通三码")
+    parser.add_argument("--dedup-prefix-level3-weights", choices=["sc", "sc_daily", "sc_balanced"], default="sc_daily",
+                        help="z??/x?? 三码前缀权重；默认 sc_daily，对标普通二码")
+    parser.add_argument("--dedup-prefix-full-weights", choices=["sc", "sc_daily", "sc_balanced"], default="sc_daily",
+                        help="z???/x??? 四码前缀权重；默认 sc_daily，对标普通三码")
     parser.add_argument("--suffix-structure", action=argparse.BooleanOptionalAction, default=False, help="是否使用 IDS 结构后缀消重（默认 zxwa 键，默认关闭；默认仅使用 z/x 后缀）")
     parser.add_argument("--suffix-structure-charset", choices=("all", "gbk", "gb2312"), default="gbk",
                         help="结构后缀候选字集：all=不限，gbk=兼顾繁简常用，gb2312=极致简体优化")
@@ -94,21 +93,18 @@ def main():
     parser.add_argument("--suffix-structure-keymap", default="zxwa",
                         help="结构类别后缀键，按 左右/上下/包围/独体 顺序给 4 个小写字母；默认 zxwa")
     parser.add_argument("--only-first-full-code", action=argparse.BooleanOptionalAction, default=False, help="仅取第一个全码（用于去重）")
-    parser.add_argument("--weights", choices=["sc_balanced", "sc"], default="sc_balanced",
-                        help="字频权重模式：sc_balanced=简繁均衡权重 (SC_BALANCED_FREQ_WEIGHTS), sc=现代简体日用优化权重 (SC_FREQ_WEIGHTS)")
+    parser.add_argument("--weights", choices=["sc", "sc_daily", "sc_balanced"], default="sc_daily",
+                        help="字频权重模式：sc=现代简体，sc_daily=简繁日常通用，sc_balanced=简繁均衡")
     args = parser.parse_args()
     suffix_z_rank_suffixes = parse_rank_suffixes(args.suffix_z_ranks)
     dedup_prefix_short_levels = parse_prefix_levels(args.dedup_prefix_short_levels)
 
     # 0. 预加载加权字频
-    def resolve_weights(name: str) -> dict[str, float]:
-        return SC_FREQ_WEIGHTS if name == "sc" else SC_BALANCED_FREQ_WEIGHTS
-
-    weights = resolve_weights(args.weights)
+    weights = get_weight_profile(args.weights)
     char_scores = get_weighted_frequencies(weights)
-    prefix_level2_scores = get_weighted_frequencies(resolve_weights(args.dedup_prefix_level2_weights))
-    prefix_level3_scores = get_weighted_frequencies(resolve_weights(args.dedup_prefix_level3_weights))
-    prefix_full_scores = get_weighted_frequencies(resolve_weights(args.dedup_prefix_full_weights))
+    prefix_level2_scores = get_weighted_frequencies(get_weight_profile(args.dedup_prefix_level2_weights))
+    prefix_level3_scores = get_weighted_frequencies(get_weight_profile(args.dedup_prefix_level3_weights))
+    prefix_full_scores = get_weighted_frequencies(get_weight_profile(args.dedup_prefix_full_weights))
 
     # 一简是单独校准的原型文件，生产构建只消费，不自动重算。
     # 按依赖顺序生成二简、三简。

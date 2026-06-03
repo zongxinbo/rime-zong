@@ -65,8 +65,8 @@ def load_excluded_codes() -> set[str]:
 
 def main():
     parser = argparse.ArgumentParser(description="生成 z?/x? 固定二简避重码表")
-    parser.add_argument("--weights", choices=tuple(WEIGHT_PROFILES), default="sc_balanced",
-                        help="字频权重模式；默认 sc_balanced")
+    parser.add_argument("--weights", choices=tuple(WEIGHT_PROFILES), default="sc_daily",
+                        help="字频权重模式；默认 sc_daily")
     args = parser.parse_args()
 
     print("==================================================")

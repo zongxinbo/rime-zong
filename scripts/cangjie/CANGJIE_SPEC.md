@@ -68,6 +68,8 @@ python scripts/cangjie/gen_wucang5.py
 
 - 二简、三简默认按固定数量生成；只有当 `--s2-count 0` 或 `--s3-count 0` 时，对应覆盖率参数才参与控量。
 - 二简默认取全码前两码，三简默认取全码前三码。
+- 生产构建默认 `--weights sc_daily`，用于二简、三简、全码排序、`z/x` 后缀救援，并在显式开启 `--s4` 时用于四简。
+- 一简不由生产构建重算；`core/gen_shortcut_1.py` 的一简审阅报告默认使用 `--weights sc`。
 - 二简、三简的候选池按 Rime 默认 `extended_charset=常用` 状态过滤；Ext-A、Ext-B 及以上和兼容汉字等增广字符不会参与简码分配。
 - `--protect-native-min-score` 控制原生二三码位保护门槛。
 - `--shortcut-candidate-min-score` 控制二三简长码候选的最低入选综合字频。
@@ -105,7 +107,7 @@ python scripts/cangjie/gen_wucang5.py --s2-count 0 --s2-coverage 0.85 --s3-count
 
 ### 6.1 一简与 z 补丁
 
-一简由 `core/gen_shortcut_1.py` 单独生成校准表，生产构建脚本只消费 `one_code.txt`，不自动重算一简。
+一简由 `core/gen_shortcut_1.py` 单独生成校准表，生产构建脚本只消费 `one_code.txt`，不自动重算一简。一简审阅默认使用 `--weights sc`，按现代简体日用频率和记忆锚点选候选。
 
 ```text
 判断依据 = 频率倍数 + 省码收益 + 字根位代价
@@ -120,6 +122,7 @@ python scripts/cangjie/gen_wucang5.py --s2-count 0 --s2-coverage 0.85 --s3-count
 - 默认取码：`full_code[:2]`
 - 可选取码：首尾码
 - 排序依据：净收益 `综合字频 × (原码长 - 2) - 原生码位代价`
+- 权重：随生产构建 `--weights`，默认 `sc_daily`
 - 默认模式：保护高频 GB2312 原生二码位，长码字可与其他原生二码位竞争
 - 原生码位保护门槛：`--protect-native-min-score`，默认 `3000`
 - 长码候选门槛：`--shortcut-candidate-min-score`，默认 `3000`
@@ -134,6 +137,7 @@ python scripts/cangjie/gen_wucang5.py --s2-count 0 --s2-coverage 0.85 --s3-count
 - 默认取码：`full_code[:3]`
 - 可选取码：前两码 + 末码
 - 排序依据：净收益 `综合字频 × (原码长 - 3) - 原生码位代价`
+- 权重：随生产构建 `--weights`，默认 `sc_daily`
 - 默认模式：保护高频 GB2312 原生三码位，长码字可与其他原生三码位竞争
 - 原生码位保护门槛：`--protect-native-min-score`，默认 `3000`
 - 长码候选门槛：`--shortcut-candidate-min-score`，默认 `3000`
@@ -146,6 +150,7 @@ python scripts/cangjie/gen_wucang5.py --s2-count 0 --s2-coverage 0.85 --s3-count
 四简候选来自 GB2312、五码、且未获得 z/一简/二简/三简的字：
 
 - 取码：`full_code[:4]`
+- 权重：随生产构建 `--weights`，默认 `sc_daily`
 - 启用后默认模式：`balanced`
 - 默认关闭；开启方式：`--s4`
 - 字集门槛：GB2312 一级字直接参与；GB2312 二级字需达到 `--s4-level2-min-score`
@@ -191,7 +196,7 @@ python scripts/cangjie/gen_wucang5.py --s2-count 0 --s2-coverage 0.85 --s3-count
 
 1. **前缀短码层**：为高频、无普通简码、当前非首选的字分配可由原码推导的 `z/x` 前缀码。
    - 二键层：主体键按普通一简锚点规则选择，依次考虑字根、首码、尾码和高频包含码，再尝试 `z + 主体键`、`x + 主体键`；主体键覆盖 `a-z`，已被字根/普通简码占用的 `xz/zz` 等仍自动跳过；默认用 `--dedup-prefix-level2-weights sc`，按全局高频重码痛点竞争，不要求节省码长。
-   - 三键层：依次尝试 `z + 前两码`、`x + 前两码`；对标普通二码，默认用 `--dedup-prefix-level3-weights sc_balanced`，按高频痛点并适度奖励节省码长。
+   - 三键层：依次尝试 `z + 前两码`、`x + 前两码`；对标普通二码，默认用 `--dedup-prefix-level3-weights sc_daily`，按高频痛点并适度奖励节省码长。
    - 二键层和三键层使用四码投影基线生成，Sicang5 与 Wucang5 共享同一套审阅文件。
 2. **方案专属深层前缀层**：排除已获得共享短前缀的字，再按方案最大码长生成：
    - Sicang5 四码前缀选重层只处理四码全码第 2/3 候选：
@@ -209,7 +214,7 @@ python scripts/cangjie/gen_wucang5.py --s2-count 0 --s2-coverage 0.85 --s3-count
 - `gb2312`：仅处理 GB2312 汉字。
 - `all`：不限制汉字范围。
 
-最低综合字频通过 `--dedup-prefix-min-score` 控制，默认值为 `1`。前缀短码层级通过 `--dedup-prefix-short-levels` 控制；是否启用短码层和深层选重层分别由 `--dedup-prefix-short`、`--dedup-prefix-full` 控制。前缀层权重独立于主构建 `--weights`，默认分层为 `z?/x?=sc`，`z??/x??` 及更深层为 `sc_balanced`。
+最低综合字频通过 `--dedup-prefix-min-score` 控制，默认值为 `1`。前缀短码层级通过 `--dedup-prefix-short-levels` 控制；是否启用短码层和深层选重层分别由 `--dedup-prefix-short`、`--dedup-prefix-full` 控制。前缀层权重独立于主构建 `--weights`，默认分层为 `z?/x?=sc`，`z??/x??` 及更深层为 `sc_daily`。
 
 ### 8.3 结构规则模式（Structure Rule-based Suffix）
 
@@ -366,7 +371,7 @@ one_code_tc.txt   繁体专精一简
 
 构建简体方案时读取 `one_code.txt`；构建繁体专精方案时读取 `one_code_tc.txt`。繁体日常高频字如 `的/不/我/是/有/了` 应进入繁体一简主层，而不是占用 `z?` 固定前缀码。
 
-普通二简、三简、四简仍按方案切换语料权重。`z/x` 后缀使用主构建综合分排序；自动前缀使用独立分层权重：`--dedup-prefix-level2-weights sc`、`--dedup-prefix-level3-weights sc_balanced`、`--dedup-prefix-full-weights sc_balanced`。frequency 范围只作为候选/冲突过滤字集边界，不改变各层指定的排序口径。
+普通二简、三简、四简仍按方案切换语料权重。`z/x` 后缀使用主构建综合分排序；自动前缀使用独立分层权重：`--dedup-prefix-level2-weights sc`、`--dedup-prefix-level3-weights sc_daily`、`--dedup-prefix-full-weights sc_daily`。frequency 范围只作为候选/冲突过滤字集边界，不改变各层指定的排序口径。
 
 #### 原型文件分层与加载顺序
 
@@ -385,7 +390,7 @@ one_code_tc.txt   繁体专精一简
 | `suffix_code_sicang5.txt` | Sicang5 `z/x` 后缀救援码审阅产物 | 构建末尾自动覆盖生成 |
 | `suffix_code_wucang5.txt` | Wucang5 `z/x` 后缀救援码审阅产物 | 构建末尾自动覆盖生成 |
 
-自动前缀和后缀仍由构建算法决定，`prefix_code_*.txt` 与 `suffix_code_*.txt` 是审阅产物，不是人工输入源；下次构建会覆盖。`prefix_code_2.txt` 和 `prefix_code_3.txt` 默认使用 `--dedup-prefix-source-max-code-length 4` 的四码投影基线，保证 Sicang5/Wucang5 的二三码前缀一致；四码及以上前缀按方案独立生成。前缀权重默认对标普通简码层：二码前缀对标一简用 `sc`，三码和更深层前缀用 `sc_balanced`。
+自动前缀和后缀仍由构建算法决定，`prefix_code_*.txt` 与 `suffix_code_*.txt` 是审阅产物，不是人工输入源；下次构建会覆盖。`prefix_code_2.txt` 和 `prefix_code_3.txt` 默认使用 `--dedup-prefix-source-max-code-length 4` 的四码投影基线，保证 Sicang5/Wucang5 的二三码前缀一致；四码及以上前缀按方案独立生成。前缀权重默认对标普通简码层：二码前缀对标一简用 `sc`，三码和更深层前缀用 `sc_daily`。
 
 推荐加载顺序：
 
@@ -447,15 +452,16 @@ root_code
 python scripts/cangjie/core/shortcut_gain.py --layer one --code t --char 其 --weights sc
 
 # 固定前缀二码：评估 xp 码位新增或替换为某字
-python scripts/cangjie/core/shortcut_gain.py --layer fixed-prefix --code xp --char 恐 --weights sc_balanced
+python scripts/cangjie/core/shortcut_gain.py --layer fixed-prefix --code xp --char 恐 --weights sc_daily
 ```
 
 权重通过 `--weights` 显式选择：
 
 - `sc`：现代简体日用优化，使用口语 20.75%、字幕 27.57%、知乎 27.92%、北语 23.76%；比例由 `core/optimize_sc_weights.py` 最小化现代简体语料共识的平均 Jensen-Shannon 距离得到。`gen_shortcut_1.py` 与 `shortcut_gain.py --layer one` 默认使用该模式。
-- `sc_balanced`：简繁平衡，使用知乎 33%、北语 27%、台标 22%、古籍 18%；`shortcut_gain.py --layer fixed-prefix` 默认使用该模式，普通二三简生产构建也默认使用该模式。
+- `sc_daily`：简繁日常通用，使用知乎 44%、北语 36%、台标 11%、古籍 9%；普通二三简、自动前缀和固定前缀评估默认使用该模式。
+- `sc_balanced`：简繁平衡，使用知乎 33%、北语 27%、台标 22%、古籍 18%；可用于偏繁体/古籍均衡的实验构建。
 
-一简不直接套用普通二三简的简繁平衡排序。一简位数量少、日常曝光高，候选报告应以 `sc` 日常频率作为默认初筛与重放口径。`a-z` 一简的静态评分只使用日常字频和记忆锚点，不加入省键数、长码压力、候选深度或前缀占位等重码救援权重；再由一简决策层按 `字根 > 首码 > 尾码 > 包含码` 的锚点等级筛选，同级内优先保留日常频率更高的字。`x/z` 没有普通仓颉锚点，使用 `--append-xz` 追加时按日常字频生成全局候选。跨键分配时，同一个字只能在最合理的键位占据一次 `Rank 1`，在其他键位只能作为 `Rank 2+` 备选。真实净收益用于展示副作用和排除负收益替换，不直接压过更强锚点或更高日常频率。普通二三四简和自动消重层仍保留重码救援评分；`z?` 简繁补位和 `x?` 重码救援继续使用 `sc_balanced`。
+一简不直接套用普通二三简的简繁日常通用排序。一简位数量少、日常曝光高，候选报告应以 `sc` 日常频率作为默认初筛与重放口径。`a-z` 一简的静态评分只使用日常字频和记忆锚点，不加入省键数、长码压力、候选深度或前缀占位等重码救援权重；再由一简决策层按 `字根 > 首码 > 尾码 > 包含码` 的锚点等级筛选，同级内优先保留日常频率更高的字。`x/z` 没有普通仓颉锚点，使用 `--append-xz` 追加时按日常字频生成全局候选。跨键分配时，同一个字只能在最合理的键位占据一次 `Rank 1`，在其他键位只能作为 `Rank 2+` 备选。真实净收益用于展示副作用和排除负收益替换，不直接压过更强锚点或更高日常频率。普通二三四简和自动消重层仍保留重码救援评分；自动 `z/x` 前缀默认使用 `sc_daily`，60/40 的 `sc_balanced` 保留为显式实验口径。
 
 需要执行无人工定稿偏置的逐键替换审计时，运行 `gen_shortcut_1.py --blind --output <path>`。盲测仍以当前正式版作为替换净收益基线和报告对照，但当前字不再获得静态候选保底；若它凭自身频率和锚点自然进入短名单，则以收益 `0` 的基线正常参与主推荐排序。该模式不是从空白状态独立生成完整一简方案。
 
