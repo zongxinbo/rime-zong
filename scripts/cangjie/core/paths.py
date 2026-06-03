@@ -32,6 +32,13 @@ FIXED_PREFIX_CODE_PATH = PROTOTYPES_DIR / "fixed_prefix_code.txt"
 TWO_CODE_PATH = PROTOTYPES_DIR / "two_code.txt"
 THREE_CODE_PATH = PROTOTYPES_DIR / "three_code.txt"
 FOUR_CODE_PATH = PROTOTYPES_DIR / "four_code.txt"
+PREFIX_CODE_2_PATH = PROTOTYPES_DIR / "prefix_code_2.txt"
+PREFIX_CODE_3_PATH = PROTOTYPES_DIR / "prefix_code_3.txt"
+PREFIX_CODE_4_SICANG5_PATH = PROTOTYPES_DIR / "prefix_code_4_sicang5.txt"
+PREFIX_CODE_4_WUCANG5_PATH = PROTOTYPES_DIR / "prefix_code_4_wucang5.txt"
+PREFIX_CODE_5_WUCANG5_PATH = PROTOTYPES_DIR / "prefix_code_5_wucang5.txt"
+SUFFIX_CODE_SICANG5_PATH = PROTOTYPES_DIR / "suffix_code_sicang5.txt"
+SUFFIX_CODE_WUCANG5_PATH = PROTOTYPES_DIR / "suffix_code_wucang5.txt"
 
 IDS_PATH = REPO_ROOT / "scripts" / "ids" / "ids.txt"
 

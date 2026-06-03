@@ -11,7 +11,14 @@ from .frequency import parse_frequency_file
 from .glyph_codes import get_glyph_preferred_codes
 from .ids import load_ids_structure_map
 from .io import parse_cangjie_dict
-from .paths import DEFAULT_FULLCODE_YIELD_MIN_SCORE
+from .paths import (
+    DEFAULT_FULLCODE_YIELD_MIN_SCORE,
+    PREFIX_CODE_2_PATH,
+    PREFIX_CODE_3_PATH,
+    PREFIX_CODE_4_SICANG5_PATH,
+    PREFIX_CODE_4_WUCANG5_PATH,
+    PREFIX_CODE_5_WUCANG5_PATH,
+)
 
 
 def load_shortcut_entries(shortcut_paths: dict) -> tuple[list[tuple[str, str, int | float]], set[str]]:
@@ -211,6 +218,44 @@ def write_final_dict(
             f.write(f"{char}\t{code}\n")
 
 
+def write_prefix_prototypes(
+    prefix_entries: list[tuple[int, tuple[str, int | float, int, int, str]]],
+    paths: dict[int, Path],
+) -> dict[int, int]:
+    """写出自动 z/x 前缀码审阅文件。"""
+    grouped: dict[int, list[tuple[str, int | float, int, int, str]]] = defaultdict(list)
+    for level, entry in prefix_entries:
+        if level in paths:
+            grouped[level].append(entry)
+
+    counts: dict[int, int] = {}
+    for level, path in paths.items():
+        entries = sorted(grouped.get(level, []))
+        path.parent.mkdir(parents=True, exist_ok=True)
+        lines = [f"# 自动 z/x 前缀 {level} 码审阅文件；构建时覆盖生成"]
+        for code, _, _, _, char in entries:
+            lines.append(f"{char}\t{code}")
+        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        counts[level] = len(entries)
+    return counts
+
+
+def write_code_prototype(
+    entries: list[tuple[str, int | float, int, int, str]],
+    path: Path,
+    *,
+    title: str,
+) -> int:
+    """写出自动码表审阅文件，两列：字、码。"""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    rows = sorted(entries)
+    lines = [f"# {title}；构建时覆盖生成"]
+    for code, _, _, _, char in rows:
+        lines.append(f"{char}\t{code}")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return len(rows)
+
+
 def generate_dict(
     output_path: Path,
     shortcut_paths: dict,
@@ -230,9 +275,21 @@ def generate_dict(
     suffix_z_rank_suffixes: tuple[tuple[int, str], ...] = ((2, "z"),),
     suffix_z_max_source_length: int | None = None,
     suffix_z_occupied_policy: str = "strict",
+    suffix_code_path: Path | None = None,
     dedup_prefix: bool = True,
     dedup_prefix_charset: str = "frequency",
     dedup_prefix_min_score: float = 1,
+    dedup_prefix_short: bool = True,
+    dedup_prefix_full: bool = True,
+    dedup_prefix_short_levels: tuple[int, ...] = (2, 3),
+    dedup_prefix_full_source_length: int = 4,
+    dedup_prefix_deep_rank_multiplier: float = 1.5,
+    dedup_prefix_source_max_code_length: int | None = 4,
+    dedup_prefix_scheme: str | None = None,
+    dedup_prefix_scheme_short_levels: tuple[int, ...] = (),
+    dedup_prefix_scheme_full_source_length: int | None = None,
+    dedup_prefix_short_level_char_freqs: dict[int, dict[str, int]] | None = None,
+    dedup_prefix_full_char_freqs: dict[str, int] | None = None,
     suffix_structure: bool = False,
     suffix_structure_charset: str = "gbk",
     suffix_structure_occupied_policy: str = "protect-min-score",
@@ -302,10 +359,17 @@ def generate_dict(
             occupied_policy=suffix_z_occupied_policy,
         )
         z_suffix_count = len(suffix_entries)
+        if suffix_code_path is not None:
+            write_code_prototype(
+                suffix_entries,
+                suffix_code_path,
+                title="自动 z/x 后缀审阅文件",
+            )
         all_entries.extend(suffix_entries)
         all_entries.sort()
         shortcut_source_entries.extend(suffix_entries)
         shortcut_source_entries.sort()
+        shortcut_leader_chars = build_shortcut_leader_chars(all_entries)
     print(
         f"z/x 后缀消重：生成 {z_suffix_count} 个条目"
         f" 字集={suffix_z_charset} 最低分={suffix_z_min_score:g}"
@@ -315,26 +379,167 @@ def generate_dict(
     )
 
     dedup_prefix_count = 0
+    prefix_counts: dict[int, int] = {}
     if dedup_prefix:
-        dedup_prefix_entries = build_dedup_prefix_entries(
-            shortcut_source_entries,
-            occupied_entries=all_entries,
-            used_text_code=used_text_code,
-            shortcut_leader_chars=shortcut_leader_chars,
-            char_freqs=char_freqs,
-            max_code_length=max_code_length,
-            charset=dedup_prefix_charset,
-            min_score=dedup_prefix_min_score,
-        )
-        dedup_prefix_count = len(dedup_prefix_entries)
-        all_entries.extend(dedup_prefix_entries)
-        all_entries.sort()
-        shortcut_source_entries.extend(dedup_prefix_entries)
-        shortcut_source_entries.sort()
+        def build_prefix_source(source_max_code_length: int | None):
+            if source_max_code_length is None:
+                return shortcut_source_entries, build_shortcut_leader_chars(all_entries)
+
+            prefix_used_text_code = {(char, code) for char, code, _ in shortcut_entries}
+            prefix_fullcode_entries = build_fullcode_entries(
+                char_full_codes,
+                root_chars=root_chars,
+                used_text_code=prefix_used_text_code,
+                char_freqs=char_freqs,
+                max_code_length=source_max_code_length,
+            )
+            prefix_all_entries = build_base_entries(
+                shortcut_entries,
+                prefix_fullcode_entries,
+                char_freqs=char_freqs,
+                fullcode_yield_min_score=fullcode_yield_min_score,
+            )
+            prefix_source_entries = prefix_all_entries
+            if weights is not None:
+                preferred_prefix_codes = {
+                    text: project_code(code, source_max_code_length)
+                    for text, code in get_glyph_preferred_codes(weights).items()
+                }
+                prefix_source_entries = [
+                    entry
+                    for entry in prefix_all_entries
+                    if entry[1] < 5
+                    or entry[4] not in preferred_prefix_codes
+                    or entry[0] == preferred_prefix_codes[entry[4]]
+                ]
+            return prefix_source_entries, build_shortcut_leader_chars(prefix_all_entries)
+
+        def append_prefix_entries(entries_with_levels: list[tuple[int, tuple[str, int | float, int, int, str]]]) -> None:
+            nonlocal dedup_prefix_count, shortcut_leader_chars
+            entries = [entry for _, entry in entries_with_levels]
+            dedup_prefix_count += len(entries)
+            all_entries.extend(entries)
+            all_entries.sort()
+            shortcut_source_entries.extend(entries)
+            shortcut_source_entries.sort()
+            shortcut_leader_chars = build_shortcut_leader_chars(all_entries)
+
+        shared_entries_with_levels: list[tuple[int, tuple[str, int | float, int, int, str]]] = []
+        if dedup_prefix_short:
+            shared_source_entries, shared_leader_chars = build_prefix_source(dedup_prefix_source_max_code_length)
+            shared_entries_with_levels = build_dedup_prefix_entries(
+                shared_source_entries,
+                occupied_entries=shared_source_entries,
+                used_text_code=used_text_code,
+                shortcut_leader_chars=shared_leader_chars,
+                char_freqs=char_freqs,
+                short_level_char_freqs=dedup_prefix_short_level_char_freqs,
+                full_char_freqs=dedup_prefix_full_char_freqs,
+                max_code_length=dedup_prefix_source_max_code_length or max_code_length,
+                charset=dedup_prefix_charset,
+                min_score=dedup_prefix_min_score,
+                short=True,
+                full=False,
+                short_levels=dedup_prefix_short_levels,
+                full_source_length=dedup_prefix_full_source_length,
+                deep_rank_multiplier=dedup_prefix_deep_rank_multiplier,
+            )
+            prefix_counts.update(write_prefix_prototypes(
+                shared_entries_with_levels,
+                {
+                    2: PREFIX_CODE_2_PATH,
+                    3: PREFIX_CODE_3_PATH,
+                },
+            ))
+            append_prefix_entries(shared_entries_with_levels)
+
+        scheme_entries_with_levels: list[tuple[int, tuple[str, int | float, int, int, str]]] = []
+        if dedup_prefix_scheme == "sicang5":
+            scheme_source_entries = shortcut_source_entries
+            scheme_entries_with_levels = build_dedup_prefix_entries(
+                scheme_source_entries,
+                occupied_entries=scheme_source_entries,
+                used_text_code=used_text_code,
+                shortcut_leader_chars=shortcut_leader_chars,
+                char_freqs=char_freqs,
+                short_level_char_freqs=dedup_prefix_short_level_char_freqs,
+                full_char_freqs=dedup_prefix_full_char_freqs,
+                max_code_length=max_code_length,
+                charset=dedup_prefix_charset,
+                min_score=dedup_prefix_min_score,
+                short=False,
+                full=dedup_prefix_full,
+                short_levels=(),
+                full_source_length=dedup_prefix_scheme_full_source_length or dedup_prefix_full_source_length,
+                deep_rank_multiplier=dedup_prefix_deep_rank_multiplier,
+            )
+            prefix_counts.update(write_prefix_prototypes(
+                scheme_entries_with_levels,
+                {4: PREFIX_CODE_4_SICANG5_PATH},
+            ))
+        elif dedup_prefix_scheme == "wucang5":
+            scheme_source_entries = shortcut_source_entries
+            scheme_entries_with_levels = build_dedup_prefix_entries(
+                scheme_source_entries,
+                occupied_entries=scheme_source_entries,
+                used_text_code=used_text_code,
+                shortcut_leader_chars=shortcut_leader_chars,
+                char_freqs=char_freqs,
+                short_level_char_freqs=dedup_prefix_short_level_char_freqs,
+                full_char_freqs=dedup_prefix_full_char_freqs,
+                max_code_length=max_code_length,
+                charset=dedup_prefix_charset,
+                min_score=dedup_prefix_min_score,
+                short=bool(dedup_prefix_scheme_short_levels),
+                full=dedup_prefix_full,
+                short_levels=dedup_prefix_scheme_short_levels,
+                full_source_length=dedup_prefix_scheme_full_source_length or max_code_length,
+                deep_rank_multiplier=dedup_prefix_deep_rank_multiplier,
+            )
+            prefix_counts.update(write_prefix_prototypes(
+                scheme_entries_with_levels,
+                {
+                    4: PREFIX_CODE_4_WUCANG5_PATH,
+                    5: PREFIX_CODE_5_WUCANG5_PATH,
+                },
+            ))
+        elif dedup_prefix_full:
+            scheme_source_entries = shortcut_source_entries
+            scheme_entries_with_levels = build_dedup_prefix_entries(
+                scheme_source_entries,
+                occupied_entries=scheme_source_entries,
+                used_text_code=used_text_code,
+                shortcut_leader_chars=shortcut_leader_chars,
+                char_freqs=char_freqs,
+                short=False,
+                full=True,
+                max_code_length=max_code_length,
+                charset=dedup_prefix_charset,
+                min_score=dedup_prefix_min_score,
+                full_source_length=dedup_prefix_full_source_length,
+                deep_rank_multiplier=dedup_prefix_deep_rank_multiplier,
+            )
+
+        if scheme_entries_with_levels:
+            append_prefix_entries(scheme_entries_with_levels)
     print(
         f"z/x 前缀消重：生成 {dedup_prefix_count} 个条目"
         f" 字集={dedup_prefix_charset} 最低分={dedup_prefix_min_score:g}"
+        f" 短码={'开' if dedup_prefix_short else '关'}"
+        f" 共享层级={','.join(str(level) for level in dedup_prefix_short_levels)}"
+        f" 共享基线={dedup_prefix_source_max_code_length if dedup_prefix_source_max_code_length is not None else max_code_length}"
+        f" 方案={dedup_prefix_scheme or 'legacy'}"
+        f" 方案短码层级={','.join(str(level) for level in dedup_prefix_scheme_short_levels) or '-'}"
+        f" 方案选重源长={dedup_prefix_scheme_full_source_length or dedup_prefix_full_source_length}"
     )
+    if dedup_prefix:
+        print(
+            "z/x 前缀审阅文件："
+            f" 2码={prefix_counts.get(2, 0)}"
+            f" 3码={prefix_counts.get(3, 0)}"
+            f" 4码={prefix_counts.get(4, 0)}"
+            f" 5码={prefix_counts.get(5, 0)}"
+        )
 
     structure_suffix_count = 0
     if suffix_structure:
