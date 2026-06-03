@@ -1,6 +1,6 @@
 # encoding: utf-8
 # Mainland glyph preferred Cangjie5 codes.
-# Resolve cj5-90000.txt unique source-table intersections first, then chidic.eduhk.hk GBK entries.
+# Resolved from chidic.eduhk.hk GBK entries.
 # A unique non-x/z GBK code wins; otherwise normalize a unique x-prefixed GBK code when its
 # stripped code exists in the source table.
 晭	abgr

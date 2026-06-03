@@ -22,8 +22,8 @@ from core.paths import CANGJIE5_DICT_PATH, REPO_ROOT
 
 DEFAULT_OUTPUT_PATH = REPO_ROOT / "scripts" / "cangjie" / "data" / "sc_glyph_preferred_code.txt"
 DEFAULT_UNRESOLVED_PATH = REPO_ROOT / "scripts" / "cangjie" / "data" / "sc_glyph_unresolved_code.txt"
-DEFAULT_CACHE_PATH = REPO_ROOT / "_tmp" / "chidic_glyph_cache.json"
-DEFAULT_REFERENCE_PATH = REPO_ROOT / "scripts" / "cangjie" / "data" / "cj5-90000.txt"
+DEFAULT_CACHE_PATH = REPO_ROOT / "scripts" / "cangjie" / "data" / "chidic_glyph_cache.json"
+DEFAULT_MANUAL_PREFERRED_PATH = REPO_ROOT / "scripts" / "cangjie" / "data" / "sc_glyph_manual_preferred_code.txt"
 CHIDIC_URL = "https://chidic.eduhk.hk/v.php?dicword={text}"
 FIELD_PATTERN = re.compile(r"鍵盤字母：</font>([A-Z]+)")
 
@@ -38,33 +38,6 @@ def load_ambiguous_codes() -> dict[str, set[str]]:
         for text, codes in codes_by_text.items()
         if len(codes) > 1 and is_gbk(text)
     }
-
-
-def load_reference_codes(path: Path) -> dict[str, set[str]]:
-    codes_by_text: dict[str, set[str]] = defaultdict(set)
-    for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
-        if not line or line.startswith("#"):
-            continue
-        parts = line.split("\t")
-        if len(parts) != 2:
-            raise ValueError(f"{path}:{lineno}: 预期为 code<TAB>text")
-        code, text = parts
-        code = code.lower()
-        if is_han_char(text) and code and not code.startswith(("x", "z")):
-            codes_by_text[text].add(code)
-    return dict(codes_by_text)
-
-
-def resolve_reference_codes(
-    ambiguous_codes: dict[str, set[str]],
-    reference_codes: dict[str, set[str]],
-) -> dict[str, str]:
-    preferred_codes: dict[str, str] = {}
-    for text, source_codes in ambiguous_codes.items():
-        matching_codes = source_codes & reference_codes.get(text, set())
-        if len(matching_codes) == 1:
-            preferred_codes[text] = next(iter(matching_codes))
-    return preferred_codes
 
 
 def extract_field(block: str, label: str) -> str:
@@ -170,13 +143,27 @@ def write_preferred_codes(path: Path, preferred_codes: dict[str, str]) -> None:
     lines = [
         "# encoding: utf-8",
         "# Mainland glyph preferred Cangjie5 codes.",
-        "# Resolve cj5-90000.txt unique source-table intersections first, then chidic.eduhk.hk GBK entries.",
+        "# Resolved from chidic.eduhk.hk GBK entries.",
         "# A unique non-x/z GBK code wins; otherwise normalize a unique x-prefixed GBK code when its",
         "# stripped code exists in the source table.",
     ]
-    items = sorted(preferred_codes.items())
+    items = sorted(preferred_codes.items(), key=lambda item: (item[1], item[0]))
     lines.extend(f"{text}\t{code}" for text, code in items)
     path.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
+
+
+def load_preferred_codes(path: Path) -> dict[str, str]:
+    if not path.exists():
+        return {}
+    preferred: dict[str, str] = {}
+    for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split("\t")
+        if len(parts) != 2 or len(parts[0]) != 1 or not parts[1]:
+            raise ValueError(f"{path}:{lineno}: 首选码格式应为 字<TAB>编码")
+        preferred[parts[0]] = parts[1]
+    return preferred
 
 
 def resolve_x_prefixed_gbk_code(source_codes: set[str], entries: list[dict[str, str]]) -> str | None:
@@ -269,6 +256,41 @@ def parse_chars(raw_chars: str) -> list[str]:
     return list(dict.fromkeys(char for char in raw_chars if char not in {",", " ", "\t", "\r", "\n"}))
 
 
+def backfill_cache_from_preferred(
+    *,
+    cache_path: Path,
+    manual_preferred_path: Path,
+    preferred_path: Path,
+    unresolved_path: Path,
+    ambiguous_codes: dict[str, set[str]],
+) -> tuple[int, int, int, int]:
+    """把人工确认表反填进 cache，并刷新 preferred/unresolved。"""
+    preferred = load_preferred_codes(manual_preferred_path)
+    cache = load_cache(cache_path, set(ambiguous_codes))
+    added = 0
+    replaced = 0
+    skipped = 0
+    for text, code in preferred.items():
+        source_codes = ambiguous_codes.get(text)
+        if source_codes is None or code not in source_codes:
+            skipped += 1
+            continue
+        entry = {"code": code, "gbk": "MANUAL", "hkscs": "", "big5": ""}
+        old = cache.get(text)
+        if old == [entry]:
+            continue
+        if old:
+            replaced += 1
+        else:
+            added += 1
+        cache[text] = [entry]
+    write_cache(cache_path, cache)
+    resolved, unresolved = resolve_preferred_codes(ambiguous_codes, cache)
+    write_preferred_codes(preferred_path, resolved)
+    write_unresolved_codes(unresolved_path, ambiguous_codes, cache, unresolved)
+    return added, replaced, skipped, len(unresolved)
+
+
 def main() -> None:
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
@@ -277,7 +299,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="抓取大陆字形首选仓颉五码")
     parser.add_argument("--chars", default="", help="仅抓取指定汉字，例如 着,的,真；默认扫描全部多码字")
     parser.add_argument("--delay", type=float, default=1.0, help="每次网络请求后的等待秒数；默认 1.0")
-    parser.add_argument("--workers", type=int, default=1, help="并发请求线程数；默认 1")
+    parser.add_argument("--workers", type=int, default=2, help="并发请求线程数；默认 2")
     parser.add_argument("--timeout", type=float, default=30.0, help="单次请求超时秒数；默认 30")
     parser.add_argument("--retries", type=int, default=0, help="单字失败重试次数；默认 0，限流后建议换 IP 再续跑")
     parser.add_argument("--failure-rounds", type=int, default=0, help="完成扫描后再次补抓失败字的轮数；默认 0")
@@ -285,11 +307,13 @@ def main() -> None:
     parser.add_argument("--batch-size", type=int, default=150, help="每批最多查询数量；默认 150")
     parser.add_argument("--batch-pause", type=float, default=0.0, help="批次之间暂停秒数；默认 0")
     parser.add_argument("--limit", type=int, default=150, help="本次最多领取多少个未决字；默认 150，0 表示不限制")
-    parser.add_argument("--offline-only", action="store_true", help="只从 cj5-90000.txt 生成离线首选码，不访问网络")
-    parser.add_argument("--reference", type=Path, default=DEFAULT_REFERENCE_PATH, help="大陆字形参考码表")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_PATH, help="首选码输出文件")
     parser.add_argument("--unresolved-output", type=Path, default=DEFAULT_UNRESOLVED_PATH, help="仍需人工确认的歧义码输出文件")
     parser.add_argument("--sort-by-code", action="store_true", help="只将现有输出文件按仓颉编码排序，然后立即退出")
+    parser.add_argument("--backfill-from-preferred", action="store_true",
+                        help="从人工确认首选码文件反填 cache，并刷新首选码和未决文件；不访问网络")
+    parser.add_argument("--manual-preferred", type=Path, default=DEFAULT_MANUAL_PREFERRED_PATH,
+                        help="人工确认首选码文件，供 --backfill-from-preferred 使用")
     parser.add_argument("--cache", type=Path, default=DEFAULT_CACHE_PATH, help="断点缓存 JSON")
     args = parser.parse_args()
     if args.sort_by_code:
@@ -297,6 +321,24 @@ def main() -> None:
         sort_tsv_file_by_code(args.unresolved_output)
         print(f"已按仓颉编码排序: {args.output}")
         print(f"已按仓颉编码排序: {args.unresolved_output}")
+        return
+    ambiguous_codes = load_ambiguous_codes()
+    if args.backfill_from_preferred:
+        added, replaced, skipped, unresolved_count = backfill_cache_from_preferred(
+            cache_path=args.cache,
+            manual_preferred_path=args.manual_preferred,
+            preferred_path=args.output,
+            unresolved_path=args.unresolved_output,
+            ambiguous_codes=ambiguous_codes,
+        )
+        print(
+            f"已从人工首选码反填 cache: 新增={added} 覆盖={replaced} "
+            f"跳过={skipped} 剩余未决={unresolved_count}"
+        )
+        print(f"cache: {args.cache}")
+        print(f"人工首选码: {args.manual_preferred}")
+        print(f"首选码: {args.output}")
+        print(f"未决码: {args.unresolved_output}")
         return
     if (
         args.delay < 0
@@ -311,27 +353,16 @@ def main() -> None:
     ):
         parser.error("delay、retries、failure-rounds、batch-pause、limit 不能为负数，workers、timeout、checkpoint-every 和 batch-size 必须大于 0")
 
-    ambiguous_codes = load_ambiguous_codes()
-    reference_codes = load_reference_codes(args.reference)
-    offline_preferred = resolve_reference_codes(ambiguous_codes, reference_codes)
-    online_ambiguous = {
-        text: codes
-        for text, codes in ambiguous_codes.items()
-        if text not in offline_preferred
-    }
+    online_ambiguous = ambiguous_codes
     texts = parse_chars(args.chars) if args.chars else sorted(online_ambiguous)
     texts = [text for text in texts if text in online_ambiguous]
     cache = load_cache(args.cache, set(online_ambiguous))
-    if args.offline_only:
-        cache = {}
 
     fetched = 0
     failures: list[tuple[str, str]] = []
     pending = [text for text in texts if not cache.get(text)]
     if args.limit:
         pending = pending[:args.limit]
-    if args.offline_only:
-        pending = []
     for round_index in range(args.failure_rounds + 1):
         if not pending:
             break
@@ -362,8 +393,7 @@ def main() -> None:
                         write_cache(args.cache, cache)
                         if fetched % args.checkpoint_every == 0:
                             online_preferred, _ = resolve_preferred_codes(online_ambiguous, cache)
-                            preferred_codes = {**offline_preferred, **online_preferred}
-                            write_preferred_codes(args.output, preferred_codes)
+                            write_preferred_codes(args.output, online_preferred)
                         print(f"[{fetched}] {text}: {cache[text]}")
                     except Exception as exc:
                         pending.append(text)
@@ -377,10 +407,9 @@ def main() -> None:
             time.sleep(args.batch_pause)
 
     online_preferred, unresolved = resolve_preferred_codes(online_ambiguous, cache)
-    preferred_codes = {**offline_preferred, **online_preferred}
     online_remaining = sum(not cache.get(text) for text in online_ambiguous)
 
-    write_preferred_codes(args.output, preferred_codes)
+    write_preferred_codes(args.output, online_preferred)
     write_unresolved_codes(
         args.unresolved_output,
         online_ambiguous,
@@ -390,8 +419,7 @@ def main() -> None:
     print(f"首选码已保存: {args.output}")
     print(f"未决码已保存: {args.unresolved_output}")
     print(
-        f"GBK 多码字: {len(ambiguous_codes)}；离线确定: {len(offline_preferred)}；"
-        f"在线缓存: {len(cache)}；在线补齐: {len(online_preferred)}；"
+        f"GBK 多码字: {len(ambiguous_codes)}；在线缓存: {len(cache)}；在线补齐: {len(online_preferred)}；"
         f"在线剩余待处理: {online_remaining}；缓存内仍未决: {len(unresolved)}；"
         f"本批待补抓: {len(pending)}；失败记录: {len(failures)}"
     )
