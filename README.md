@@ -66,6 +66,8 @@ Rime 方案集合，包含拼音、自然码、仓颉、郑码、四角号码和
 | [`scripts/scheme_dependencies.py`](scripts/scheme_dependencies.py) | 扫描正式方案并生成 [`schemas/common/dependencies.yaml`](schemas/common/dependencies.yaml)。 |
 | [`scripts/export_schemes.py`](scripts/export_schemes.py) | 按一个或多个 `schema_id` 导出依赖到 `_output` 或指定下划线目录。 |
 
+仓颉普通一简审阅默认使用 `--weights sc`；Sicang5/Wucang5 生产构建默认使用 `--weights sc_daily` 生成二简、三简、全码排序、后缀救援，并在显式开启 `--s4` 时用于四简。60/40 的 `sc_balanced` 保留为显式实验口径。
+
 详细参数见 [`scripts/README.md`](scripts/README.md)。
 
 ## 通用按键

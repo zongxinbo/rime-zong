@@ -79,7 +79,7 @@ class ShortcutGainAnalyzer:
         self,
         *,
         char_scores: dict[str, int | float] | None = None,
-        weights: str = "sc_balanced",
+        weights: str = "sc_daily",
         protect_native: bool = True,
         protect_native_charset: str = "gbk",
         protect_native_min_score: int | float = 3000,
@@ -318,14 +318,14 @@ def main() -> None:
     parser.add_argument("--code", required=True, help="目标简码，例如 t、za、xp")
     parser.add_argument("--char", required=True, help="拟写入目标码位的单字")
     parser.add_argument("--top-changes", type=int, default=10, help="输出影响最大的逐字变化数量")
-    parser.add_argument("--weights", choices=("sc", "sc_balanced"), default=None,
-                        help="权重模式；默认 one=sc，fixed-prefix=sc_balanced")
+    parser.add_argument("--weights", choices=("sc", "sc_daily", "sc_balanced"), default=None,
+                        help="权重模式；默认 one=sc，fixed-prefix=sc_daily")
     parser.add_argument("--protect-native-charset", choices=("all", "frequency", "gbk", "gb2312"), default="gbk")
     parser.add_argument("--protect-native-min-score", type=float, default=3000)
     parser.add_argument("--shortcut-candidate-min-score", type=float, default=3000)
     args = parser.parse_args()
 
-    weights = args.weights or ("sc" if args.layer == "one" else "sc_balanced")
+    weights = args.weights or ("sc" if args.layer == "one" else "sc_daily")
     analyzer = ShortcutGainAnalyzer(
         weights=weights,
         protect_native_charset=args.protect_native_charset,
