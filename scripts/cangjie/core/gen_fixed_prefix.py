@@ -3,7 +3,7 @@
 """
 纯算法生成 z?/x? 固定二简避重码表 (fixed_prefix_code.txt)
 根据可选权重模式归一化字频挑选 52 个最需要救援的繁简常用字，
-并根据用户的多级直觉流（首键优先 -> 尾键其次 -> 包含键第三 -> 兜底第四）进行键位智能映射。
+并根据首键优先、尾键其次的可记忆锚点进行键位映射；无首尾匹配则放弃。
 """
 
 import sys
@@ -150,7 +150,7 @@ def main():
     for i, (score, char, code, depth, freq) in enumerate(top_50[:10], 1):
         print(f"  No.{i}: {char} (全码:{code}, 候选顺位:{depth}, 归一化字频:{freq:.6f}, 避重得分:{score:.2f})")
         
-    # 5. 执行多级直觉流映射分配算法 (首键 -> 尾键 -> 包含 -> 兜底)
+    # 5. 执行首尾锚点映射分配算法 (首键 -> 尾键)
     # 初始化 50 个可用槽位 (排除已占用的 xz, zz)
     letters = "abcdefghijklmnopqrstuvwxyz"
     all_slots = []
@@ -163,12 +163,11 @@ def main():
     slot_to_char = {}
     char_to_slot = {}
     
-    # 待用兜底的后备队列
-    fallback_chars = []
+    skipped_chars = []
     
     for score, char, code, depth, freq in top_50:
         if not code:
-            fallback_chars.append(char)
+            skipped_chars.append(char)
             continue
             
         assigned = False
@@ -197,33 +196,10 @@ def main():
         if assigned:
             continue
             
-        # --- 规则 3：包含键映射 ---
-        # 遍历全码中的非首尾字母
-        inner_assigned = False
-        for char_key in code:
-            for prefix in ("z", "x"):
-                candidate_slot = prefix + char_key
-                if candidate_slot in all_slots and candidate_slot not in slot_to_char:
-                    slot_to_char[candidate_slot] = char
-                    char_to_slot[char] = candidate_slot
-                    inner_assigned = True
-                    break
-            if inner_assigned:
-                assigned = True
-                break
-        if assigned:
-            continue
-            
-        # --- 规则 4：加入后备队列 ---
-        fallback_chars.append(char)
-        
-    # 6. 对后备队列执行兜底空位填充
+        skipped_chars.append(char)
+
     empty_slots = [slot for slot in all_slots if slot not in slot_to_char]
-    print(f"\n多级字形映射后，剩余未分配槽位 {len(empty_slots)} 个，后备队列有 {len(fallback_chars)} 个字")
-    
-    for char, slot in zip(fallback_chars, empty_slots):
-        slot_to_char[slot] = char
-        char_to_slot[char] = slot
+    print(f"\n首尾锚点映射后，剩余未分配槽位 {len(empty_slots)} 个，无首尾匹配或槽位冲突放弃 {len(skipped_chars)} 个字")
         
     # 7. 整理并写入 fixed_prefix_code.txt
     print(f"正在写入原型文件: {FIXED_PREFIX_CODE_PATH} ...")
