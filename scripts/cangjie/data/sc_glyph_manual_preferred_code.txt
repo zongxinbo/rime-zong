@@ -1,0 +1,31 @@
+# encoding: utf-8
+# Manually confirmed Mainland glyph preferred Cangjie5 codes.
+# text<TAB>code
+肞	bei
+橷	dlpn
+沜	elln
+湠	eukf
+兏	hymu
+覑	lnbuu
+牉	lnfq
+牘	lngwc
+版	lnhe
+牐	lnhjx
+牑	lnisb
+牖	lnisb
+牕	lnhwp
+牔	lnibi
+牋	lnii
+牗	lnilb
+牍	lnjnk
+牏	lnomn
+牎	lnpkp
+牒	lnptd
+牊	lnshr
+牓	lnybs
+烎	mtf
+魸	nflln
+剱	ooshi
+扸	qlln
+黻	tbike
+剙	ttshc
