@@ -48,6 +48,12 @@ def extract_field(block: str, label: str) -> str:
     return html.unescape(value).strip()
 
 
+def extract_code_field(block: str, label: str) -> str:
+    value = extract_field(block, label).upper()
+    match = re.search(r"[A-Z]+", value)
+    return match.group(0).lower() if match else ""
+
+
 def parse_chidic_page(page: str) -> list[dict[str, str]]:
     matches = list(FIELD_PATTERN.finditer(page))
     entries: list[dict[str, str]] = []
@@ -56,6 +62,7 @@ def parse_chidic_page(page: str) -> list[dict[str, str]]:
         block = page[match.start():end]
         entries.append({
             "code": match.group(1).lower(),
+            "wucang_dup_code": extract_code_field(block, "五倉重碼"),
             "gbk": extract_field(block, "GBK"),
             "hkscs": extract_field(block, "HKSCS"),
             "big5": extract_field(block, "BIG5"),
@@ -203,14 +210,14 @@ def write_unresolved_codes(
         entries = cache[text]
         source_codes = ",".join(sorted(ambiguous_codes[text]))
         gbk_codes = ",".join(sorted({
-            entry["code"]
+            effective_gbk_code(entry, ambiguous_codes[text]) or entry["code"]
             for entry in entries
             if entry["gbk"]
         }))
         normal_gbk_codes = ",".join(sorted({
-            entry["code"]
+            effective_gbk_code(entry, ambiguous_codes[text]) or entry["code"]
             for entry in entries
-            if entry["gbk"] and not entry["code"].startswith(("x", "z"))
+            if entry["gbk"] and not (effective_gbk_code(entry, ambiguous_codes[text]) or entry["code"]).startswith(("x", "z"))
         }))
         rows.append((text, source_codes, gbk_codes, normal_gbk_codes))
     rows.sort(key=lambda row: row[0])
@@ -233,12 +240,14 @@ def resolve_preferred_codes(
         if entries is None:
             continue
         gbk_codes = {
-            entry["code"]
+            code
             for entry in entries
+            for code in [effective_gbk_code(entry, source_codes)]
             if (
-                entry["gbk"]
-                and not entry["code"].startswith(("x", "z"))
-                and entry["code"] in source_codes
+                code is not None
+                and entry["gbk"]
+                and not code.startswith(("x", "z"))
+                and code in source_codes
             )
         }
         if len(gbk_codes) == 1:
@@ -254,6 +263,27 @@ def resolve_preferred_codes(
 
 def parse_chars(raw_chars: str) -> list[str]:
     return list(dict.fromkeys(char for char in raw_chars if char not in {",", " ", "\t", "\r", "\n"}))
+
+
+def effective_gbk_code(entry: dict[str, str], source_codes: set[str]) -> str | None:
+    code = entry["code"]
+    if entry.get("gbk") and code in source_codes:
+        return code
+    dup_code = entry.get("wucang_dup_code", "")
+    if entry.get("gbk") and code.startswith("x") and dup_code in source_codes:
+        return dup_code
+    return None
+
+
+def load_unresolved_texts(path: Path) -> list[str]:
+    if not path.exists():
+        return []
+    texts: list[str] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line or line.startswith("#"):
+            continue
+        texts.append(line.split("\t", maxsplit=1)[0])
+    return texts
 
 
 def backfill_cache_from_preferred(
@@ -314,6 +344,8 @@ def main() -> None:
                         help="从人工确认首选码文件反填 cache，并刷新首选码和未决文件；不访问网络")
     parser.add_argument("--manual-preferred", type=Path, default=DEFAULT_MANUAL_PREFERRED_PATH,
                         help="人工确认首选码文件，供 --backfill-from-preferred 使用")
+    parser.add_argument("--refetch-unresolved", action="store_true",
+                        help="只重查当前未决文件中的汉字，并先删除这些字的旧 cache")
     parser.add_argument("--cache", type=Path, default=DEFAULT_CACHE_PATH, help="断点缓存 JSON")
     args = parser.parse_args()
     if args.sort_by_code:
@@ -354,9 +386,16 @@ def main() -> None:
         parser.error("delay、retries、failure-rounds、batch-pause、limit 不能为负数，workers、timeout、checkpoint-every 和 batch-size 必须大于 0")
 
     online_ambiguous = ambiguous_codes
-    texts = parse_chars(args.chars) if args.chars else sorted(online_ambiguous)
+    if args.refetch_unresolved:
+        texts = load_unresolved_texts(args.unresolved_output)
+    else:
+        texts = parse_chars(args.chars) if args.chars else sorted(online_ambiguous)
     texts = [text for text in texts if text in online_ambiguous]
     cache = load_cache(args.cache, set(online_ambiguous))
+    if args.refetch_unresolved:
+        for text in texts:
+            cache.pop(text, None)
+        write_cache(args.cache, cache)
 
     fetched = 0
     failures: list[tuple[str, str]] = []

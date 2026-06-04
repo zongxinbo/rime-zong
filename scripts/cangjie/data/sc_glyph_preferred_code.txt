@@ -1510,6 +1510,7 @@
 俺	oklu
 脩	olhb
 條	olhd
+倐	olhf
 儵	olhf
 絛	olhf
 鯈	olhf
@@ -1976,6 +1977,7 @@
 郱	ttnl
 蒫	ttqm
 善	ttr
+刱	ttshc
 剙	ttshc
 剏	ttshi
 荓	ttt
@@ -2247,6 +2249,7 @@
 竜	ytwu
 齻	yujbc
 齡	yuoii
+齢	yuoii
 齠	yushr
 齸	yutct
 鼑	yuvml
