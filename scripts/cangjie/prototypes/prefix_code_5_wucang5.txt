@@ -1,4 +1,11 @@
 # 自动 z/x 前缀 5 码审阅文件；构建时覆盖生成
-鳯	xhnha
 飀	zhnhh
+徴	zhoug
+骕	znmll
+鲡	znmmb
 锿	zopyr
+縰	zvfho
+繦	zvfnr
+訉	zyrhn
+龂	zyuhm
+齷	zyusm
