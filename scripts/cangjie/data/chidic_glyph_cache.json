@@ -259,18 +259,10 @@
   ],
   "佟": [
     {
-      "big5": "CA63",
-      "code": "ohem",
-      "gbk": "D9A1",
-      "hkscs": "",
-      "wucang_dup_code": ""
-    },
-    {
-      "big5": "CA63",
+      "big5": "",
       "code": "ohey",
-      "gbk": "D9A1",
-      "hkscs": "",
-      "wucang_dup_code": ""
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "佨": [
@@ -1115,18 +1107,10 @@
   ],
   "凞": [
     {
-      "big5": "E8F9",
-      "code": "imlsf",
-      "gbk": "8444",
-      "hkscs": "",
-      "wucang_dup_code": ""
-    },
-    {
       "big5": "",
-      "code": "lvf",
-      "gbk": "",
-      "hkscs": "",
-      "wucang_dup_code": ""
+      "code": "imluf",
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "凲": [
@@ -2761,9 +2745,8 @@
     {
       "big5": "",
       "code": "hkg",
-      "gbk": "",
-      "hkscs": "",
-      "wucang_dup_code": ""
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "圴": [
@@ -2913,10 +2896,9 @@
   "垹": [
     {
       "big5": "",
-      "code": "gqkl",
-      "gbk": "88A0",
-      "hkscs": "",
-      "wucang_dup_code": ""
+      "code": "gqjl",
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "埆": [
@@ -3234,10 +3216,9 @@
   "墫": [
     {
       "big5": "",
-      "code": "gcmi",
-      "gbk": "",
-      "hkscs": "",
-      "wucang_dup_code": ""
+      "code": "gtwi",
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "墰": [
@@ -3984,9 +3965,8 @@
     {
       "big5": "",
       "code": "ydknk",
-      "gbk": "",
-      "hkscs": "",
-      "wucang_dup_code": ""
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "宂": [
@@ -5920,10 +5900,9 @@
   "懬": [
     {
       "big5": "",
-      "code": "xxicp",
-      "gbk": "",
-      "hkscs": "",
-      "wucang_dup_code": "icp"
+      "code": "itcp",
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "懿": [
@@ -5988,9 +5967,8 @@
     {
       "big5": "",
       "code": "risj",
-      "gbk": "",
-      "hkscs": "",
-      "wucang_dup_code": ""
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "戹": [
@@ -6482,10 +6460,9 @@
   "挷": [
     {
       "big5": "",
-      "code": "qqkl",
-      "gbk": "92B2",
-      "hkscs": "",
-      "wucang_dup_code": ""
+      "code": "qqjl",
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "挻": [
@@ -8125,24 +8102,9 @@
   "梆": [
     {
       "big5": "",
-      "code": "dhql",
-      "gbk": "",
-      "hkscs": "",
-      "wucang_dup_code": ""
-    },
-    {
-      "big5": "B1F5",
       "code": "dqjl",
-      "gbk": "",
-      "hkscs": "",
-      "wucang_dup_code": ""
-    },
-    {
-      "big5": "",
-      "code": "dqkl",
-      "gbk": "B0F0",
-      "hkscs": "",
-      "wucang_dup_code": ""
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "梏": [
@@ -9168,10 +9130,9 @@
   "殩": [
     {
       "big5": "",
-      "code": "mnmed",
-      "gbk": "",
-      "hkscs": "",
-      "wucang_dup_code": ""
+      "code": "mnyed",
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "殺": [
@@ -9198,18 +9159,10 @@
   ],
   "毋": [
     {
-      "big5": "C960",
-      "code": "wj",
-      "gbk": "9AAF",
-      "hkscs": "",
-      "wucang_dup_code": ""
-    },
-    {
-      "big5": "A4F0",
+      "big5": "",
       "code": "wjh",
-      "gbk": "CEE3",
-      "hkscs": "",
-      "wucang_dup_code": ""
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "毐": [
@@ -10936,9 +10889,8 @@
     {
       "big5": "",
       "code": "ykf",
-      "gbk": "",
-      "hkscs": "",
-      "wucang_dup_code": ""
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "熡": [
@@ -12476,10 +12428,9 @@
   "癢": [
     {
       "big5": "",
-      "code": "ktcv",
-      "gbk": "",
-      "hkscs": "",
-      "wucang_dup_code": ""
+      "code": "ktov",
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "癤": [
@@ -13385,10 +13336,9 @@
   "礻": [
     {
       "big5": "",
-      "code": "iny",
-      "gbk": "ECEA",
-      "hkscs": "8BD8",
-      "wucang_dup_code": ""
+      "code": "inf",
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "礼": [
@@ -15738,10 +15688,9 @@
   "簰": [
     {
       "big5": "",
-      "code": "hlsj",
-      "gbk": "BA92",
-      "hkscs": "",
-      "wucang_dup_code": ""
+      "code": "hlnj",
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "簶": [
@@ -16307,10 +16256,9 @@
   "綁": [
     {
       "big5": "",
-      "code": "vfqkl",
-      "gbk": "BD89",
-      "hkscs": "",
-      "wucang_dup_code": ""
+      "code": "vfqjl",
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "綖": [
@@ -17478,10 +17426,9 @@
   "膥": [
     {
       "big5": "",
-      "code": "jsobo",
-      "gbk": "",
-      "hkscs": "99A8",
-      "wucang_dup_code": ""
+      "code": "dsobo",
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "膳": [
@@ -19413,10 +19360,9 @@
   "蝂": [
     {
       "big5": "",
-      "code": "lilse",
-      "gbk": "CE5A",
-      "hkscs": "",
-      "wucang_dup_code": ""
+      "code": "lilne",
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "蝆": [
@@ -19541,18 +19487,10 @@
   ],
   "蝳": [
     {
-      "big5": "E7A6",
-      "code": "liqmh",
-      "gbk": "CE7D",
-      "hkscs": "",
-      "wucang_dup_code": ""
-    },
-    {
-      "big5": "E7A6",
+      "big5": "",
       "code": "liqmy",
-      "gbk": "CE7D",
-      "hkscs": "",
-      "wucang_dup_code": ""
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "蝹": [
@@ -19652,10 +19590,9 @@
   "蟄": [
     {
       "big5": "",
-      "code": "xxgkl",
-      "gbk": "",
-      "hkscs": "",
-      "wucang_dup_code": "gilmi"
+      "code": "gklmi",
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "蟡": [
@@ -22289,17 +22226,9 @@
   "辶": [
     {
       "big5": "",
-      "code": "iiso",
-      "gbk": "",
-      "hkscs": "",
-      "wucang_dup_code": ""
-    },
-    {
-      "big5": "",
-      "code": "iso",
-      "gbk": "",
-      "hkscs": "",
-      "wucang_dup_code": ""
+      "code": "inno",
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "迅": [
@@ -23810,11 +23739,10 @@
   ],
   "鑝": [
     {
-      "big5": "F84C",
+      "big5": "",
       "code": "ctyj",
-      "gbk": "",
-      "hkscs": "",
-      "wucang_dup_code": ""
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "鑧": [
@@ -23850,17 +23778,9 @@
   "閝": [
     {
       "big5": "",
-      "code": "anomi",
-      "gbk": "E971",
-      "hkscs": "",
-      "wucang_dup_code": ""
-    },
-    {
-      "big5": "",
-      "code": "anoml",
-      "gbk": "",
-      "hkscs": "",
-      "wucang_dup_code": ""
+      "code": "anoii",
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "閭": [
@@ -25158,31 +25078,9 @@
   "養": [
     {
       "big5": "",
-      "code": "tciav",
-      "gbk": "F042",
-      "hkscs": "",
-      "wucang_dup_code": ""
-    },
-    {
-      "big5": "",
-      "code": "tcmav",
-      "gbk": "F042",
-      "hkscs": "",
-      "wucang_dup_code": ""
-    },
-    {
-      "big5": "",
       "code": "toiav",
-      "gbk": "F042",
-      "hkscs": "",
-      "wucang_dup_code": ""
-    },
-    {
-      "big5": "BE69",
-      "code": "tomav",
-      "gbk": "F042",
-      "hkscs": "",
-      "wucang_dup_code": ""
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "餌": [
@@ -27846,10 +27744,9 @@
   "麭": [
     {
       "big5": "",
-      "code": "xxdep",
-      "gbk": "",
-      "hkscs": "",
-      "wucang_dup_code": "depru"
+      "code": "depru",
+      "gbk": "MANUAL",
+      "hkscs": ""
     }
   ],
   "麮": [

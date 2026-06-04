@@ -339,7 +339,7 @@ def main() -> None:
     parser.add_argument("--limit", type=int, default=150, help="本次最多领取多少个未决字；默认 150，0 表示不限制")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_PATH, help="首选码输出文件")
     parser.add_argument("--unresolved-output", type=Path, default=DEFAULT_UNRESOLVED_PATH, help="仍需人工确认的歧义码输出文件")
-    parser.add_argument("--sort-by-code", action="store_true", help="只将现有输出文件按仓颉编码排序，然后立即退出")
+    parser.add_argument("--sort-by-code", action="store_true", help="只将现有首选码输出文件按仓颉编码排序，然后立即退出")
     parser.add_argument("--backfill-from-preferred", action="store_true",
                         help="从人工确认首选码文件反填 cache，并刷新首选码和未决文件；不访问网络")
     parser.add_argument("--manual-preferred", type=Path, default=DEFAULT_MANUAL_PREFERRED_PATH,
@@ -350,9 +350,7 @@ def main() -> None:
     args = parser.parse_args()
     if args.sort_by_code:
         sort_tsv_file_by_code(args.output)
-        sort_tsv_file_by_code(args.unresolved_output)
         print(f"已按仓颉编码排序: {args.output}")
-        print(f"已按仓颉编码排序: {args.unresolved_output}")
         return
     ambiguous_codes = load_ambiguous_codes()
     if args.backfill_from_preferred:

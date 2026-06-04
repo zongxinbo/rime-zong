@@ -1,28 +1,2 @@
 # encoding: utf-8
 # text<TAB>source_codes<TAB>chidic_gbk_codes<TAB>chidic_normal_gbk_codes
-佟	ohem,ohey	ohem,ohey	ohem,ohey
-凞	imluf,iuf,ivf	imlsf	imlsf
-圱	hjg,hkg		
-垹	ghql,gqjl	gqkl	gqkl
-墫	gcmi,gtwi		
-孰	ydkni,ydknk		
-懬	icp,itcp,itmp		
-戢	risj,rji		
-挷	qhql,qqjl	qqkl	qqkl
-梆	dhql,dqjl	dqkl	dqkl
-殩	mnmed,mnyed		
-毋	wj,wjh	wj,wjh	wj,wjh
-熟	yif,ykf		
-癢	ktcv,ktov		
-礻	inf,mmf	iny	iny
-簰	hllj,hlnj	hlsj	hlsj
-綁	vfhql,vfqjl	vfqkl	vfqkl
-膥	dsobo,jsobo		
-蝂	lille,lilne	lilse	lilse
-蝳	liqmh,liqmj,liqmy	liqmh,liqmy	liqmh,liqmy
-蟄	gilmi,gklmi		
-辶	iino,inno,ino,yno		
-鑝	ctyj,cytj		
-閝	anoii,anoml	anomi	anomi
-養	tciav,tcmav,toiav,tomav	tciav,tcmav,toiav,tomav	tciav,tcmav,toiav,tomav
-麭	depru,depsu,jepru,jepsu,jnpru,jnpsu		
