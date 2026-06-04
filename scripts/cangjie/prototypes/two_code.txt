@@ -86,7 +86,7 @@
 塊	gh
 城	gi
 報	gj
-垮	gk
+勢	gk
 赤	gl
 坏	gm
 场	gn
@@ -98,7 +98,7 @@
 劉	hc
 乎	hf
 笑	hh
-简	hl
+州	hl
 后	hm
 印	hp
 師	hr
@@ -111,7 +111,7 @@
 救	ie
 神	if
 郎	ii
-州	il
+康	il
 次	im
 之	in
 资	io
@@ -196,7 +196,7 @@
 挡	qf
 持	qg
 投	qh
-秦	qk
+势	qk
 帮	ql
 换	qn
 指	qp

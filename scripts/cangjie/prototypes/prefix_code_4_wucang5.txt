@@ -1,5 +1,5 @@
 # 自动 z/x 前缀 4 码审阅文件；构建时覆盖生成
-鳯	xhnh
+鵚	xhnh
 徴	xhou
 鵅	xhrh
 骕	xnml
@@ -48,6 +48,7 @@
 铱	zopy
 頜	zorm
 翖	zors
+螯	zqkl
 踯	zrmt
 鼍	zrrw
 鸮	zrsp

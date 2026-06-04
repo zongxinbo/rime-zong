@@ -5,7 +5,6 @@
 眊	xbuh
 眰	xbum
 膗	xbuo
-洭	xesm
 糥	xfdm
 穂	xhdj
 鵞	xhih
@@ -130,8 +129,6 @@
 糇	zfdo
 縈	zffb
 歘	zffn
-埌	zgia
-幇	zgil
 刼	zgis
 皥	zhah
 鷮	zhbh
@@ -145,7 +142,7 @@
 鄡	zhdn
 魎	zhim
 颶	zhnb
-鳯	zhnh
+鵚	zhnh
 飃	zhnm
 飑	zhnp
 飔	zhnw
@@ -174,6 +171,7 @@
 诼	zivm
 谲	zivn
 诠	zivo
+讱	zivs
 谤	zivy
 窰	zjcb
 穾	zjch
@@ -181,6 +179,7 @@
 轗	zjji
 軯	zjjm
 軵	zjjo
+轇	zjjs
 猨	zkhb
 猘	zkhh
 狁	zkhi
@@ -237,6 +236,7 @@
 璜	zmgt
 瓅	zmgv
 璩	zmgy
+殁	zmnh
 殡	zmnj
 殓	zmno
 跫	zmnr
@@ -320,9 +320,10 @@
 翖	zors
 匉	zpmf
 憟	zpmw
-揙	zqis
+贽	zqkb
+螯	zqkl
+摃	zqmb
 嚔	zrjb
-嘧	zrjp
 咺	zrma
 嚘	zrmb
 唒	zrmc
@@ -354,7 +355,7 @@
 駬	zsfs
 褧	zsfy
 鷚	zshh
-屐	zsho
+屦	zsho
 鬛	zshw
 聍	zsjj
 屝	zslm
@@ -363,7 +364,6 @@
 顜	ztbm
 覥	ztcb
 鷬	ztch
-蓺	ztgg
 蔦	ztha
 薫	zthg
 葻	zthn
@@ -393,7 +393,7 @@
 緞	zvfh
 紿	zvfi
 縝	zvfj
-紈	zvfk
+糼	zvfk
 紃	zvfl
 縟	zvfm
 繈	zvfn
@@ -410,10 +410,10 @@
 绺	zvmh
 姪	zvmi
 缜	zvmj
-纮	zvmk
 缛	zvmm
 缏	zvmo
 纰	zvmp
+纫	zvms
 缣	zvmt
 缫	zvmv
 缧	zvmw
