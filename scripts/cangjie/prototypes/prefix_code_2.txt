@@ -21,7 +21,6 @@
 晩	xu
 縯	xv
 囮	xw
-铱	xx
 达	xy
 缩	za
 贱	zb
@@ -46,5 +45,4 @@
 冕	zu
 绿	zv
 困	zw
-压	zx
 头	zy

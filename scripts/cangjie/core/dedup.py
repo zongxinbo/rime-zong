@@ -212,8 +212,8 @@ def short_prefix_codes(code: str, level: int, rank: int) -> tuple[str, ...]:
     raise ValueError("前缀短码层级只能是 2、3 或 4")
 
 
-def one_code_anchor_keys(code: str, char: str, ranks: dict[str, int]) -> list[tuple[str, float]]:
-    """按普通一简锚点规则返回可用主体键和倍率。"""
+def prefix_level2_anchor_keys(code: str) -> list[tuple[str, float]]:
+    """返回二码 z/x 前缀主体键，按首码、末码顺序尝试。"""
     anchors: dict[str, float] = {}
     if not code:
         return []
@@ -224,13 +224,6 @@ def one_code_anchor_keys(code: str, char: str, ranks: dict[str, int]) -> list[tu
         anchors[first] = max(anchors.get(first, 0), 1.15)
     if last in ONE_CODE_BODY_LETTERS:
         anchors[last] = max(anchors.get(last, 0), 1.05)
-    if ranks.get(char, 999999) <= 120:
-        for letter in code:
-            if letter in ONE_CODE_BODY_LETTERS:
-                anchors[letter] = max(anchors.get(letter, 0), 0.72)
-    for letter, radical in ONE_CODE_RADICALS.items():
-        if char == radical:
-            anchors[letter] = max(anchors.get(letter, 0), 1.30)
 
     return sorted(anchors.items(), key=lambda item: (-item[1], item[0]))
 
@@ -300,12 +293,6 @@ def build_dedup_prefix_entries(
     )
     short_level_char_freqs = short_level_char_freqs or {}
     full_char_freqs = full_char_freqs or char_freqs
-    level2_freqs = short_level_char_freqs.get(2, char_freqs)
-    level2_ranks = {
-        char: rank
-        for rank, char in enumerate(sorted(level2_freqs, key=level2_freqs.get, reverse=True), start=1)
-    }
-
     short_candidates_by_level: dict[int, list[PrefixCandidate]] = defaultdict(list)
     full_candidates: list[PrefixCandidate] = []
     for code, entries in code_groups.items():
@@ -330,15 +317,13 @@ def build_dedup_prefix_entries(
                         continue
                     if not dedup_prefix_charset_allows(char, charset, score=level_score):
                         continue
+                    if len(code) < level:
+                        continue
                     if level == 2:
-                        anchor_keys = one_code_anchor_keys(code, char, level2_ranks)
+                        anchor_keys = prefix_level2_anchor_keys(code)
                         for anchor_key, anchor_factor in anchor_keys:
                             priority_score = level_score * anchor_factor * rank_multiplier
                             short_candidates_by_level[level].append((priority_score, rank, anchor_key, char, ""))
-                        fallback_score = level_score * 0.01 * rank_multiplier
-                        short_candidates_by_level[level].append((fallback_score, rank, "", char, prefix + "x"))
-                        continue
-                    if len(code) < level:
                         continue
                     saved_keys = max(len(code) - level, 0)
                     saved_multiplier = saved_keys + 1
