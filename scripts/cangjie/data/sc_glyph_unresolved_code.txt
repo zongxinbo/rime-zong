@@ -1,9 +1,7 @@
 # encoding: utf-8
 # text<TAB>source_codes<TAB>chidic_gbk_codes<TAB>chidic_normal_gbk_codes
 佟	ohem,ohey	ohem,ohey	ohem,ohey
-倐	olhf,olof	xxxoh	
 凞	imluf,iuf,ivf	imlsf	imlsf
-刱	ttshc,ttshi	xxtts	
 圱	hjg,hkg		
 垹	ghql,gqjl	gqkl	gqkl
 墫	gcmi,gtwi		
@@ -28,4 +26,3 @@
 閝	anoii,anoml	anomi	anomi
 養	tciav,tcmav,toiav,tomav	tciav,tcmav,toiav,tomav	tciav,tcmav,toiav,tomav
 麭	depru,depsu,jepru,jepsu,jnpru,jnpsu		
-齢	yuoii,yuoml	xxyuo	
