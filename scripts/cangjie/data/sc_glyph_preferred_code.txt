@@ -21,6 +21,7 @@
 開	anmt
 閻	annhx
 闞	annjk
+閝	anoii
 閭	anrr
 昤	aoii
 晦	aowy
@@ -163,6 +164,7 @@
 鐥	cttr
 鐏	ctwi
 鎌	ctxc
+鑝	ctyj
 尦	cupi
 鐖	cvik
 曾	cwa
@@ -191,6 +193,7 @@
 麧	deon
 麴	depfd
 皰	depru
+麭	depru
 麩	deqo
 麯	detw
 麷	deujt
@@ -250,6 +253,7 @@
 枹	dpru
 韞	dqabt
 韍	dqike
+梆	dqjl
 槥	dqjm
 韌	dqshh
 韛	dqthb
@@ -260,6 +264,7 @@
 杒	dshh
 梕	dsip
 檻	dsit
+膥	dsobo
 榏	dtct
 楢	dtcw
 様	dtge
@@ -462,6 +467,7 @@
 熱	gkf
 鷙	gkhaf
 勢	gkks
+蟄	gklmi
 埯	gklu
 慹	gkp
 摯	gkq
@@ -493,6 +499,7 @@
 圴	gpi
 均	gpim
 垉	gpru
+垹	gqjl
 埕	grmg
 壏	gsit
 塀	gstt
@@ -501,6 +508,7 @@
 墴	gtlc
 垪	gtt
 墡	gttr
+墫	gtwi
 壿	gtwi
 塃	gtyu
 毐	gwjh
@@ -577,6 +585,7 @@
 簆	hjme
 舌	hjr
 谸	hkcor
+圱	hkg
 刋	hkln
 笂	hknk
 岙	hku
@@ -585,6 +594,7 @@
 州	hlil
 劓	hlln
 簍	hllv
+簰	hlnj
 簭	hmcr
 筑	hmhn
 筓	hmkj
@@ -869,10 +879,13 @@
 廔	illv
 凋	imbgr
 冹	imike
+凞	imluf
 凂	imnau
 次	imno
 冷	imoii
 况	imrhu
+礻	inf
+辶	inno
 衤	inol
 資	iobuc
 栥	iod
@@ -918,6 +931,7 @@
 扆	isyhv
 戽	isyj
 扂	isyr
+懬	itcp
 廣	itlc
 庰	itt
 廉	itxc
@@ -1024,6 +1038,7 @@
 轫	kqshh
 匏	kspru
 癀	ktlc
+癢	ktov
 瘥	ktqm
 鵪	kuhaf
 剦	kuln
@@ -1064,6 +1079,7 @@
 蠊	liitc
 袚	like
 螻	lillv
+蝂	lilne
 蚅	limsu
 蚈	limt
 蟫	limwj
@@ -1075,6 +1091,7 @@
 虳	lipi
 蚐	lipim
 蚫	lipru
+蝳	liqmy
 蝇	lirlu
 蜈	lirmk
 蟤	liruc
@@ -1202,6 +1219,7 @@
 跫	mnryo
 聓	mnsj
 鞏	mntlj
+殩	mnyed
 豱	moabt
 贗	mofc
 豟	moisn
@@ -1378,6 +1396,7 @@
 鶴	oghaf
 仮	ohe
 俢	oheh
+佟	ohey
 任	ohg
 俈	ohgr
 偛	ohjx
@@ -1692,6 +1711,7 @@
 扚	qpi
 抣	qpim
 抱	qpru
+挷	qqjl
 擑	qrij
 拐	qrks
 挰	qrmg
@@ -1740,6 +1760,7 @@
 啷	riil
 哤	rikh
 唥	rimi
+戢	risj
 唳	risk
 呝	risn
 嗔	rjbc
@@ -1942,6 +1963,7 @@
 茎	tnom
 蔃	tnri
 荏	tohg
+養	toiav
 苓	toii
 养	toll
 萮	tomn
@@ -2054,6 +2076,7 @@
 紷	vfoii
 緰	vfomn
 約	vfpi
+綁	vfqjl
 絽	vfrr
 繏	vfruc
 紉	vfshh
@@ -2117,6 +2140,7 @@
 黤	wfklu
 畈	whe
 図	wiik
+毋	wjh
 眔	wlff
 罶	wlhhw
 置	wljbm
@@ -2135,6 +2159,7 @@
 歔	ycno
 兗	ycrhu
 鶐	ydhaf
+孰	ydknk
 褻	ygkv
 逺	ygvo
 返	yhe
@@ -2147,6 +2172,7 @@
 夣	yiwln
 竷	yjhee
 辨	yjhlj
+熟	ykf
 塾	ykg
 斒	ykisb
 虠	ykypn

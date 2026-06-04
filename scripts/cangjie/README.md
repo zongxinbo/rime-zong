@@ -57,7 +57,7 @@ python scripts/cangjie/core/optimize_sc_weights.py
 # 每次最多查询 150 个剩余歧义字；换 VPN 节点后重复运行
 python scripts/cangjie/core/fetch_sc_glyph_preferred_codes.py --workers 2 --delay 1 --limit 150
 
-# 全部确认后仅整理现有文件顺序，不读取码表、不合并缓存、不访问网络
+# 只整理 sc_glyph_preferred_code.txt 顺序，不读取码表、不合并缓存、不访问网络
 python scripts/cangjie/core/fetch_sc_glyph_preferred_codes.py --sort-by-code
 
 # 人工确认 sc_glyph_manual_preferred_code.txt 后反填 cache，并刷新 preferred/unresolved；不访问网络
@@ -70,7 +70,7 @@ python scripts/cangjie/core/fetch_sc_glyph_preferred_codes.py --refetch-unresolv
 python scripts/cangjie/core/fetch_sc_glyph_preferred_codes.py --chars 着,的,真 --limit 3
 ```
 
-脚本仅处理 GBK 范围内的一字多普通码汉字，并排除最终结果中的 `x/z` 前缀编码。脚本通过系统 `curl` 请求字库页面；在线结果优先采用唯一 GBK 普通码；若 GBK 字形块的键盘字母为 `x/xx...` 前缀且页面给出 `五倉重碼`，则优先用 `五倉重碼` 命中源码候选；否则再尝试去掉前缀后直接命中源码候选，或将其唯一展开为以该缩略码开头的源码候选。在线缓存位于 `data/chidic_glyph_cache.json`，每字落盘；空页面不会视为成功缓存。仍无法唯一判断的字会写入 `data/sc_glyph_unresolved_code.txt`，供人工确认。`--refetch-unresolved` 只重查当前未决文件中的字，并先删除这些字的旧 cache。`--backfill-from-preferred` 会把人工维护的 `data/sc_glyph_manual_preferred_code.txt` 反填进 cache，并重算 `sc_glyph_preferred_code.txt` 和 `sc_glyph_unresolved_code.txt`；该操作不访问网络。`--sort-by-code` 是独立的纯排序操作，只整理现有输出文件，不会读取码表、合并缓存或访问网络。
+脚本仅处理 GBK 范围内的一字多普通码汉字，并排除最终结果中的 `x/z` 前缀编码。脚本通过系统 `curl` 请求字库页面；在线结果优先采用唯一 GBK 普通码；若 GBK 字形块的键盘字母为 `x/xx...` 前缀且页面给出 `五倉重碼`，则优先用 `五倉重碼` 命中源码候选；否则再尝试去掉前缀后直接命中源码候选，或将其唯一展开为以该缩略码开头的源码候选。在线缓存位于 `data/chidic_glyph_cache.json`，每字落盘；空页面不会视为成功缓存。仍无法唯一判断的字会写入 `data/sc_glyph_unresolved_code.txt`，供人工确认。`--refetch-unresolved` 只重查当前未决文件中的字，并先删除这些字的旧 cache。`--backfill-from-preferred` 会把人工维护的 `data/sc_glyph_manual_preferred_code.txt` 反填进 cache，并重算 `sc_glyph_preferred_code.txt` 和 `sc_glyph_unresolved_code.txt`；该操作不访问网络。`--sort-by-code` 是独立的纯排序操作，只整理 `sc_glyph_preferred_code.txt`，不会读取码表、合并缓存或访问网络。
 
 所有简码生成器和 `shortcut_gain.py` 会按 `--weights` 模式名选择字形首选表：模式名包含 `sc` 时使用 `data/sc_glyph_preferred_code.txt`，否则模式名包含 `tc` 时使用 `data/tc_glyph_preferred_code.txt`。例如 `sc_balanced` 仍按 `sc` 大陆字形处理。首选表尚不存在时按空表处理。最终字典仍保留兼容全码，但自动消重码只从过滤后的地区字形视图派生。
 
