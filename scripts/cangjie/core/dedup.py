@@ -189,23 +189,26 @@ def parse_prefix_levels(text: str) -> tuple[int, ...]:
     return tuple(dict.fromkeys(levels))
 
 
-def short_prefix_codes(code: str, level: int) -> tuple[str, ...]:
-    """返回自动 z/x 前缀短码候选，保持可由原码推导。"""
+def rank_prefix(rank: int) -> str | None:
+    """按全码候选位返回固定 z/x 前缀。"""
+    if rank == 2:
+        return "z"
+    if rank == 3:
+        return "x"
+    return None
+
+
+def short_prefix_codes(code: str, level: int, rank: int) -> tuple[str, ...]:
+    """返回自动 z/x 前缀短码候选，保持可由原码和候选位推导。"""
+    prefix = rank_prefix(rank)
+    if prefix is None:
+        return ()
     if level == 2:
-        return (
-            "z" + code[0],
-            "x" + code[0],
-        )
+        return (prefix + code[0],)
     if level == 3:
-        return (
-            "z" + code[:2],
-            "x" + code[:2],
-        )
+        return (prefix + code[:2],)
     if level == 4:
-        return (
-            "z" + code[:3],
-            "x" + code[:3],
-        )
+        return (prefix + code[:3],)
     raise ValueError("前缀短码层级只能是 2、3 或 4")
 
 
@@ -310,7 +313,8 @@ def build_dedup_prefix_entries(
             continue
 
         for rank, entry in enumerate(unique_seen_entries(entries), start=1):
-            if rank == 1:
+            prefix = rank_prefix(rank)
+            if prefix is None:
                 continue
             if entry[1] != 5:
                 continue
@@ -332,8 +336,7 @@ def build_dedup_prefix_entries(
                             priority_score = level_score * anchor_factor * rank_multiplier
                             short_candidates_by_level[level].append((priority_score, rank, anchor_key, char, ""))
                         fallback_score = level_score * 0.01 * rank_multiplier
-                        short_candidates_by_level[level].append((fallback_score, rank, "", char, "zx"))
-                        short_candidates_by_level[level].append((fallback_score, rank, "", char, "xx"))
+                        short_candidates_by_level[level].append((fallback_score, rank, "", char, prefix + "x"))
                         continue
                     if len(code) < level:
                         continue
@@ -341,8 +344,7 @@ def build_dedup_prefix_entries(
                     saved_multiplier = saved_keys + 1
                     priority_score = level_score * saved_multiplier * rank_multiplier
                     short_candidates_by_level[level].append((priority_score, rank, code, char, ""))
-            if full and len(code) == full_source_length and rank in {2, 3}:
-                prefix = "z" if rank == 2 else "x"
+            if full and len(code) == full_source_length:
                 target_code = prefix + code[: full_source_length - 1]
                 full_score = full_char_freqs.get(char, 0)
                 if full_score < min_score:
@@ -358,10 +360,10 @@ def build_dedup_prefix_entries(
 
     def allocate(candidates: list[PrefixCandidate], *, short_level: int | None = None) -> None:
         candidates.sort(key=lambda item: (-item[0], item[1], item[2], item[3]))
-        for priority_score, _, source_code, char, fixed_code in candidates:
+        for priority_score, rank, source_code, char, fixed_code in candidates:
             if char in allocated_chars:
                 continue
-            target_codes = (fixed_code,) if fixed_code else short_prefix_codes(source_code, short_level)
+            target_codes = (fixed_code,) if fixed_code else short_prefix_codes(source_code, short_level, rank)
             for new_code in target_codes:
                 if new_code in allocated_codes or (char, new_code) in used_text_code:
                     continue
