@@ -299,7 +299,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="抓取大陆字形首选仓颉五码")
     parser.add_argument("--chars", default="", help="仅抓取指定汉字，例如 着,的,真；默认扫描全部多码字")
     parser.add_argument("--delay", type=float, default=1.0, help="每次网络请求后的等待秒数；默认 1.0")
-    parser.add_argument("--workers", type=int, default=2, help="并发请求线程数；默认 2")
+    parser.add_argument("--workers", type=int, default=5, help="并发请求线程数；默认 5")
     parser.add_argument("--timeout", type=float, default=30.0, help="单次请求超时秒数；默认 30")
     parser.add_argument("--retries", type=int, default=0, help="单字失败重试次数；默认 0，限流后建议换 IP 再续跑")
     parser.add_argument("--failure-rounds", type=int, default=0, help="完成扫描后再次补抓失败字的轮数；默认 0")
