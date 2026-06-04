@@ -71,6 +71,7 @@
 朿	dbz
 棁	dcruz
 壄	ddgz
+麨	defhz
 板	dhez
 梔	dhmuz
 杮	djbz
@@ -134,7 +135,6 @@
 柒	epdz
 汋	epiz
 泃	eprz
-澀	esimz
 洭	esmgx
 濯	esmgz
 潯	esmiz
@@ -168,8 +168,8 @@
 墝	ggguz
 堼	gigz
 幇	gilbz
-摰	giqz
 圹	giz
+摰	gkqz
 壖	gmbbz
 坆	gokz
 坵	gomz
@@ -221,6 +221,7 @@
 床	idz
 慼	ifpz
 丷	ihz
+疒	iimz
 厸	iix
 戔	iiz
 庋	ijez
@@ -253,7 +254,6 @@
 撃	jeqz
 宊	jikz
 亁	jjonz
-廾	jjx
 艹	jjz
 宄	jknz
 宆	jnz
@@ -270,6 +270,7 @@
 犷	khiz
 厷	kiz
 癲	kjccz
+廾	kjz
 痏	kkbz
 爻	kkz
 疔	kmnz
@@ -295,7 +296,6 @@
 闼	lsykz
 㐄	lsz
 襨	ltgiz
-冑	lwbz
 奜	lykz
 戩	maiz
 亙	mbmz
@@ -442,10 +442,13 @@
 栔	qhdz
 扦	qhjz
 恝	qhpz
-焘	qifz
 揙	qisbz
 扩	qiz
+贽	qkboz
 抜	qkez
+熬	qkfz
+挚	qkqz
+靑	qmbz
 擼	qnwaz
 捨	qomrz
 拃	qosz
@@ -470,7 +473,6 @@
 吽	rhqz
 嚓	rjbfz
 嚔	rjboz
-戢	rjiz
 嘧	rjpuz
 吰	rkiz
 嘨	rlllz
@@ -497,11 +499,9 @@
 卟	ryz
 腎	sebz
 壂	segz
-戮	shiz
 屧	shodz
 屐	shoez
 屦	shovz
-慰	sipz
 鐾	sjcx
 屄	sjcz
 憵	sjpz
@@ -530,7 +530,6 @@
 共	tcz
 藫	temjz
 苒	tgbz
-蓺	tggiz
 莰	tgnoz
 芏	tgz
 蔦	thafz
@@ -613,8 +612,10 @@
 攣	vfqz
 糺	vfuz
 孌	vfvz
+嬤	vidiz
 槳	vidz
 糹	vifz
+妫	viksz
 奬	vikz
 妒	visz
 厶	viz
@@ -660,7 +661,6 @@
 逎	ymcwz
 尗	ymfz
 忐	ympz
-氵	ymz
 遜	yndfz
 込	yoz
 迆	ypdz

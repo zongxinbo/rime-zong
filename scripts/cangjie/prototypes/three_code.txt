@@ -95,9 +95,9 @@
 洛	ehe
 洗	ehg
 派	ehh
-激	ehs
+洲	ehl
+沒	ehs
 浪	eia
-洲	eil
 潮	ejj
 演	ejm
 湖	ejr
@@ -141,7 +141,6 @@
 墙	ggc
 封	ggd
 幫	gih
-勢	gik
 域	gir
 却	gis
 執	gjk
@@ -186,6 +185,7 @@
 段	hjh
 垂	hjt
 欣	hln
+简	hls
 毁	hmh
 歸	hms
 風	hnh
@@ -341,6 +341,7 @@
 奇	kmn
 病	kmo
 症	kmy
+痛	kni
 辅	kqi
 辆	kqm
 轻	kqn
@@ -386,7 +387,7 @@
 爾	mfb
 飘	mfh
 玻	mgd
-珠	mgh
+班	mgh
 到	mgl
 玩	mgm
 玛	mgn
@@ -562,11 +563,12 @@
 抵	qhv
 搜	qhx
 搬	qhy
-势	qik
+拔	qik
 擦	qjb
 控	qjc
 艳	qjn
 慧	qjs
+秦	qkh
 奏	qkm
 执	qkn
 排	qlm
@@ -651,12 +653,11 @@
 欺	tcn
 業	tct
 薄	tei
-荡	ten
 范	tes
 觀	tgb
 對	tgd
 義	tgh
-藝	tgi
+藝	tgk
 歡	tgn
 鞋	tjg
 著	tjk
@@ -677,7 +678,6 @@
 養	toi
 养	tol
 難	too
-羞	tqn
 瓶	ttm
 尊	twd
 萬	twl
@@ -695,7 +695,6 @@
 姓	vhq
 娘	via
 斷	vih
-幼	vik
 響	vly
 將	vmb
 纷	vmc
@@ -750,6 +749,7 @@
 邊	yhu
 充	yih
 遍	yis
+辨	yjh
 辩	yji
 辦	yjk
 連	yjw

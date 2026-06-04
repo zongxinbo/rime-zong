@@ -87,8 +87,8 @@
 畑	fwz
 愨	gepz
 堼	gigz
-摰	giqz
 圹	giz
+摰	gkqz
 坆	gokz
 坵	gomz
 圪	gonz
@@ -124,6 +124,7 @@
 床	idz
 慼	ifpz
 丷	ihz
+疒	iimz
 厸	iix
 戔	iiz
 庋	ijez
@@ -151,7 +152,6 @@
 宋	jdz
 撃	jeqz
 宊	jikz
-廾	jjx
 艹	jjz
 宄	jknz
 宆	jnz
@@ -162,6 +162,7 @@
 疢	kfz
 犷	khiz
 厷	kiz
+廾	kjz
 痏	kkbz
 爻	kkz
 疔	kmnz
@@ -182,7 +183,6 @@
 刂	lnz
 冂	lsx
 㐄	lsz
-冑	lwbz
 奜	lykz
 戩	maiz
 亙	mbmz
@@ -287,9 +287,11 @@
 栔	qhdz
 扦	qhjz
 恝	qhpz
-焘	qifz
 扩	qiz
 抜	qkez
+熬	qkfz
+挚	qkqz
+靑	qmbz
 拃	qosz
 扖	qoz
 抋	qpz
@@ -301,7 +303,6 @@
 叭	rcz
 吙	rfz
 吽	rhqz
-戢	rjiz
 吰	rkiz
 呙	robx
 吶	robz
@@ -313,8 +314,6 @@
 卟	ryz
 腎	sebz
 壂	segz
-戮	shiz
-慰	sipz
 鐾	sjcx
 屄	sjcz
 憵	sjpz
@@ -403,7 +402,6 @@
 头	ykz
 尗	ymfz
 忐	ympz
-氵	ymz
 込	yoz
 迆	ypdz
 呰	yprz

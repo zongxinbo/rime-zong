@@ -2,7 +2,7 @@
 # 由 cangjie_builder.py 生成
 ---
 name: wucang5
-version: '2026-06-03'
+version: '2026-06-04'
 sort: by_weight
 ...
 
@@ -10831,6 +10831,7 @@ sort: by_weight
 桫	defh
 麨	defh
 𪍉	defhh
+麨	defhz
 柽	deg
 𡍁	deg
 𰉤	deg
@@ -15396,6 +15397,7 @@ sort: by_weight
 㴁	ehkt
 𭰡	ehkt
 𣵜	ehku
+洲	ehl
 𰝗	ehla
 渪	ehlb
 𤁩	ehlc
@@ -15519,22 +15521,22 @@ sort: by_weight
 𰈌	ehrp
 𣳨	ehrr
 㵇	ehrt
-激	ehs
+沒	ehs
 沪	ehs
 㴜	ehsb
 𣾡	ehsb
 𬇽	ehsb
 𭱘	ehsc
 淭	ehsd
-沒	ehse
 溵	ehse
+沒	ehse
 㴃	ehse
 𣸔	ehsf
 𬉤	ehsf
 𱦾	ehsf
 𣶉	ehsj
-淚	ehsk
 激	ehsk
+淚	ehsk
 𣺱	ehsk
 𣷲	ehsl
 𣹜	ehsl
@@ -15736,7 +15738,6 @@ sort: by_weight
 𪟛	eiks
 沋	eiku
 𠬭	eiku
-洲	eil
 滽	eilb
 𣾩	eild
 漮	eile
@@ -17471,7 +17472,6 @@ sort: by_weight
 𭱟	esii
 涩	esim
 澀	esim
-澀	esimz
 涊	esip
 濫	esit
 𱧨	esiu
@@ -23087,7 +23087,6 @@ sort: by_weight
 𱑫	gijhr
 𨎌	gijwj
 𨎐	gijwj
-勢	gik
 𡉩	gik
 坺	gike
 𡐮	gikf
@@ -23095,8 +23094,8 @@ sort: by_weight
 坺	gikk
 𫮓	gikm
 垅	gikp
-劫	giks
 勢	giks
+劫	giks
 𫝑	giks
 𮰫	giku
 𮰫	gikv
@@ -23165,7 +23164,6 @@ sort: by_weight
 𢫀	giq
 𩇘	giqmb
 𡒅	giqw
-摰	giqz
 域	gir
 坮	gir
 𱋿	girlu
@@ -23352,7 +23350,7 @@ sort: by_weight
 𢽞	gjye
 𱿔	gjypn
 𱿔	gjypu
-垮	gk
+勢	gk
 𡉑	gk
 暬	gka
 𣊁	gka
@@ -23474,6 +23472,7 @@ sort: by_weight
 摯	gkq
 摰	gkq
 摮	gkq
+摰	gkqz
 嗸	gkr
 𭊆	gkr
 鼇	gkrxu
@@ -29879,7 +29878,7 @@ sort: by_weight
 𧺆	hkyo
 𬛯	hkyta
 𡙶	hkytu
-简	hl
+州	hl
 亻	hl
 𠂝	hl
 𥫯	hl
@@ -30068,6 +30067,7 @@ sort: by_weight
 𰈕	hlrp
 𪖲	hlrse
 𨂢	hlryo
+简	hls
 简	hlsa
 𨈐	hlsh
 𰪃	hlsh
@@ -37422,6 +37422,7 @@ sort: by_weight
 𣩇	iimnp
 𦫍	iimt
 𤭒	iimvn
+疒	iimz
 𪦽	iind
 𫼑	iinde
 郎	iinl
@@ -37684,7 +37685,7 @@ sort: by_weight
 㪐	ikye
 𪠠	ikyvo
 庆	ikz
-州	il
+康	il
 㐃	il
 廔	ilav
 庸	ilb
@@ -42237,7 +42238,6 @@ sort: by_weight
 𫧩	jjwot
 𨐁	jjwwm
 轠	jjwww
-廾	jjx
 較	jjy
 𨊣	jjy
 𰹑	jjya
@@ -45629,6 +45629,7 @@ sort: by_weight
 𨊦	kjwj
 𢾴	kjye
 𧙐	kjyhv
+廾	kjz
 希	kk
 爻	kk
 㚐	kk
@@ -46028,6 +46029,7 @@ sort: by_weight
 𩱼	knhui
 𪖒	knhul
 𪼵	knhvo
+痛	kni
 丸	kni
 厹	kni
 𠀊	kni
@@ -51201,7 +51203,6 @@ sort: by_weight
 𭾊	lwbt
 𤳃	lwbvk
 𠢮	lwbws
-冑	lwbz
 𮕳	lwc
 𭾉	lwcct
 𡕦	lwce
@@ -53937,7 +53938,7 @@ sort: by_weight
 𬍬	mggtj
 瓄	mggwc
 𮴙	mggyo
-珠	mgh
+班	mgh
 珀	mgha
 𤦝	mghab
 𪻼	mghad
@@ -75191,7 +75192,6 @@ sort: by_weight
 𢵊	qift
 𢹿	qift
 𢬦	qifu
-焘	qifz
 垫	qig
 𢬂	qig
 𪭽	qigi
@@ -75225,7 +75225,7 @@ sort: by_weight
 𰍎	qijmo
 𢳿	qijo
 𨌏	qijwj
-势	qik
+拔	qik
 㧋	qik
 𢫨	qik
 𢭒	qikd
@@ -75576,7 +75576,7 @@ sort: by_weight
 𢲟	qjyj
 𣁮	qjyj
 𢯴	qjyk
-秦	qk
+势	qk
 丯	qk
 𡗗	qk
 𢩩	qk
@@ -75599,6 +75599,7 @@ sort: by_weight
 𪮌	qkbn
 赘	qkbo
 贽	qkbo
+贽	qkboz
 𥂢	qkbt
 𰥖	qkbu
 贅	qkbuc
@@ -75629,9 +75630,11 @@ sort: by_weight
 拻	qkf
 𤎅	qkf
 𱫡	qkf
+熬	qkfz
 垫	qkg
 𭠨	qkg
 㨒	qkgg
+秦	qkh
 鷔	qkhaf
 𪃈	qkhaf
 𢴘	qkhb
@@ -75748,6 +75751,7 @@ sort: by_weight
 𫯠	qkq
 𰖫	qkqab
 𰓼	qkql
+挚	qkqz
 嗸	qkr
 𠰫	qkr
 𭇈	qkr
@@ -75953,6 +75957,7 @@ sort: by_weight
 𢸍	qmbv
 𱠕	qmbv
 擂	qmbw
+靑	qmbz
 搢	qmca
 𢺕	qmce
 𭡵	qmcp
@@ -78953,7 +78958,6 @@ sort: by_weight
 𡁳	rjike
 𭋲	rjim
 𠽡	rjip
-戢	rjiz
 𠦫	rjj
 嘲	rjjb
 𡅫	rjjb
@@ -84260,7 +84264,6 @@ sort: by_weight
 𩯎	shist
 𬴯	shitc
 𩭒	shiuh
-戮	shiz
 𩯭	shjac
 𩯔	shjau
 𠥃	shjb
@@ -84904,7 +84907,6 @@ sort: by_weight
 慰	sip
 𫴭	sip
 𫵝	sip
-慰	sipz
 𢲴	siq
 𨲪	siqmc
 𠤶	siqn
@@ -88008,7 +88010,6 @@ sort: by_weight
 𦵜	temw
 𦵩	temw
 𰰼	temy
-荡	ten
 𰰸	ten
 蒅	tend
 莈	tene
@@ -88321,7 +88322,6 @@ sort: by_weight
 葑	tggi
 蓺	tggi
 𮐦	tggi
-蓺	tggiz
 蓺	tggk
 𦏟	tggni
 𡆐	tggrr
@@ -88351,7 +88351,6 @@ sort: by_weight
 𦏡	tghs
 羌	tghu
 𠒌	tghu
-藝	tgi
 䒧	tgi
 𧁈	tgid
 爇	tgif
@@ -88385,6 +88384,7 @@ sort: by_weight
 蓻	tgjk
 𦶗	tgjo
 𠵊	tgjr
+藝	tgk
 美	tgk
 𧁈	tgkd
 𦍸	tgkdi
@@ -91791,7 +91791,6 @@ sort: by_weight
 𦎣	tqmwg
 𮊴	tqmwu
 䓯	tqmy
-羞	tqn
 𦎈	tqnbg
 𦎈	tqnbq
 𦏘	tqnbq
@@ -97932,6 +97931,7 @@ sort: by_weight
 𪪋	vidh
 嬷	vidi
 嬤	vidi
+嬤	vidiz
 𭞉	vidp
 𡣥	vidv
 孊	vidy
@@ -97997,7 +97997,6 @@ sort: by_weight
 嫲	vijc
 㛏	vije
 𫷟	vijks
-幼	vik
 幾	vik
 奬	vik
 娀	vik
@@ -98012,14 +98011,15 @@ sort: by_weight
 𡞋	vikh
 妭	vikk
 𡣇	vikp
-妫	viks
 幼	viks
+妫	viks
 𢆲	viks
 𩑴	viksc
 鴢	viksf
 𱉢	viksm
 𣢜	vikso
 𫷤	viksr
+妫	viksz
 㚭	viku
 奬	vikz
 𢆯	vil
@@ -102012,7 +102012,7 @@ sort: by_weight
 涣	xen
 浛	xeo
 泃	xep
-濯	xes
+洭	xes
 濾	xey
 灭	xf
 炯	xfb
@@ -102021,7 +102021,8 @@ sort: by_weight
 嫳	xfk
 垄	xg
 㲄	xgg
-摰	xgi
+幇	xgi
+騺	xgk
 彀	xgn
 坵	xgo
 嚞	xgr
@@ -102034,7 +102035,8 @@ sort: by_weight
 翺	xhj
 頎	xhl
 笈	xhn
-鳯	xhnh
+鵚	xhnh
+鳯	xhnha
 徽	xho
 徴	xhou
 觕	xhq
@@ -102067,6 +102069,7 @@ sort: by_weight
 贡	xmb
 瑜	xmg
 䢵	xmi
+擪	xmk
 亍	xmm
 殇	xmn
 碘	xmr
@@ -102099,29 +102102,28 @@ sort: by_weight
 勺	xp
 愊	xpm
 慛	xpu
-扩	xq
+熬	xq
 鶄	xqb
 恝	xqh
-鸷	xqi
-抜	xqk
-摃	xqm
+骜	xqk
+靑	xqm
 拃	xqo
 掫	xqs
 摅	xqy
 酪	xr
 噅	xrb
 噑	xrh
-戢	xrj
+嘧	xrj
 踮	xrm
 嚕	xrn
 唅	xro
 囂	xrr
 鶚	xrs
 喨	xry
-慰	xs
+妒	xs
 繄	xse
 駹	xsf
-鬢	xsh
+屐	xsh
 耵	xsj
 殹	xsk
 頤	xsl
@@ -102151,7 +102153,7 @@ sort: by_weight
 緒	xvf
 縰	xvfh
 繦	xvfn
-奬	xvi
+妫	xvi
 绞	xvm
 苗	xw
 黲	xwf
@@ -103825,6 +103827,7 @@ sort: by_weight
 𡮇	yjf
 𭶈	yjff
 𱗈	yjg
+辨	yjh
 鵫	yjhaf
 𪁽	yjhaf
 𪅂	yjhaf
@@ -104924,7 +104927,6 @@ sort: by_weight
 𱥄	ymyrn
 𰩠	ymyt
 𣦟	ymytg
-氵	ymz
 通	yn
 𠧒	yn
 𣎆	yn
@@ -109323,6 +109325,7 @@ sort: by_weight
 棗	zdb
 棁	zdc
 檒	zdd
+麨	zde
 梔	zdh
 杮	zdj
 憗	zdk
@@ -109349,7 +109352,7 @@ sort: by_weight
 汐	zen
 瀹	zeo
 柒	zep
-澀	zes
+濯	zes
 満	zet
 瑬	zeu
 滾	zey
@@ -109370,7 +109373,8 @@ sort: by_weight
 愨	zge
 鷇	zgf
 墝	zgg
-墄	zgi
+埌	zgi
+螫	zgk
 壖	zgm
 殼	zgn
 圪	zgo
@@ -109408,6 +109412,7 @@ sort: by_weight
 郙	zib
 祛	zif
 毵	zih
+疒	zii
 庋	zij
 庥	zio
 庇	zip
@@ -109445,7 +109450,6 @@ sort: by_weight
 牗	zln
 闫	zls
 襨	zlt
-冑	zlw
 褳	zly
 历	zm
 戩	zma
@@ -109459,7 +109463,7 @@ sort: by_weight
 瑧	zmgq
 珫	zmgy
 叆	zmi
-擪	zmk
+郉	zmk
 帀	zml
 鼋	zmm
 殤	zmn
@@ -109530,8 +109534,9 @@ sort: by_weight
 耨	zqd
 撹	zqf
 扦	zqh
-焘	zqi
-骜	zqk
+揙	zqi
+挚	zqk
+螯	zqkl
 摽	zqm
 擼	zqn
 捨	zqo
@@ -109561,7 +109566,7 @@ sort: by_weight
 已	zs
 腎	zse
 騊	zsf
-戮	zsh
+鬢	zsh
 嬖	zsj
 尻	zsk
 匮	zsl
@@ -109610,7 +109615,7 @@ sort: by_weight
 鷥	zvfh
 縯	zvfj
 絻	zvfn
-妒	zvi
+嬤	zvi
 绰	zvm
 姼	zvn
 姫	zvs
