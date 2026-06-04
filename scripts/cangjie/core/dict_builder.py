@@ -343,41 +343,10 @@ def generate_dict(
             or entry[0] == preferred_codes[entry[4]]
         ]
 
-    z_suffix_count = 0
-    if suffix_z:
-        suffix_entries = build_z_suffix_entries(
-            shortcut_source_entries,
-            occupied_entries=all_entries,
-            used_text_code=used_text_code,
-            shortcut_leader_chars=shortcut_leader_chars,
-            char_freqs=char_freqs,
-            max_code_length=max_code_length,
-            charset=suffix_z_charset,
-            min_score=suffix_z_min_score,
-            rank_suffixes=suffix_z_rank_suffixes,
-            max_source_length=suffix_z_max_source_length,
-            occupied_policy=suffix_z_occupied_policy,
-        )
-        z_suffix_count = len(suffix_entries)
-        if suffix_code_path is not None:
-            write_code_prototype(
-                suffix_entries,
-                suffix_code_path,
-                title="自动 z/x 后缀审阅文件",
-            )
-        all_entries.extend(suffix_entries)
-        all_entries.sort()
-        shortcut_source_entries.extend(suffix_entries)
-        shortcut_source_entries.sort()
-        shortcut_leader_chars = build_shortcut_leader_chars(all_entries)
-    print(
-        f"z/x 后缀消重：生成 {z_suffix_count} 个条目"
-        f" 字集={suffix_z_charset} 最低分={suffix_z_min_score:g}"
-        f" 位次={','.join(f'{rank}:{suffix}' for rank, suffix in suffix_z_rank_suffixes)}"
-        f" 源码最长={suffix_z_max_source_length if suffix_z_max_source_length is not None else max_code_length - 1}"
-        f" 占用策略={suffix_z_occupied_policy}"
-    )
+    natural_shortcut_source_entries = list(shortcut_source_entries)
+    natural_shortcut_leader_chars = set(shortcut_leader_chars)
 
+    z_suffix_count = 0
     dedup_prefix_count = 0
     prefix_counts: dict[int, int] = {}
     if dedup_prefix:
@@ -540,6 +509,40 @@ def generate_dict(
             f" 4码={prefix_counts.get(4, 0)}"
             f" 5码={prefix_counts.get(5, 0)}"
         )
+
+    if suffix_z:
+        suffix_entries = build_z_suffix_entries(
+            natural_shortcut_source_entries,
+            occupied_entries=all_entries,
+            used_text_code=used_text_code,
+            shortcut_leader_chars=natural_shortcut_leader_chars,
+            char_freqs=char_freqs,
+            max_code_length=max_code_length,
+            charset=suffix_z_charset,
+            min_score=suffix_z_min_score,
+            rank_suffixes=suffix_z_rank_suffixes,
+            max_source_length=suffix_z_max_source_length,
+            occupied_policy=suffix_z_occupied_policy,
+        )
+        z_suffix_count = len(suffix_entries)
+        if suffix_code_path is not None:
+            write_code_prototype(
+                suffix_entries,
+                suffix_code_path,
+                title="自动 z/x 后缀审阅文件",
+            )
+        all_entries.extend(suffix_entries)
+        all_entries.sort()
+        shortcut_source_entries.extend(suffix_entries)
+        shortcut_source_entries.sort()
+        shortcut_leader_chars = build_shortcut_leader_chars(all_entries)
+    print(
+        f"z/x 后缀消重：生成 {z_suffix_count} 个条目"
+        f" 字集={suffix_z_charset} 最低分={suffix_z_min_score:g}"
+        f" 位次={','.join(f'{rank}:{suffix}' for rank, suffix in suffix_z_rank_suffixes)}"
+        f" 源码最长={suffix_z_max_source_length if suffix_z_max_source_length is not None else max_code_length - 1}"
+        f" 占用策略={suffix_z_occupied_policy}"
+    )
 
     structure_suffix_count = 0
     if suffix_structure:
