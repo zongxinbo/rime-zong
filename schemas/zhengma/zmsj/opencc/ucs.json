@@ -1,0 +1,16 @@
+{
+  "name": "UCS",
+  "segmentation": {
+    "type": "mmseg",
+    "dict": {
+      "type": "text",
+      "file": "ucs.txt"
+    }
+  },
+  "conversion_chain": [{
+    "dict": {
+      "type": "text",
+      "file": "ucs.txt"
+    }
+  }]
+}
