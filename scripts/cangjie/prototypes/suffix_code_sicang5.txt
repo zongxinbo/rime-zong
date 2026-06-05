@@ -4,6 +4,7 @@
 昈	aisz
 旰	amjz
 閂	anmz
+煦	arfz
 旵	auz
 艮	avz
 旼	aykz
@@ -50,7 +51,9 @@
 扌	dmx
 杠	dmz
 杴	dnoz
+枞	dooz
 柞	dosz
+杓	dpiz
 朼	dpz
 梱	dwdz
 杧	dyvz
@@ -75,6 +78,7 @@
 泸	eysz
 尙	fbrx
 炯	fbrz
+挙	fcqz
 炔	fdkz
 焇	ffbz
 氺	ffz
@@ -87,7 +91,7 @@
 畑	fwz
 愨	gepz
 堼	gigz
-圹	giz
+圹	gix
 摰	gkqz
 坆	gokz
 坵	gomz
@@ -103,6 +107,7 @@
 夊	hex
 冬	heyz
 夂	hez
+釆	hfdz
 灬	hfz
 棃	hhdz
 彡	hhhz
@@ -119,6 +124,7 @@
 牝	hqpz
 吿	hqrz
 峊	hruz
+憩	hupz
 忄	hyz
 宀	ibz
 床	idz
@@ -157,7 +163,7 @@
 宆	jnz
 宓	jphz
 肀	jsz
-冇	kbz
+冇	kbx
 杀	kdz
 疢	kfz
 犷	khiz
@@ -165,6 +171,7 @@
 廾	kjz
 痏	kkbz
 爻	kkz
+堑	klgz
 疔	kmnz
 旮	knaz
 厹	kniz
@@ -212,6 +219,7 @@
 垔	mwgz
 墮	nbgz
 奂	nbkz
+亟	nemz
 氶	nez
 夕	niz
 阝	nlx
@@ -278,6 +286,7 @@
 勺	piz
 匁	pkz
 勻	pmmz
+忉	pshz
 乜	psz
 匄	pyvz
 掤	qbbz
@@ -299,17 +308,21 @@
 扎	quz
 捰	qwdz
 抆	qykz
+邑	rauz
+呗	rboz
 唫	rcx
 叭	rcz
 吙	rfz
 吽	rhqz
 吰	rkiz
+叻	rksz
 呙	robx
 吶	robz
 吣	rpz
 吅	rrz
 叧	rshz
 吚	rskz
+咲	rtkz
 呅	rykz
 卟	ryz
 腎	sebz
@@ -360,6 +373,7 @@
 苗	twz
 荙	tykz
 凷	ugz
+屺	usuz
 屾	uux
 岀	uuz
 攣	vfqz
@@ -379,6 +393,7 @@
 辔	vmrz
 兦	voz
 妌	vttz
+纟	vvmz
 巛	vvvz
 巜	vvz
 困	wdz
