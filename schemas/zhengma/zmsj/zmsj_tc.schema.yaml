@@ -1,0 +1,37 @@
+# Rime schema
+# vim: set sw=2 sts=2 et:
+# encoding: utf-8
+#
+# ZMSJ TC - 傳統鄭碼
+#
+# QQ群：40737127
+
+__include: zmsj.schema:/
+
+schema:
+  schema_id: &schema zmsj_tc
+  name: 傳統鄭碼
+  description: |
+    鄭碼輸入法
+    包含漢字基本集CJK、擴展集CJK-A~J全漢字、詞組、西夏文等，傳統漢字優先，編碼兼顧港臺、大陸字形
+  dependencies:
+    - &reverse terra_pinyin # 拼音反查採用地球拼音（rime-terra-pinyin）方案，可根據需要替換其他方案
+
+__patch:
+  switches/@last: {name: simplification, states: [原始, 簡體]} # 出簡
+
+translator:
+  dictionary: *schema
+
+reverse_lookup: # 拼音反查
+  dictionary: *reverse
+
+simplifier: # 出簡
+  option_name/=:
+  opencc_config: t2s.json # 轉簡體
+
+div: # 拆分
+  opencc_config: zmsj_tc_div.json
+
+__patch:
+  key_binder/bindings/@last/toggle: simplification # 出簡

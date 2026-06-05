@@ -1,0 +1,16 @@
+{
+  "name": "ZMSJ_TC Div",
+  "segmentation": {
+    "type": "mmseg",
+    "dict": {
+      "type": "text",
+      "file": "zmsj_tc_div.txt"
+    }
+  },
+  "conversion_chain": [{
+    "dict": {
+      "type": "text",
+      "file": "zmsj_tc_div.txt"
+    }
+  }]
+}
