@@ -49,6 +49,8 @@ def main():
                         help="原生二三码位保护字集：all=不限，frequency=仅综合字频中出现的字，gbk=常见繁简字，gb2312=简体常用字")
     parser.add_argument("--protect-native-min-score", type=float, default=3000, help="综合字频门槛：原生二三码字达到该值才受保护")
     parser.add_argument("--shortcut-candidate-min-score", type=float, default=3000, help="综合字频门槛：长码字达到该值才可入选二三简")
+    parser.add_argument("--fullcode-yield", action=argparse.BooleanOptionalAction, default=False,
+                        help="是否启用出简让全：已有普通简码的字在全码候选中让位给无简码常用字（默认关闭）")
     parser.add_argument("--fullcode-yield-min-score", type=float, default=1000, help="全码简码让位：可顶位字的最低综合字频")
     parser.add_argument("--fixed-prefix", action=argparse.BooleanOptionalAction, default=False,
                         help="是否加载 fixed_prefix_code.txt 中的 z?/x? 固定前缀码（默认关闭）")
@@ -175,6 +177,7 @@ def main():
         max_code_length=5,
         exclude_extended=args.exclude_extended,
         only_first_full_code=args.only_first_full_code,
+        fullcode_yield=args.fullcode_yield,
         fullcode_yield_min_score=args.fullcode_yield_min_score,
         suffix_z=args.suffix_z,
         suffix_z_charset=args.suffix_z_charset,

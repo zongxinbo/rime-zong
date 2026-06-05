@@ -91,12 +91,13 @@ def build_base_entries(
     fullcode_entries: list[tuple[str, str, int]],
     *,
     char_freqs: dict[str, int],
+    fullcode_yield: bool,
     fullcode_yield_min_score: float,
 ) -> list[tuple[str, int | float, int, int, str]]:
     all_entries: list[tuple[str, int, int, int, str]] = []
     fullcode_order = build_fullcode_yield_order(
         fullcode_entries,
-        shortcut_entries,
+        shortcut_entries if fullcode_yield else [],
         min_promote_score=fullcode_yield_min_score,
     )
 
@@ -268,6 +269,7 @@ def generate_dict(
     min_phrase_weight: int = None,
     only_first_full_code: bool = False,
     char_freqs: dict[str, int] = None,
+    fullcode_yield: bool = True,
     fullcode_yield_min_score: float = DEFAULT_FULLCODE_YIELD_MIN_SCORE,
     suffix_z: bool = True,
     suffix_z_charset: str = "all",
@@ -326,6 +328,7 @@ def generate_dict(
         shortcut_entries,
         fullcode_entries,
         char_freqs=char_freqs,
+        fullcode_yield=fullcode_yield,
         fullcode_yield_min_score=fullcode_yield_min_score,
     )
     shortcut_leader_chars = build_shortcut_leader_chars(all_entries)
@@ -366,6 +369,7 @@ def generate_dict(
                 shortcut_entries,
                 prefix_fullcode_entries,
                 char_freqs=char_freqs,
+                fullcode_yield=fullcode_yield,
                 fullcode_yield_min_score=fullcode_yield_min_score,
             )
             prefix_source_entries = prefix_all_entries
@@ -576,6 +580,7 @@ def generate_dict(
     print(
         f"完成：简码={sc_count} 全码={fc_count}"
         f" zx后缀={z_suffix_count} zx前缀={dedup_prefix_count} 结构后缀={structure_suffix_count}"
+        f" 全码让位={'开' if fullcode_yield else '关'}"
         f" 全码让位门槛={fullcode_yield_min_score:g}"
         f" 总计={len(all_entries)} 输出={output_path}"
     )

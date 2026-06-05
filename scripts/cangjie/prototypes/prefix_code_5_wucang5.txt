@@ -1,6 +1,8 @@
 # 自动 z/x 前缀 5 码审阅文件；构建时覆盖生成
 飀	zhnhh
 徴	zhoug
+蚬	zlibh
+瑲	zmgoi
 鲹	znmik
 骕	znmll
 鲡	znmmb
@@ -8,6 +10,7 @@
 縰	zvfho
 繦	zvfnr
 龒	zypmm
+謡	zyrbo
 訉	zyrhn
 龂	zyuhm
 齷	zyusm
