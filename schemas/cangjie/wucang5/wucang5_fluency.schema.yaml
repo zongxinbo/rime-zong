@@ -26,7 +26,7 @@ schema:
       右Shift：提交当前文字并切到英文模式。
     反查：输入 ` 可拼音反查。
   dependencies:
-    - pinyin_simp
+    - pinyin
 
 switches:
   - name: ascii_mode
@@ -87,8 +87,8 @@ abc_segmentor:
 #    - reverse_lookup  # 與拼音（反查碼）混打
 
 reverse_lookup:
-  dictionary: pinyin_simp
-  prism: pinyin_simp
+  dictionary: pinyin
+  prism: pinyin
   prefix: "`"
   tips: 〔拼音〕
   preedit_format:
