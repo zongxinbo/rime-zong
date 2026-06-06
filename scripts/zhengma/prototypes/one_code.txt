@@ -1,0 +1,29 @@
+# 一简单字
+# 来源：schemas/zhengma/zmsj/zmsj.dict.yaml
+# 列：词条	编码	权重	造词码
+一	a	1	av
+地	b	1	bv
+现	c	1	cv
+的	d	1	dv
+世	e	1	ev
+要	f	1	fv
+在	g	1	gv
+成	h	1	hv
+上	i	1	iv
+中	j	1	jv
+是	k	1	kv
+用	l	1	lv
+我	m	1	mv
+他	n	1	nv
+个	o	1	ov
+所	p	1	pv
+月	q	1	qv
+多	r	1	rv
+说	s	1	sv
+度	t	1	tv
+为	u	1	uv
+没	v	1	vv
+这	w	1	wv
+对	x	1	xv
+了	y	1	yv
+发	z	1	zv
