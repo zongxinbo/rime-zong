@@ -22,7 +22,6 @@ from core.cangjie_builder import (
     ONE_CODE_PATH,
     FIXED_PREFIX_CODE_PATH,
     parse_cangjie_dict,
-    parse_frequency_file,
     get_weighted_frequencies,
     is_gb2312,
     is_common_han_char,
@@ -35,6 +34,9 @@ from core.glyph_codes import filter_glyph_preferred_entries
 from core.weight_profiles import WEIGHT_PROFILES, get_weight_profile
 
 NATIVE_3_PENALTY_RATIO = 1.2
+
+
+ShortcutCandidate = tuple[str, str, int | float, float, int, str, str | None, int | float]
 
 
 def _load_excluded_chars_and_occupied_codes() -> tuple[set[str], set[str]]:
@@ -53,6 +55,119 @@ def _load_excluded_chars_and_occupied_codes() -> tuple[set[str], set[str]]:
     return excluded_chars, occupied_codes
 
 
+def collect_shortcut_3_candidates(
+    *,
+    gb_only: bool = False,
+    prefix: bool = True,
+    char_scores: dict[str, int] | None = None,
+    protect_native: bool = True,
+    protect_native_charset: str = "gbk",
+    protect_native_min_score: int | float = 3000,
+    shortcut_candidate_min_score: int | float | None = 3000,
+    weights: str = "sc",
+    absolute_empty_only: bool = False,
+) -> list[ShortcutCandidate]:
+    """收集三简候选，返回按净收益降序排列的候选列表。"""
+    excluded_chars, occupied_codes = _load_excluded_chars_and_occupied_codes()
+
+    if char_scores is None:
+        char_scores = get_weighted_frequencies(get_weight_profile(weights))
+    if shortcut_candidate_min_score is None:
+        shortcut_candidate_min_score = protect_native_min_score
+
+    raw_entries = filter_glyph_preferred_entries(
+        parse_cangjie_dict(CANGJIE5_DICT_PATH),
+        weights,
+    )
+
+    char_codes = {}
+    for entry in raw_entries:
+        if not is_common_han_char(entry.text) or entry.code.startswith(("z", "x")):
+            continue
+        if entry.text in excluded_chars:
+            continue
+        if entry.text not in char_codes or len(entry.code) < len(char_codes[entry.text]):
+            char_codes[entry.text] = entry.code
+
+    candidates_by_code = defaultdict(lambda: {"orig": None, "long": []})
+    for char, full_code in char_codes.items():
+        if len(full_code) == 3:
+            if not gb_only or is_gb2312(char):
+                curr_orig = candidates_by_code[full_code]["orig"]
+                score = char_scores.get(char, 0)
+                if not curr_orig or score > curr_orig[1]:
+                    candidates_by_code[full_code]["orig"] = (char, score)
+        elif len(full_code) > 3:
+            score = char_scores.get(char, 0)
+            if score < shortcut_candidate_min_score:
+                continue
+            if gb_only and not is_gb2312(char):
+                continue
+            code3 = full_code[:3] if prefix else full_code[0] + full_code[1] + full_code[-1]
+            candidates_by_code[code3]["long"].append((char, score, len(full_code), full_code))
+
+    valid_shortcuts = []
+    for code3, data in candidates_by_code.items():
+        if code3 in occupied_codes:
+            continue
+        if not data["long"]:
+            continue
+
+        native_char = None
+        native_score = 0
+        native_penalty = 0
+        if data["orig"]:
+            native_char, native_score = data["orig"]
+            if absolute_empty_only or gb_only or (
+                protect_native
+                and shortcut_charset_allows(native_char, protect_native_charset, score=native_score)
+                and native_score >= protect_native_min_score
+            ):
+                continue
+            native_penalty = native_score * NATIVE_3_PENALTY_RATIO
+
+        best_item = None
+        for long_char, long_score, full_len, full_code in data["long"]:
+            saved_keys = full_len - 3
+            if saved_keys <= 0:
+                continue
+            net_score = (long_score * saved_keys) - native_penalty
+            if net_score <= 0:
+                continue
+            item = (long_char, code3, long_score, net_score, saved_keys, full_code, native_char, native_score)
+            if best_item is None or item[3] > best_item[3]:
+                best_item = item
+
+        if best_item is not None:
+            valid_shortcuts.append(best_item)
+
+    valid_shortcuts.sort(key=lambda item: item[3], reverse=True)
+    return valid_shortcuts
+
+
+def select_shortcut_candidates(
+    candidates: list[ShortcutCandidate],
+    *,
+    count: int,
+    auto_coverage: float,
+    char_scores: dict[str, int],
+) -> list[ShortcutCandidate]:
+    """按固定数量或累计覆盖率筛选最终写出的简码。"""
+    if count > 0:
+        return candidates[:count]
+
+    sorted_scores = sorted(char_scores.values(), reverse=True)
+    total_score = sum(sorted_scores)
+    cum_sum = 0
+    threshold_score = 0
+    for score in sorted_scores:
+        cum_sum += score
+        if cum_sum >= total_score * auto_coverage:
+            threshold_score = score
+            break
+    return [item for item in candidates if item[2] >= threshold_score]
+
+
 def generate_shortcut_3(
     gb_only: bool = False,
     prefix: bool = True,
@@ -65,115 +180,26 @@ def generate_shortcut_3(
     shortcut_candidate_min_score: int | float | None = 3000,
     weights: str = "sc",
 ):
-    source_dict = CANGJIE5_DICT_PATH
     output_path = THREE_CODE_PATH
 
-    # 1. 排除名单 (z, 1, 2)，并保护既有三码简码位。
-    excluded_chars, occupied_codes = _load_excluded_chars_and_occupied_codes()
-
-    # 2. 获取加权得分
     if char_scores is None:
         char_scores = get_weighted_frequencies(get_weight_profile(weights))
-    if shortcut_candidate_min_score is None:
-        shortcut_candidate_min_score = protect_native_min_score
-
-    raw_entries = filter_glyph_preferred_entries(
-        parse_cangjie_dict(source_dict),
-        weights,
+    valid_shortcuts = collect_shortcut_3_candidates(
+        gb_only=gb_only,
+        prefix=prefix,
+        char_scores=char_scores,
+        protect_native=protect_native,
+        protect_native_charset=protect_native_charset,
+        protect_native_min_score=protect_native_min_score,
+        shortcut_candidate_min_score=shortcut_candidate_min_score,
+        weights=weights,
     )
-    
-    # 统计重码桶与候选深度
-    code_to_chars = defaultdict(list)
-    for entry in raw_entries:
-        if not is_common_han_char(entry.text):
-            continue
-        if entry.code.startswith(("z", "x")):
-            continue
-        if entry.text not in code_to_chars[entry.code]:
-            code_to_chars[entry.code].append(entry.text)
-            
-    char_depths = {}
-    for code, chars in code_to_chars.items():
-        sorted_chars = sorted(chars, key=lambda c: char_scores.get(c, 0), reverse=True)
-        for index, char in enumerate(sorted_chars):
-            char_depths[char] = index + 1
-            
-    char_codes = {}
-    for e in raw_entries:
-        if not is_common_han_char(e.text) or e.code.startswith('z') or e.code.startswith('x'): continue
-        if e.text in excluded_chars: continue
-        # 记录每个字的最短编码
-        if e.text not in char_codes or len(e.code) < len(char_codes[e.text]):
-            char_codes[e.text] = e.code
-    
-    # 3. 分组候选
-    candidates_by_code = defaultdict(lambda: {"orig": None, "long": []})
-    for char, full_code in char_codes.items():
-        if len(full_code) == 3:
-            if not gb_only or is_gb2312(char):
-                curr_orig = candidates_by_code[full_code]["orig"]
-                score = char_scores.get(char, 0)
-                if not curr_orig or score > curr_orig[1]:
-                    candidates_by_code[full_code]["orig"] = (char, score)
-        elif len(full_code) > 3:
-            score = char_scores.get(char, 0)
-            if score < shortcut_candidate_min_score: continue
-            if gb_only and not is_gb2312(char): continue
-            code3 = full_code[:3] if prefix else full_code[0] + full_code[1] + full_code[-1]
-            candidates_by_code[code3]["long"].append((char, score, len(full_code)))
-
-    # 4. 按净收益判定：省码收益 - 原生码位代价。
-    valid_shortcuts = []
-    for code3, data in candidates_by_code.items():
-        if code3 in occupied_codes:
-            continue
-        if not data["long"]:
-            continue
-
-        native_penalty = 0
-        if data["orig"]:
-            orig_char, orig_score = data["orig"]
-            if gb_only or (
-                protect_native
-                and shortcut_charset_allows(orig_char, protect_native_charset, score=orig_score)
-                and orig_score >= protect_native_min_score
-            ):
-                continue
-            else:
-                native_penalty = orig_score * NATIVE_3_PENALTY_RATIO
-
-        best_item = None
-        for long_char, long_score, full_len in data["long"]:
-            saved_keys = full_len - 3
-            if saved_keys <= 0:
-                continue
-                
-            net_score = (long_score * saved_keys) - native_penalty
-            if net_score <= 0:
-                continue
-            item = (long_char, code3, long_score, net_score, saved_keys)
-            if best_item is None or item[3] > best_item[3]:
-                best_item = item
-
-        if best_item is not None:
-            valid_shortcuts.append(best_item)
-
-    # 5. 过滤与输出
-    valid_shortcuts.sort(key=lambda x: x[3], reverse=True)
-    
-    if count > 0:
-        top_n = valid_shortcuts[:count]
-    else:
-        sorted_scores = sorted(char_scores.values(), reverse=True)
-        total_score = sum(sorted_scores)
-        cum_sum = 0
-        threshold_score = 0
-        for s in sorted_scores:
-            cum_sum += s
-            if cum_sum >= total_score * auto_coverage:
-                threshold_score = s
-                break
-        top_n = [item for item in valid_shortcuts if item[2] >= threshold_score]
+    top_n = select_shortcut_candidates(
+        valid_shortcuts,
+        count=count,
+        auto_coverage=auto_coverage,
+        char_scores=char_scores,
+    )
         
     top_n.sort(key=lambda x: x[1])
 
