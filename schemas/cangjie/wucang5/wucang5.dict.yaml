@@ -9224,6 +9224,7 @@ sort: by_weight
 𨨶	covl
 鋂	cowy
 𨯑	coyp
+鈞	cp
 鈊	cp
 𨤽	cp
 銁	cpa
@@ -9487,7 +9488,6 @@ sort: by_weight
 𨬯	cseq
 𰽎	csfe
 𮣌	csfv
-贫	csh
 分	csh
 釖	csh
 𠔆	csh
@@ -13513,7 +13513,6 @@ sort: by_weight
 欖	dswu
 𣖕	dsyj
 𱌠	dsymu
-样	dt
 来	dt
 𢌶	dt
 模	dta
@@ -23130,7 +23129,6 @@ sort: by_weight
 𡒞	ghyu
 𱘗	ghyu
 𱘗	ghyv
-城	gi
 去	gi
 圹	gi
 圡	gi
@@ -23193,7 +23191,7 @@ sort: by_weight
 𱑰	gigrw
 𡓜	gigw
 堼	gigz
-幫	gih
+城	gih
 幫	gihab
 鷙	gihaf
 𩿟	gihaf
@@ -23381,7 +23379,6 @@ sort: by_weight
 𡏂	giwg
 𰆯	giwg
 𭻈	giwl
-圹	gix
 𡐝	gixf
 塶	gixp
 𡓔	giyd
@@ -23400,6 +23397,7 @@ sort: by_weight
 䖔	giypu
 𡌽	giyr
 𠬇	giyrf
+圹	giz
 報	gj
 𠥻	gj
 𡈿	gj
@@ -25176,6 +25174,7 @@ sort: by_weight
 𱳊	gtyku
 塃	gtyu
 塃	gtyv
+翹	gu
 圠	gu
 圸	gu
 𡉆	gu
@@ -25248,6 +25247,7 @@ sort: by_weight
 𰊾	guwf
 𢿣	guye
 𪙓	guymu
+圠	guz
 𡉓	gv
 𱘞	gvfd
 𡔖	gvfk
@@ -26330,7 +26330,6 @@ sort: by_weight
 䈀	hbtn
 𥮚	hbtn
 𥬰	hbtt
-算	hbu
 自	hbu
 嶨	hbu
 𥬥	hbu
@@ -38552,7 +38551,6 @@ sort: by_weight
 𨜽	innl
 辶	inno
 𣢛	inno
-廢	ino
 之	ino
 辶	ino
 㡱	ino
@@ -42039,6 +42037,7 @@ sort: by_weight
 𨋴	jjjv
 䡛	jjjwj
 𨍘	jjjws
+軌	jjk
 軑	jjk
 𨎼	jjkbj
 轑	jjkcf
@@ -42073,6 +42072,7 @@ sort: by_weight
 𰹐	jjksr
 𨋸	jjkt
 𨋛	jjkus
+軑	jjkz
 軮	jjlbk
 𨋄	jjlbu
 𮝢	jjlib
@@ -44082,7 +44082,6 @@ sort: by_weight
 𤻗	kavf
 𭼡	kawe
 𣂏	kayj
-郁	kb
 有	kb
 冇	kb
 𡗚	kb
@@ -44172,6 +44171,7 @@ sort: by_weight
 瓻	kbmvn
 𤭨	kbmvn
 𠁑	kbmy
+郁	kbn
 𤶖	kbnd
 郁	kbnl
 郗	kbnl
@@ -44225,13 +44225,13 @@ sort: by_weight
 𥇛	kbuu
 𡙵	kbuv
 𬏰	kbvk
-冇	kbx
 𡗭	kby
 𰣤	kby
 龓	kbybp
 𭣷	kbye
 𰳳	kbyhv
 𬂑	kbykm
+冇	kbz
 㾣	kc
 𡗕	kc
 𡗜	kc
@@ -44510,6 +44510,7 @@ sort: by_weight
 𧈏	kfypn
 𧈏	kfypu
 疢	kfz
+奎	kg
 㽵	kg
 圶	kg
 𡉄	kg
@@ -44744,6 +44745,7 @@ sort: by_weight
 㹰	khfmu
 𰡫	khfqf
 𭸦	khfqt
+猿	khg
 𱱋	khg
 𤝫	khgb
 𤡬	khgbt
@@ -46465,7 +46467,6 @@ sort: by_weight
 𤸤	koiv
 𡗧	koj
 𤵍	koj
-痴	kok
 疾	kok
 𱱌	kok
 𭼯	kokg
@@ -47427,6 +47428,7 @@ sort: by_weight
 㿔	kwww
 𡚗	kwww
 𤵝	kwyi
+疵	ky
 冭	ky
 𤴩	ky
 𡘐	kya
@@ -52939,7 +52941,6 @@ sort: by_weight
 𭘎	mcsu
 𱙎	mcv
 𩑍	mcvu
-酉	mcw
 西	mcw
 𭻍	mcw
 𱦆	mcwe
@@ -64751,7 +64752,6 @@ sort: by_weight
 骇	nmyvo
 鳣	nmywm
 𫘰	nmywm
-承	nn
 了	nn
 亇	nn
 弜	nn
@@ -64954,6 +64954,7 @@ sort: by_weight
 夠	nnpr
 𣖦	nnptd
 𱉉	nnpym
+承	nnq
 𭐹	nnqhp
 承	nnqo
 𠄘	nnqo
@@ -69120,7 +69121,6 @@ sort: by_weight
 𠉎	one
 𰂟	onem
 𪝻	onemw
-氣	onf
 你	onf
 𣱛	onf
 㲵	onfb
@@ -75037,6 +75037,7 @@ sort: by_weight
 捎	qfbz
 𢱣	qfcb
 𫽥	qfcq
+搂	qfd
 𢬊	qfd
 𥸮	qfd
 𢹔	qfdc
@@ -79107,6 +79108,7 @@ sort: by_weight
 呱	rhvo
 𭇇	rhvp
 𱔍	rhvu
+啤	rhw
 囖	rhwg
 啤	rhwj
 𠱖	rhwk
@@ -79613,7 +79615,6 @@ sort: by_weight
 𡃉	rkrf
 𭊨	rkrm
 𮡝	rkrwg
-咖	rks
 另	rks
 叻	rks
 嗋	rksb
@@ -79622,7 +79623,7 @@ sort: by_weight
 𠸊	rksj
 咖	rksr
 𠱿	rkss
-叻	rksx
+叻	rksz
 𰇕	rkt
 𠵃	rktj
 𰇶	rktj
@@ -88891,7 +88892,6 @@ sort: by_weight
 蓻	tgjk
 𦶗	tgjo
 𠵊	tgjr
-藝	tgk
 美	tgk
 𧁈	tgkd
 𦍸	tgkdi
@@ -97713,6 +97713,7 @@ sort: by_weight
 𡟒	vfqv
 𦄹	vfqyj
 攣	vfqz
+繩	vfr
 轡	vfr
 㘘	vfr
 𡅀	vfr
@@ -97753,6 +97754,7 @@ sort: by_weight
 繩	vfrxu
 𫃥	vfryo
 𮜭	vfryo
+轡	vfrz
 絕	vfs
 𦃷	vfsat
 𮈧	vfsav
@@ -102627,10 +102629,9 @@ sort: by_weight
 哬	xrom
 噐	xrr
 嚁	xrs
-叻	xs
+鐾	xs
 騀	xsf
 鬒	xsh
-鐾	xsj
 頣	xsl
 薅	xt
 槊	xtb
@@ -107810,6 +107811,7 @@ sort: by_weight
 𱡷	yscwa
 㿶	ysdhe
 𣃣	ysdhe
+遲	yse
 𠬣	yse
 𨓪	yse
 遲	yseq
@@ -110206,7 +110208,7 @@ sort: by_weight
 嚓	zrj
 嚔	zrjb
 嘧	zrjp
-吰	zrk
+叻	zrk
 嘨	zrl
 蹤	zrm
 唒	zrmc

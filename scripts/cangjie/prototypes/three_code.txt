@@ -100,7 +100,6 @@
 爷	cks
 欲	crn
 卻	crs
-贫	csh
 兽	cwm
 鏡	cyt
 棍	dap
@@ -260,7 +259,7 @@
 馨	geh
 墙	ggc
 封	ggd
-幫	gih
+城	gih
 劫	gik
 埃	gio
 域	gir
@@ -301,7 +300,6 @@
 制	hbl
 筒	hbm
 學	hbn
-算	hbu
 舟	hby
 譽	hcy
 税	hdc
@@ -431,7 +429,6 @@
 凉	imy
 序	ini
 庭	ink
-廢	ino
 資	iob
 府	iod
 應	iog
@@ -488,6 +485,7 @@
 韓	jjd
 斬	jjh
 轉	jjj
+軌	jjk
 輕	jjm
 輪	jjo
 韩	jjq
@@ -530,10 +528,12 @@
 寂	jyf
 宰	jyt
 牵	kbh
+郁	kbn
 殺	kdh
 刹	kdl
 狠	kha
 疼	khe
+猿	khg
 狐	khh
 狼	khi
 猪	khj
@@ -560,7 +560,6 @@
 症	kmy
 痛	kni
 奮	kog
-痴	kok
 轰	kqe
 辕	kqg
 斩	kqh
@@ -636,7 +635,6 @@
 雪	mbs
 霸	mbt
 頁	mbu
-酉	mcw
 爾	mfb
 飘	mfh
 玻	mgd
@@ -748,6 +746,7 @@
 预	nnm
 豫	nnn
 夠	nnp
+承	nnq
 飛	noh
 蛋	nol
 登	nom
@@ -802,7 +801,6 @@
 會	omw
 像	ona
 氛	onc
-氣	onf
 仍	onh
 健	onk
 侯	onm
@@ -889,6 +887,7 @@
 耕	qdt
 摊	qeo
 撑	qfb
+搂	qfd
 播	qhd
 括	qhj
 抓	qhl
@@ -958,13 +957,13 @@
 响	rhb
 呼	rhf
 哦	rhq
+啤	rhw
 嘛	rid
 喊	rih
 唉	rio
 喃	rjb
 嘲	rjj
 喷	rjt
-咖	rks
 啸	rll
 啡	rlm
 跟	rma
@@ -1071,7 +1070,6 @@
 羨	tge
 義	tgh
 羡	tgi
-藝	tgk
 歡	tgn
 莉	thd
 薇	tho
@@ -1140,6 +1138,7 @@
 蠻	vfl
 給	vfo
 績	vfq
+繩	vfr
 絕	vfs
 繼	vfv
 統	vfy
@@ -1280,6 +1279,7 @@
 選	yru
 謂	yrw
 識	yry
+遲	yse
 避	ysr
 遂	ytp
 靖	ytq

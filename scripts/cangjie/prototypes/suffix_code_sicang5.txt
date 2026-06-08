@@ -106,12 +106,13 @@
 畑	fwz
 愨	gepz
 堼	gigz
-圹	gix
+圹	giz
 摰	gkqz
 坆	gokz
 坵	gomz
 圪	gonz
 坩	gtmz
+圠	guz
 垯	gykz
 圤	gyz
 笪	hamz
@@ -175,6 +176,7 @@
 宋	jdz
 撃	jeqz
 宊	jikz
+軑	jjkz
 艹	jjz
 宄	jknz
 宖	jniz
@@ -182,7 +184,7 @@
 宓	jphz
 肀	jsz
 兙	jujz
-冇	kbx
+冇	kbz
 杀	kdz
 疢	kfz
 犷	khiz
@@ -347,7 +349,7 @@
 咭	rgrz
 吽	rhqz
 吰	rkiz
-叻	rksx
+叻	rksz
 呙	robx
 吶	robz
 咇	rphz
@@ -421,6 +423,7 @@
 鑾	vfcz
 欒	vfdz
 攣	vfqz
+轡	vfrz
 糺	vfuz
 孌	vfvz
 槳	vidz

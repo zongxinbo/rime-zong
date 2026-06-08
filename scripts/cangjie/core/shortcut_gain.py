@@ -152,14 +152,14 @@ class ShortcutGainAnalyzer:
         groups: dict[str, dict[str, object]] = defaultdict(lambda: {"native": None, "long": []})
 
         for text, full_code in self.shortest_full_codes.items():
-            if text in excluded_chars:
-                continue
             score = self.char_scores.get(text, 0)
             if len(full_code) == length:
                 native = groups[full_code]["native"]
                 if native is None or score > native[1]:
                     groups[full_code]["native"] = (text, score)
             elif len(full_code) > length and score >= self.shortcut_candidate_min_score:
+                if text in excluded_chars:
+                    continue
                 groups[full_code[:length]]["long"].append((text, score, len(full_code)))
 
         valid: list[tuple[str, str, int | float]] = []

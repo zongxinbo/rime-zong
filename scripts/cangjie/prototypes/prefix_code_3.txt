@@ -50,7 +50,6 @@
 嚁	xrs
 騀	xsf
 鬒	xsh
-鐾	xsj
 頣	xsl
 槊	xtb
 莰	xtg
@@ -299,7 +298,7 @@
 咭	zrg
 吽	zrh
 嚓	zrj
-吰	zrk
+叻	zrk
 嘨	zrl
 蹤	zrm
 喚	zrn
