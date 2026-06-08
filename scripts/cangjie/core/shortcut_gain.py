@@ -85,7 +85,7 @@ class ShortcutGainAnalyzer:
         protect_native_min_score: int | float = 3000,
         shortcut_candidate_min_score: int | float = 3000,
         s2_count: int = 300,
-        s3_count: int = 800,
+        s3_count: int = 1300,
     ) -> None:
         self.weights = weights
         self.char_scores = char_scores or get_weighted_frequencies(get_weight_profile(weights))
@@ -323,7 +323,13 @@ def main() -> None:
     parser.add_argument("--protect-native-charset", choices=("all", "frequency", "gbk", "gb2312"), default="gbk")
     parser.add_argument("--protect-native-min-score", type=float, default=3000)
     parser.add_argument("--shortcut-candidate-min-score", type=float, default=3000)
+    parser.add_argument("--s2-count", type=int, default=300, help="重放二简数量；默认 300，与生产构建默认一致")
+    parser.add_argument("--s3-count", type=int, default=1300, help="重放三简数量；默认 1300，与生产构建默认一致")
     args = parser.parse_args()
+    if args.s2_count <= 0:
+        parser.error("--s2-count 必须大于 0")
+    if args.s3_count <= 0:
+        parser.error("--s3-count 必须大于 0")
 
     weights = args.weights or ("sc" if args.layer == "one" else "sc_daily")
     analyzer = ShortcutGainAnalyzer(
@@ -331,6 +337,8 @@ def main() -> None:
         protect_native_charset=args.protect_native_charset,
         protect_native_min_score=args.protect_native_min_score,
         shortcut_candidate_min_score=args.shortcut_candidate_min_score,
+        s2_count=args.s2_count,
+        s3_count=args.s3_count,
     )
     result = analyzer.evaluate_assignment(code=args.code, text=args.char, layer=args.layer)
     replaced = result.replaced_text or "空位"

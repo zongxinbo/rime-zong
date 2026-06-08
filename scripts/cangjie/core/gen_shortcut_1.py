@@ -8,8 +8,8 @@
 1. 权重可通过 `--weights` 选择；一简默认使用日常简体优先 `sc`。
 2. 普通位先出，`x/z` 只有带参数时才追加到报告末尾：
    - 字根字/首码匹配优先，高频且全码包含该键时允许作为跨位候选；
-   - `a-z` 一简只按日常字频和记忆锚点评分，不加入码长、重码或前缀占位救援权重；
-   - `x/z` 没有普通仓颉锚点，追加时按日常字频生成全局候选。
+   - `a-z` 一简只按日常字频和记忆锚点评分，主推荐目标可用 `--objective` 切换；
+   - `x/z` 没有普通仓颉锚点，普通位定案后重新生成全局候选，并按真实净收益分配。
 """
 
 from __future__ import annotations
@@ -38,6 +38,9 @@ DEFAULT_LETTERS = "abcdefghijklmnopqrstuvwy"
 SPECIAL_LETTERS = "xz"
 TOP_CANDIDATES_PER_KEY = 8
 GAIN_CANDIDATES_PER_KEY = 8
+DEFAULT_S2_COUNT = 300
+DEFAULT_S3_COUNT = 1300
+OBJECTIVES = ("mnemonic", "hybrid", "gain")
 
 ORIGINAL_RADICALS = {
     "a": "日", "b": "月", "c": "金", "d": "木", "e": "水", "f": "火", "g": "土",
@@ -65,6 +68,12 @@ ANCHOR_PRIORITIES = {
     "末码": 1,
     "包含": 0,
     "全局": -1,
+}
+
+OBJECTIVE_DESCRIPTIONS = {
+    "mnemonic": "记忆锚点优先：锚点等级 > 日常频率 > 实际净收益",
+    "hybrid": "混合模式：锚点等级 > 实际净收益 > 日常频率",
+    "gain": "净收益优先：实际净收益 > 锚点等级 > 日常频率",
 }
 
 
@@ -112,23 +121,14 @@ def shortest_code(char_codes: dict[str, list[str]], text: str) -> str:
     return min(codes, key=lambda code: (len(code), code))
 
 
-def code_position(code_chars: dict[str, list[str]], text: str, code: str) -> int:
-    chars = code_chars.get(code, [])
-    if text not in chars:
-        return 0
-    return chars.index(text) + 1
-
-
-def prefix_blockage(
+def prefix_blockage_note(
     text: str,
     code: str,
     code_chars: dict[str, list[str]],
     scores: dict[str, float],
-) -> tuple[float, str]:
+) -> str:
     """基于 Cangjie5 源码表判断普通二三简是否容易被原生字占据。"""
     blocks: list[str] = []
-    factor = 1.0
-    text_score = scores.get(text, 0.0)
 
     for prefix_len in (2, 3):
         if len(code) <= prefix_len:
@@ -142,14 +142,11 @@ def prefix_blockage(
             continue
         native_score = scores.get(native, 0.0)
         # 源码表中的原生字只要有实际频率，就会增加普通简码抢位难度；
-        # 放大强度再按相对频率缩放，避免冷字占位过度影响排序。
+        # 一简不把这个因素混入静态评分，只在报告中展示供人工判断。
         if native_score > 0:
             blocks.append(f"{prefix}:{native}")
-            relative = min(max(native_score / max(text_score, 1e-12), 0.20), 1.50)
-            base = 0.28 if prefix_len == 2 else 0.18
-            factor += base * relative
 
-    return factor, "；".join(blocks)
+    return "；".join(blocks)
 
 
 def build_rank(scores: dict[str, float]) -> dict[str, int]:
@@ -157,22 +154,6 @@ def build_rank(scores: dict[str, float]) -> dict[str, int]:
         text: rank
         for rank, text in enumerate(sorted(scores, key=scores.get, reverse=True), start=1)
     }
-
-
-def shortcut_pressure(
-    text: str,
-    code: str,
-    code_chars: dict[str, list[str]],
-) -> tuple[float, str]:
-    if len(code) > 3:
-        return 1.18, "长码普通简码压力"
-    if len(code) == 2:
-        group = code_chars.get(code, [])
-        pos = code_position(code_chars, text, code)
-        if len(group) >= 3 and pos >= 2:
-            factor = 1.14 if pos >= 3 else 1.08
-            return factor, f"{code} 第 {pos}/{len(group)} 候选"
-    return 1.0, ""
 
 
 def one_key_candidates(
@@ -229,7 +210,7 @@ def one_key_candidates(
         if is_current:
             note = f"当前人工定稿；{note}"
 
-        _, blockage = prefix_blockage(text, code, code_chars, scores)
+        blockage = prefix_blockage_note(text, code, code_chars, scores)
         candidates.append(
             Candidate(
                 text=text,
@@ -257,10 +238,11 @@ def global_frequency_candidates(
     code_chars: dict[str, list[str]],
     scores: dict[str, float],
     excluded_chars: set[str],
+    current_text: str = "",
 ) -> list[Candidate]:
     candidates: list[Candidate] = []
     for text in char_codes:
-        if text in excluded_chars:
+        if text in excluded_chars and text != current_text:
             continue
         base = scores.get(text, 0.0)
         if base <= 0:
@@ -269,7 +251,7 @@ def global_frequency_candidates(
         if not code:
             continue
         saved = max(len(code) - 1, 0)
-        _, blockage = prefix_blockage(text, code, code_chars, scores)
+        blockage = prefix_blockage_note(text, code, code_chars, scores)
         candidates.append(
             Candidate(
                 text=text,
@@ -283,7 +265,12 @@ def global_frequency_candidates(
             )
         )
     candidates.sort(key=lambda item: (-item.score, item.code, item.text))
-    return candidates[:TOP_CANDIDATES_PER_KEY]
+    top = candidates[:GAIN_CANDIDATES_PER_KEY]
+    if current_text and all(item.text != current_text for item in top):
+        current = next((item for item in candidates if item.text == current_text), None)
+        if current is not None:
+            top = top[:-1] + [current]
+    return top
 
 
 def select_one_key_candidate(candidates: list[Candidate], current_text: str) -> Candidate | None:
@@ -310,18 +297,11 @@ def choose_proposal(
     code_chars: dict[str, list[str]],
     scores: dict[str, float],
     current_one: dict[str, str],
-    *,
-    append_special_xz: bool,
 ) -> tuple[dict[str, Candidate], dict[str, list[Candidate]]]:
     ranks = build_rank(scores)
     used_chars: set[str] = set()
     proposal: dict[str, Candidate] = {}
     candidates_by_key: dict[str, list[Candidate]] = {}
-    default_excluded_chars = {
-        current_one.get(letter, "")
-        for letter in DEFAULT_LETTERS
-        if current_one.get(letter, "")
-    }
 
     for letter in DEFAULT_LETTERS:
         candidates = one_key_candidates(
@@ -340,20 +320,6 @@ def choose_proposal(
         if selected:
             proposal[letter] = selected
             used_chars.add(selected.text)
-
-    if append_special_xz:
-        for letter in SPECIAL_LETTERS:
-            candidates = global_frequency_candidates(
-                char_codes,
-                code_chars,
-                scores,
-                default_excluded_chars | used_chars,
-            )
-            candidates_by_key[letter] = candidates
-            selected = select_one_key_candidate(candidates, current_one.get(letter, ""))
-            if selected:
-                proposal[letter] = selected
-                used_chars.add(selected.text)
 
     return proposal, candidates_by_key
 
@@ -392,9 +358,25 @@ def add_actual_gains(
     return result
 
 
+def actual_gain(candidate: Candidate) -> int | float:
+    return candidate.actual_gain or 0
+
+
+def proposal_sort_key(letter: str, candidate: Candidate, objective: str) -> tuple:
+    anchor_priority = ANCHOR_PRIORITIES.get(candidate.kind, -2)
+    gain = actual_gain(candidate)
+    if objective == "gain":
+        return (-gain, -anchor_priority, -candidate.base_score, -candidate.score, letter, candidate.text)
+    if objective == "hybrid":
+        return (-anchor_priority, -gain, -candidate.base_score, -candidate.score, letter, candidate.text)
+    return (-anchor_priority, -candidate.base_score, -gain, -candidate.score, letter, candidate.text)
+
+
 def select_gain_proposal(
     current_one: dict[str, str],
     candidates_by_key: dict[str, list[Candidate]],
+    *,
+    objective: str,
 ) -> dict[str, Candidate]:
     """跨键分配唯一主推荐，避免同一个字同时占据多个 Rank 1。"""
     proposal: dict[str, Candidate] = {}
@@ -406,19 +388,10 @@ def select_gain_proposal(
         for item in candidates
         if (
                 item.text == current_one.get(letter, "")
-                or (item.actual_gain or 0) > 0
+                or actual_gain(item) > 0
         )
     ]
-    placements.sort(
-        key=lambda placement: (
-            -ANCHOR_PRIORITIES.get(placement[1].kind, -2),
-            -placement[1].base_score,
-            -(placement[1].actual_gain or 0),
-            -placement[1].score,
-            placement[0],
-            placement[1].text,
-        )
-    )
+    placements.sort(key=lambda placement: proposal_sort_key(placement[0], placement[1], objective))
 
     for letter, item in placements:
         if letter in used_keys or item.text in used_chars:
@@ -438,18 +411,13 @@ def select_gain_proposal(
                 item.text not in used_chars
                 and (
                     item.text == current_one.get(letter, "")
-                    or (item.actual_gain or 0) > 0
+                    or actual_gain(item) > 0
                 )
             )
         ]
-        selected = max(
+        selected = min(
             eligible,
-            key=lambda item: (
-                ANCHOR_PRIORITIES.get(item.kind, -2),
-                item.base_score,
-                item.actual_gain or 0,
-                item.score,
-            ),
+            key=lambda item: proposal_sort_key(letter, item, objective),
             default=None,
         )
         if selected is not None:
@@ -482,6 +450,9 @@ def write_report(
     append_special_xz: bool,
     weights: str,
     blind: bool,
+    objective: str,
+    s2_count: int,
+    s3_count: int,
     output_path: Path,
 ) -> None:
     lines = [
@@ -495,13 +466,14 @@ def write_report(
         f"- 决策模式：`{'blind replacement audit' if blind else 'calibration'}`。"
         + ("当前正式版不参与候选保底；若凭自身频率和锚点自然进入短名单，则以收益 `0` 的基线正常参与主推荐排序。"
            if blind else "当前正式版作为收益基线，并保留校准候选资格。"),
-        f"- 每键先按静态规则保留 {GAIN_CANDIDATES_PER_KEY} 个候选，再调用 `shortcut_gain.py` 重放真实 S2/S3，按实际净收益排序输出前 {TOP_CANDIDATES_PER_KEY} 个。",
-        "- 总览建议采用一简专用决策层：跨键全局分配唯一主推荐；锚点等级优先，同级内按日常频率优先，真实净收益只作为可行性门槛和辅助信息。等级为 `字根 > 首码 > 尾码 > 包含码`；当前正式版以收益 `0` 作为基线参与比较。",
+        f"- 主推荐目标：`{objective}`。{OBJECTIVE_DESCRIPTIONS[objective]}。",
+        f"- 每键先按静态规则保留 {GAIN_CANDIDATES_PER_KEY} 个候选，再调用 `shortcut_gain.py` 重放真实 S2/S3（S2={s2_count}，S3={s3_count}），按实际净收益排序输出前 {TOP_CANDIDATES_PER_KEY} 个。",
+        "- 总览建议采用一简专用决策层：跨键全局分配唯一主推荐；当前正式版以收益 `0` 作为基线参与比较。锚点等级为 `字根 > 首码 > 尾码 > 包含码 > 全局`。",
         "- 同一个字只能在最合理的键位占据一次 `Rank 1`；它仍可保留在其他键位的 `Rank 2+`，供人工比较。",
         "- 默认先出普通位，`x/z` 仅在追加模式下放到报告末尾。",
         "- `a-z` 一简只按日常字频和按键记忆锚点评分，不加入码长、重码或前缀占位救援权重。",
         "- 字根字/首码匹配优先；高频包含键位可跨位。真实 S2/S3 重放仍用于展示副作用和排除负收益替换。",
-        "- `x/z` 没有普通仓颉锚点，追加时按日常字频生成全局候选；普通二三四简和自动消重层不受影响。",
+        "- `x/z` 没有普通仓颉锚点，追加时在普通位定案后重新生成全局候选，并固定按实际净收益优先分配；普通二三四简和自动消重层不受影响。",
         "- 当前正式版来自 `one_code.txt`，最终是否采用建议仍需人工定稿。",
         "",
         "## 总览",
@@ -590,6 +562,12 @@ def main() -> None:
                         help="权重模式：sc=现代简体日用优化，sc_daily=简繁日常通用，sc_balanced=简繁平衡；默认 sc")
     parser.add_argument("--gain-candidates-per-key", type=int, default=8,
                         help="每键进入真实 S2/S3 重放的静态候选数；默认 8，调大可深扫但耗时线性增加")
+    parser.add_argument("--objective", choices=OBJECTIVES, default="mnemonic",
+                        help="主推荐目标：mnemonic=记忆锚点优先，hybrid=锚点内净收益优先，gain=净收益优先；默认 mnemonic")
+    parser.add_argument("--s2-count", type=int, default=DEFAULT_S2_COUNT,
+                        help=f"真实重放二简数量；默认 {DEFAULT_S2_COUNT}，与生产构建一致")
+    parser.add_argument("--s3-count", type=int, default=DEFAULT_S3_COUNT,
+                        help=f"真实重放三简数量；默认 {DEFAULT_S3_COUNT}，与生产构建一致")
     parser.add_argument("--blind", action="store_true",
                         help="盲测模式：当前正式版仅作为收益基线和报告对照，不参与候选保底或主推荐排序")
     parser.add_argument("--output", type=Path, default=ONE_CODE_REPORT_PATH,
@@ -597,6 +575,10 @@ def main() -> None:
     args = parser.parse_args()
     if args.gain_candidates_per_key <= 0:
         parser.error("--gain-candidates-per-key 必须大于 0")
+    if args.s2_count <= 0:
+        parser.error("--s2-count 必须大于 0")
+    if args.s3_count <= 0:
+        parser.error("--s3-count 必须大于 0")
     global GAIN_CANDIDATES_PER_KEY
     GAIN_CANDIDATES_PER_KEY = args.gain_candidates_per_key
 
@@ -609,9 +591,8 @@ def main() -> None:
         code_chars,
         scores,
         decision_current,
-        append_special_xz=args.append_xz,
     )
-    analyzer = ShortcutGainAnalyzer(weights=args.weights)
+    analyzer = ShortcutGainAnalyzer(weights=args.weights, s2_count=args.s2_count, s3_count=args.s3_count)
     candidates_by_key = add_actual_gains(candidates_by_key, analyzer, current_one)
     proposal = select_gain_proposal(
         current_one,
@@ -620,19 +601,23 @@ def main() -> None:
             for letter in DEFAULT_LETTERS
             if letter in candidates_by_key
         },
+        objective=args.objective,
     )
     if args.append_xz:
         used_chars = {candidate.text for candidate in proposal.values()}
         special_candidates = {
-            letter: [
-                candidate
-                for candidate in candidates_by_key.get(letter, [])
-                if candidate.text not in used_chars
-            ]
+            letter: global_frequency_candidates(
+                char_codes,
+                code_chars,
+                scores,
+                used_chars,
+                current_one.get(letter, ""),
+            )
             for letter in SPECIAL_LETTERS
         }
+        special_candidates = add_actual_gains(special_candidates, analyzer, current_one)
         candidates_by_key.update(special_candidates)
-        proposal.update(select_gain_proposal(current_one, special_candidates))
+        proposal.update(select_gain_proposal(current_one, special_candidates, objective="gain"))
     candidates_by_key = rank_report_candidates(candidates_by_key, proposal)
     write_report(
         current_one,
@@ -641,6 +626,9 @@ def main() -> None:
         append_special_xz=args.append_xz,
         weights=args.weights,
         blind=args.blind,
+        objective=args.objective,
+        s2_count=args.s2_count,
+        s3_count=args.s3_count,
         output_path=args.output,
     )
     print(f"一简设计报告已保存: {args.output}")
