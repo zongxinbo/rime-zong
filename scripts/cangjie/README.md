@@ -10,6 +10,10 @@
 python scripts/cangjie/core/gen_shortcut_1.py --weights sc
 # 盲测：不让当前人工定稿影响候选保底或主推荐排序，并避免覆盖常规报告
 python scripts/cangjie/core/gen_shortcut_1.py --weights sc --blind --output _tmp/one_code_report_blind.md
+# 净收益审计：保留同一候选池，但让主推荐按实际净收益优先
+python scripts/cangjie/core/gen_shortcut_1.py --weights sc --blind --objective gain --output _tmp/one_code_report_gain.md
+# 追加审计 x/z 单键位
+python scripts/cangjie/core/gen_shortcut_1.py --weights sc --blind --append-xz --output _tmp/one_code_report_xz.md
 python scripts/cangjie/core/gen_shortcut_2.py
 python scripts/cangjie/core/gen_shortcut_3.py
 python scripts/cangjie/core/gen_shortcut_4.py
@@ -27,11 +31,11 @@ python scripts/cangjie/core/shortcut_gain.py --layer one --code t --char 其 --w
 python scripts/cangjie/core/shortcut_gain.py --layer fixed-prefix --code xp --char 恐 --weights sc_daily
 ```
 
-`gen_shortcut_1.py` 先静态初筛，再调用 `shortcut_gain.py` 核心重放真实 S2/S3。单独使用 `shortcut_gain.py` 时，可评估 one 或 fixed-prefix 层的替换收益；生产构建默认不加载 fixed-prefix。详细算法见 [CANGJIE_SPEC.md](CANGJIE_SPEC.md) 9.3。
+`gen_shortcut_1.py` 先静态初筛，再调用 `shortcut_gain.py` 核心重放真实 S2/S3。默认重放参数为 S2=300、S3=1300，与生产构建默认一致；可用 `--s2-count`、`--s3-count` 显式覆盖。单独使用 `shortcut_gain.py` 时，可评估 one 或 fixed-prefix 层的替换收益；生产构建默认不加载 fixed-prefix。详细算法见 [CANGJIE_SPEC.md](CANGJIE_SPEC.md) 9.3。
 
 `gen_shortcut_1.py` 默认每键重放静态 Top 8。需要扩大深扫范围时使用 `--gain-candidates-per-key`，耗时近似线性增长。
 
-`a-z` 一简的静态排序只使用日常字频和记忆锚点，不加入码长、重码或前缀占位救援权重。`x/z` 没有普通仓颉锚点，使用 `--append-xz` 追加时按日常字频生成全局候选。真实 S2/S3 重放仍用于展示副作用和排除负收益替换；普通二三四简和自动消重层保留重码救援评分。
+`a-z` 一简的静态排序只使用日常字频和记忆锚点，不加入码长、重码或前缀占位救援权重。主推荐默认使用 `--objective mnemonic`，即锚点等级优先、同级内日常频率优先；`--objective hybrid` 会在同锚点等级内优先真实净收益，`--objective gain` 用于收益最大化审计。`x/z` 没有普通仓颉锚点，使用 `--append-xz` 追加时会在普通位定案后重新生成全局候选，并固定按真实净收益优先分配。真实 S2/S3 重放仍用于展示副作用和排除负收益替换；普通二三四简和自动消重层保留重码救援评分。
 
 `gen_shortcut_1.py --blind` 用于执行无人工定稿偏置的逐键替换审计。盲测仍以当前正式版计算替换净收益并输出对照，但不会把当前字强制塞入静态短名单；若当前字凭自身频率和锚点自然入围，则以收益 `0` 的基线正常参与排序。它不是从空白状态独立生成完整一简方案。建议配合 `--output` 写入单独报告。
 
