@@ -40,6 +40,7 @@ TOP_CANDIDATES_PER_KEY = 8
 GAIN_CANDIDATES_PER_KEY = 8
 DEFAULT_S2_COUNT = 300
 DEFAULT_S3_COUNT = 1300
+MNEMONIC_GAIN_BREAKTHROUGH_MIN = 2_000_000
 OBJECTIVES = ("mnemonic", "hybrid", "gain")
 
 ORIGINAL_RADICALS = {
@@ -71,7 +72,7 @@ ANCHOR_PRIORITIES = {
 }
 
 OBJECTIVE_DESCRIPTIONS = {
-    "mnemonic": "记忆锚点优先：锚点等级 > 日常频率 > 实际净收益",
+    "mnemonic": "记忆锚点优先：锚点等级 > 显著净收益突破 > 当前方案稳定性 > 日常频率 > 实际净收益",
     "hybrid": "混合模式：锚点等级 > 实际净收益 > 日常频率",
     "gain": "净收益优先：实际净收益 > 锚点等级 > 日常频率",
 }
@@ -362,14 +363,32 @@ def actual_gain(candidate: Candidate) -> int | float:
     return candidate.actual_gain or 0
 
 
-def proposal_sort_key(letter: str, candidate: Candidate, objective: str) -> tuple:
+def proposal_sort_key(
+    letter: str,
+    candidate: Candidate,
+    objective: str,
+    *,
+    current_text: str | None = None,
+) -> tuple:
     anchor_priority = ANCHOR_PRIORITIES.get(candidate.kind, -2)
     gain = actual_gain(candidate)
     if objective == "gain":
         return (-gain, -anchor_priority, -candidate.base_score, -candidate.score, letter, candidate.text)
     if objective == "hybrid":
         return (-anchor_priority, -gain, -candidate.base_score, -candidate.score, letter, candidate.text)
-    return (-anchor_priority, -candidate.base_score, -gain, -candidate.score, letter, candidate.text)
+    breakthrough = gain >= MNEMONIC_GAIN_BREAKTHROUGH_MIN
+    incumbent = current_text is not None and candidate.text == current_text
+    return (
+        -anchor_priority,
+        not breakthrough,
+        not incumbent if not breakthrough else False,
+        -candidate.saved_keys if breakthrough else 0,
+        -gain if breakthrough else 0,
+        -candidate.base_score,
+        -candidate.score,
+        letter,
+        candidate.text,
+    )
 
 
 def select_gain_proposal(
@@ -391,7 +410,14 @@ def select_gain_proposal(
                 or actual_gain(item) > 0
         )
     ]
-    placements.sort(key=lambda placement: proposal_sort_key(placement[0], placement[1], objective))
+    placements.sort(
+        key=lambda placement: proposal_sort_key(
+            placement[0],
+            placement[1],
+            objective,
+            current_text=current_one.get(placement[0]),
+        )
+    )
 
     for letter, item in placements:
         if letter in used_keys or item.text in used_chars:
@@ -417,7 +443,12 @@ def select_gain_proposal(
         ]
         selected = min(
             eligible,
-            key=lambda item: proposal_sort_key(letter, item, objective),
+            key=lambda item: proposal_sort_key(
+                letter,
+                item,
+                objective,
+                current_text=current_one.get(letter),
+            ),
             default=None,
         )
         if selected is not None:
@@ -469,6 +500,7 @@ def write_report(
         f"- 主推荐目标：`{objective}`。{OBJECTIVE_DESCRIPTIONS[objective]}。",
         f"- 每键先按静态规则保留 {GAIN_CANDIDATES_PER_KEY} 个候选，再调用 `shortcut_gain.py` 重放真实 S2/S3（S2={s2_count}，S3={s3_count}），按实际净收益排序输出前 {TOP_CANDIDATES_PER_KEY} 个。",
         "- 总览建议采用一简专用决策层：跨键全局分配唯一主推荐；当前正式版以收益 `0` 作为基线参与比较。锚点等级为 `字根 > 首码 > 尾码 > 包含码 > 全局`。",
+        f"- `mnemonic` 的显著净收益突破门槛为 {MNEMONIC_GAIN_BREAKTHROUGH_MIN:,}；只在同锚点等级内生效，并优先考虑省键数更大的候选。",
         "- 同一个字只能在最合理的键位占据一次 `Rank 1`；它仍可保留在其他键位的 `Rank 2+`，供人工比较。",
         "- 默认先出普通位，`x/z` 仅在追加模式下放到报告末尾。",
         "- `a-z` 一简只按日常字频和按键记忆锚点评分，不加入码长、重码或前缀占位救援权重。",
