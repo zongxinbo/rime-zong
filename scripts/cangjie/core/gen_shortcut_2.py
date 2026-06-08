@@ -83,8 +83,6 @@ def collect_shortcut_2_candidates(
     for entry in raw_entries:
         if not is_common_han_char(entry.text) or entry.code.startswith(("z", "x")):
             continue
-        if entry.text in excluded_chars:
-            continue
         if entry.text not in char_codes or len(entry.code) < len(char_codes[entry.text]):
             char_codes[entry.text] = entry.code
 
@@ -97,6 +95,8 @@ def collect_shortcut_2_candidates(
                 if not curr_orig or score > curr_orig[1]:
                     candidates_by_code[full_code]["orig"] = (char, score)
         elif len(full_code) > 2:
+            if char in excluded_chars:
+                continue
             score = char_scores.get(char, 0)
             if score < shortcut_candidate_min_score:
                 continue

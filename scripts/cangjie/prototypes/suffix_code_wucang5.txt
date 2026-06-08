@@ -206,7 +206,7 @@
 墝	ggguz
 堼	gigz
 幇	gilbz
-圹	gix
+圹	giz
 摰	gkqz
 壖	gmbbz
 坆	gokz
@@ -215,6 +215,7 @@
 嚞	grgrz
 嘉	grtrz
 坩	gtmz
+圠	guz
 垯	gykz
 圤	gyz
 篃	hahuz
@@ -298,6 +299,7 @@
 宋	jdz
 撃	jeqz
 宊	jikz
+軑	jjkz
 亁	jjonz
 艹	jjz
 宄	jknz
@@ -313,7 +315,7 @@
 勊	juksz
 剜	julnz
 郗	kbnlz
-冇	kbx
+冇	kbz
 瘌	kdlnx
 剎	kdlnz
 杀	kdz
@@ -557,7 +559,7 @@
 嚔	rjboz
 嘧	rjpuz
 吰	rkiz
-叻	rksx
+叻	rksz
 嘨	rlllz
 唒	rmcwz
 啀	rmggz
@@ -720,6 +722,7 @@
 鑾	vfcz
 欒	vfdz
 攣	vfqz
+轡	vfrz
 糺	vfuz
 孌	vfvz
 嬤	vidiz
