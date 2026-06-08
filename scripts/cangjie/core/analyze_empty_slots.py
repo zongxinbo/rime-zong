@@ -153,7 +153,13 @@ def load_mixed_freq(name: str) -> dict[str, float]:
     return norm
 
 
-def build_sicang_assess_entries(selected: list[ShortcutCandidate], *, char_scores: dict[str, int], weights: str):
+def build_sicang_assess_entries(
+    selected: list[ShortcutCandidate],
+    *,
+    char_scores: dict[str, int],
+    weights: str,
+    dedup_layers: str,
+):
     shortcut_entries, root_chars = load_shortcut_entries({
         "root": ROOT_CODE_PATH,
         1: ONE_CODE_PATH,
@@ -229,81 +235,96 @@ def build_sicang_assess_entries(selected: list[ShortcutCandidate], *, char_score
     ]
     shared_leader_chars = build_shortcut_leader_chars(prefix_all_entries)
     used_text_code_for_generated = set(used_text_code)
-    shared_entries_with_levels = build_dedup_prefix_entries(
-        shared_source_entries,
-        occupied_entries=shared_source_entries,
-        used_text_code=used_text_code_for_generated,
-        shortcut_leader_chars=shared_leader_chars,
-        char_freqs=char_scores,
-        short_level_char_freqs={
-            2: prefix_level2_scores,
-            3: prefix_level3_scores,
-        },
-        full_char_freqs=prefix_full_scores,
-        max_code_length=4,
-        charset="frequency",
-        min_score=1,
-        short=True,
-        full=False,
-        short_levels=(2, 3),
-        full_source_length=4,
-        deep_rank_multiplier=1.5,
-    )
-    shared_entries = [entry for _, entry in shared_entries_with_levels]
-    all_entries.extend(shared_entries)
-    all_entries.sort()
-    shortcut_source_entries.extend(shared_entries)
-    shortcut_source_entries.sort()
-    shortcut_leader_chars = build_shortcut_leader_chars(all_entries)
-
-    scheme_entries_with_levels = build_dedup_prefix_entries(
-        shortcut_source_entries,
-        occupied_entries=shortcut_source_entries,
-        used_text_code=used_text_code_for_generated,
-        shortcut_leader_chars=shortcut_leader_chars,
-        char_freqs=char_scores,
-        short_level_char_freqs={
-            2: prefix_level2_scores,
-            3: prefix_level3_scores,
-        },
-        full_char_freqs=prefix_full_scores,
-        max_code_length=4,
-        charset="frequency",
-        min_score=1,
-        short=False,
-        full=True,
-        short_levels=(),
-        full_source_length=4,
-        deep_rank_multiplier=1.5,
-    )
-    scheme_entries = [entry for _, entry in scheme_entries_with_levels]
-    if scheme_entries:
-        all_entries.extend(scheme_entries)
+    if dedup_layers in {"prefix", "all"}:
+        shared_entries_with_levels = build_dedup_prefix_entries(
+            shared_source_entries,
+            occupied_entries=shared_source_entries,
+            used_text_code=used_text_code_for_generated,
+            shortcut_leader_chars=shared_leader_chars,
+            char_freqs=char_scores,
+            short_level_char_freqs={
+                2: prefix_level2_scores,
+                3: prefix_level3_scores,
+            },
+            full_char_freqs=prefix_full_scores,
+            max_code_length=4,
+            charset="frequency",
+            min_score=1,
+            short=True,
+            full=False,
+            short_levels=(2, 3),
+            full_source_length=4,
+            deep_rank_multiplier=1.5,
+        )
+        shared_entries = [entry for _, entry in shared_entries_with_levels]
+        all_entries.extend(shared_entries)
         all_entries.sort()
-        shortcut_source_entries.extend(scheme_entries)
+        shortcut_source_entries.extend(shared_entries)
         shortcut_source_entries.sort()
+        shortcut_leader_chars = build_shortcut_leader_chars(all_entries)
 
-    suffix_entries = build_z_suffix_entries(
-        natural_shortcut_source_entries,
-        occupied_entries=all_entries,
-        used_text_code=used_text_code_for_generated,
-        shortcut_leader_chars=natural_shortcut_leader_chars,
-        char_freqs=char_scores,
-        max_code_length=4,
-        charset="frequency",
-        min_score=1,
-        rank_suffixes=((2, "z"), (3, "x")),
-        max_source_length=3,
-        occupied_policy="ignore-nonfrequency-or-shortcut",
-    )
-    all_entries.extend(suffix_entries)
-    all_entries.sort()
+        scheme_entries_with_levels = build_dedup_prefix_entries(
+            shortcut_source_entries,
+            occupied_entries=shortcut_source_entries,
+            used_text_code=used_text_code_for_generated,
+            shortcut_leader_chars=shortcut_leader_chars,
+            char_freqs=char_scores,
+            short_level_char_freqs={
+                2: prefix_level2_scores,
+                3: prefix_level3_scores,
+            },
+            full_char_freqs=prefix_full_scores,
+            max_code_length=4,
+            charset="frequency",
+            min_score=1,
+            short=False,
+            full=True,
+            short_levels=(),
+            full_source_length=4,
+            deep_rank_multiplier=1.5,
+        )
+        scheme_entries = [entry for _, entry in scheme_entries_with_levels]
+        if scheme_entries:
+            all_entries.extend(scheme_entries)
+            all_entries.sort()
+            shortcut_source_entries.extend(scheme_entries)
+            shortcut_source_entries.sort()
+
+    if dedup_layers in {"suffix", "all"}:
+        suffix_entries = build_z_suffix_entries(
+            natural_shortcut_source_entries,
+            occupied_entries=all_entries,
+            used_text_code=used_text_code_for_generated,
+            shortcut_leader_chars=natural_shortcut_leader_chars,
+            char_freqs=char_scores,
+            max_code_length=4,
+            charset="frequency",
+            min_score=1,
+            rank_suffixes=((2, "z"), (3, "x")),
+            max_source_length=3,
+            occupied_policy="ignore-nonfrequency-or-shortcut",
+        )
+        all_entries.extend(suffix_entries)
+        all_entries.sort()
 
     return [(char, code, char_scores.get(char, 0)) for code, _, _, _, char in all_entries]
 
 
-def mixed_dynamic_rate(selected: list[ShortcutCandidate], *, dynamic_freq: dict[str, float], charset: str, char_scores: dict[str, int], weights: str) -> float:
-    rows = build_sicang_assess_entries(selected, char_scores=char_scores, weights=weights)
+def mixed_dynamic_rate(
+    selected: list[ShortcutCandidate],
+    *,
+    dynamic_freq: dict[str, float],
+    charset: str,
+    char_scores: dict[str, int],
+    weights: str,
+    dedup_layers: str,
+) -> float:
+    rows = build_sicang_assess_entries(
+        selected,
+        char_scores=char_scores,
+        weights=weights,
+        dedup_layers=dedup_layers,
+    )
     charset_filter = get_charset_filter(charset)
     result = analyze_duplicates(
         "",
@@ -356,6 +377,8 @@ def main() -> None:
         help="简全联用动态选重率用字频；combined=北语简体与台标繁体取较大值")
     parser.add_argument("--dynamic-charset", default="CJK_BASIC",
                         help="传给 scripts/assess 的字符集过滤名，如 GB2312/CJK_BASIC/GUOZI")
+    parser.add_argument("--dedup-layers", choices=("none", "prefix", "suffix", "all"), default="none",
+                        help="动态选重率是否计入 z/x 前缀、后缀消重层；none 用于评估二三简本身，all 用于对齐最终方案")
     parser.add_argument("--top", type=int, default=8, help="打印前 N 个候选样例")
     args = parser.parse_args()
 
@@ -372,7 +395,7 @@ def main() -> None:
         f"权重={args.weights} 保护原生码={args.protect_native} "
         f"保护字符集={args.protect_native_charset} 保护最低分={args.protect_native_min_score:g} "
         f"仅绝对空位={args.absolute_empty_only} 动态字频={args.dynamic_freq} "
-        f"动态字符集={args.dynamic_charset}"
+        f"动态字符集={args.dynamic_charset} 消重层={args.dedup_layers}"
     )
 
     for min_score in min_scores:
@@ -413,6 +436,7 @@ def main() -> None:
                 charset=args.dynamic_charset,
                 char_scores=char_scores,
                 weights=args.weights,
+                dedup_layers=args.dedup_layers,
             )
             print(f"| {count} | {len(s2)} | {len(s3)} | {rate * 10000:.2f}‱ |")
 
