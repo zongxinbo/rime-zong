@@ -470,6 +470,7 @@
 究	jck
 容	jco
 窃	jcp
+窥	jcq
 窝	jcr
 勃	jdk
 教	jdo
@@ -641,7 +642,6 @@
 琐	mgf
 班	mgh
 琦	mgk
-到	mgl
 玩	mgm
 玛	mgn
 致	mgo
