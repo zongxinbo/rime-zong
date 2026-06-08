@@ -78,6 +78,46 @@ python scripts/cangjie/gen_wucang5.py
 - 四简启用时默认上限 1000 个；`--s4-count 0` 表示不做数量截断，由四简模式自身过滤规则决定数量。
 - GB2312 二级字启用四简时默认需要综合字频达到 1000；`--s4-level2-min-score 0` 表示不过滤二级字。
 
+### 5.1 二三简数量评估策略
+
+二简、三简数量校准要分两种口径：
+
+1. **普通简码自身评估**：使用 `core/evaluate_shortcut_counts.py --dedup-layers none`。该口径只构造字根、一简、二简、三简和全码，不包含自动 `z/x` 前缀、后缀消重层，用来判断二三简本身是否制造或缓解选重。
+2. **最终方案体验评估**：使用 `core/evaluate_shortcut_counts.py --dedup-layers all` 或 `scripts/assess/summary.py`。该口径包含自动前缀和后缀消重层，用来验证最终用户实际选重率。
+
+默认扫描口径：
+
+- 评估口径：`--assess-profile combined`，等同于 `summary.py` 的“繁简联合”：北语简体与台标繁体归一化后取较大值，字集使用 `CJK_BASIC`。
+- 排序权重：`--weights sc_daily`。
+- 原生码位保护：`--protect-native --protect-native-charset gbk --protect-native-min-score 3000`。
+- 长码候选门槛：`--shortcut-candidate-min-score 3000`。
+
+常用命令：
+
+```powershell
+# 评估二三简自身，不含 z/x 前缀、后缀消重层
+python scripts/cangjie/core/evaluate_shortcut_counts.py --assess-profile combined --dedup-layers none --counts 300,500,800,1000,1200,1300,1500 --min-scores 3000
+
+# 对齐最终 Sicang5 体验，包含全部自动消重层
+python scripts/cangjie/core/evaluate_shortcut_counts.py --assess-profile combined --dedup-layers all --counts 800 --min-scores 3000
+
+# 直接跑完整评估报告
+python scripts/assess/summary.py --dict schemas/cangjie/sicang5/sicang5.dict.yaml
+```
+
+当前 `--dedup-layers none` 扫描结论：
+
+| 二简 | 三简 | 简全联用动态选重率 |
+| ---: | ---: | ---: |
+| 300 | 1300 | 170.69‱ |
+| 310 | 1300 | 170.69‱ |
+
+解释：
+
+- 当前规则下二简有效候选池为 310 个；`300` 与 `310` 在三简 `1300` 时动态选重率相同，因此二简可暂保留 `300`，保持整齐和保守。
+- 三简在不含消重层时，`1250-1300` 附近收益较好；`1300` 是当前扫描的低点，超过后收益基本停滞并略有回升。
+- 该结论用于下一轮参数试验，不等同于已经修改生产默认值。
+
 常用命令：
 
 ```powershell
