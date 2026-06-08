@@ -30,6 +30,7 @@
 檇	zdog
 赉	zdtb
 様	zdtg
+渇	zeap
 濉	zebu
 瀬	zedl
 洫	zehb
@@ -142,12 +143,12 @@
 憟	zpmw
 慛	zpuo
 懐	zpyw
+撹	zqfb
 贽	zqkb
 螯	zqkl
-擼	zqnw
 捨	zqom
 掫	zqsj
-摅	zqyp
+擄	zqyp
 唄	zrbu
 噑	zrha
 嚔	zrjb
@@ -171,13 +172,13 @@
 屝	zslm
 覠	zsrb
 鶋	zsrh
-邵	zsrn
 苋	ztbh
 勱	ztbk
 蒯	ztbl
 顜	ztbm
 鷬	ztch
 䢼	ztcn
+藫	ztem
 羑	ztgn
 蔦	ztha
 薫	zthg

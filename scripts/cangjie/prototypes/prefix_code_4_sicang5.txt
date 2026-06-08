@@ -110,8 +110,10 @@
 檇	zdog
 赉	zdtb
 様	zdtg
+渇	zeap
 濉	zebu
 瀬	zedl
+敠	zeee
 洫	zehb
 渢	zehn
 溵	zehs
@@ -405,14 +407,14 @@
 靚	zqbb
 鶄	zqbh
 捊	zqbn
+撹	zqfb
 贽	zqkb
 螯	zqkl
 骜	zqkn
 摃	zqmb
-擼	zqnw
 捨	zqom
 掫	zqsj
-摅	zqyp
+擄	zqyp
 噅	zrbh
 唄	zrbu
 噑	zrha
@@ -465,7 +467,6 @@
 頤	zslm
 覠	zsrb
 鶋	zsrh
-邵	zsrn
 觏	ztbb
 苋	ztbh
 勱	ztbk
@@ -474,6 +475,7 @@
 覥	ztcb
 鷬	ztch
 䢼	ztcn
+藫	ztem
 羑	ztgn
 蔦	ztha
 薫	zthg

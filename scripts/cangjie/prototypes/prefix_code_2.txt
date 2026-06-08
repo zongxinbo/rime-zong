@@ -1,6 +1,6 @@
 # 自动 z/x 前缀 2 码审阅文件；构建时覆盖生成
 诣	xa
-囗	xb
+肓	xb
 碘	xc
 楽	xd
 汨	xe
@@ -15,8 +15,9 @@
 欠	xn
 镍	xo
 忒	xp
+抆	xq
 锆	xr
-鐾	xs
+叻	xs
 薅	xt
 晩	xu
 縯	xv
@@ -45,4 +46,5 @@
 冕	zu
 绿	zv
 困	zw
+潚	zx
 头	zy
