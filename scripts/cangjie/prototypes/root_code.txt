@@ -28,6 +28,4 @@
 山	uz
 女	vz
 田	wz
-难	xz
 卜	yz
-重	zz

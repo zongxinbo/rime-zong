@@ -37,7 +37,7 @@ def main():
     parser.add_argument("--s2-count", type=int, default=300, help="二简：输出数量限制")
     parser.add_argument("--s2-coverage", type=float, default=0, help="二简：按累计字频覆盖率自动决定数量")
     parser.add_argument("--s3-prefix", action=argparse.BooleanOptionalAction, default=True, help="三简：提取规则取前三码（而非前两码+末码）")
-    parser.add_argument("--s3-count", type=int, default=800, help="三简：固定输出数量")
+    parser.add_argument("--s3-count", type=int, default=1300, help="三简：固定输出数量")
     parser.add_argument("--s3-coverage", type=float, default=0, help="三简：按累计字频覆盖率自动决定数量")
     parser.add_argument("--protect-native", action=argparse.BooleanOptionalAction, default=True, help="保护指定字集内的高频原生二三码位")
     parser.add_argument("--protect-native-charset", choices=("all", "frequency", "gbk", "gb2312"), default="gbk",

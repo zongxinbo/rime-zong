@@ -41,7 +41,7 @@
 - 四简：`scripts/cangjie/prototypes/four_code.txt`（启用 `--s4` 时生成）
 - 前缀避重四码：`scripts/cangjie/prototypes/dedup_prefix_code_4.txt`
 
-旧的 `z_code.txt` 只作为过渡文件名保留，不再承载新的 `z?`、`z??` 或 `z???` 规则；现有 `zz:重` 这类特殊键本体码应迁入 `root_code.txt`。
+旧的 `z_code.txt` 只作为过渡文件名保留，不再承载新的 `z?`、`z??` 或 `z???` 规则；`root_code.txt` 只放真正的字根字和键本体码，不放 `难	xz`、`重	zz` 这类高频普通字特殊码，避免它们被排除出二三简候选。
 
 ## 5. Wucang5 默认构建
 
@@ -54,7 +54,7 @@ python scripts/cangjie/gen_wucang5.py
 当前默认参数：
 
 - `--s2-count 300`
-- `--s3-count 800`
+- `--s3-count 1300`
 - `--s2-coverage 0`
 - `--s3-coverage 0`
 - `--protect-native-min-score 3000`
@@ -99,7 +99,7 @@ python scripts/cangjie/gen_wucang5.py
 python scripts/cangjie/core/evaluate_shortcut_counts.py --assess-profile combined --dedup-layers none --counts 300,500,800,1000,1200,1300,1500 --min-scores 3000
 
 # 对齐最终 Sicang5 体验，包含全部自动消重层
-python scripts/cangjie/core/evaluate_shortcut_counts.py --assess-profile combined --dedup-layers all --counts 800 --min-scores 3000
+python scripts/cangjie/core/evaluate_shortcut_counts.py --assess-profile combined --dedup-layers all --counts 1300 --min-scores 3000
 
 # 直接跑完整评估报告
 python scripts/assess/summary.py --dict schemas/cangjie/sicang5/sicang5.dict.yaml
@@ -116,7 +116,7 @@ python scripts/assess/summary.py --dict schemas/cangjie/sicang5/sicang5.dict.yam
 
 - 当前规则下二简有效候选池为 310 个；`300` 与 `310` 在三简 `1300` 时动态选重率相同，因此二简可暂保留 `300`，保持整齐和保守。
 - 三简在不含消重层时，`1250-1300` 附近收益较好；`1300` 是当前扫描的低点，超过后收益基本停滞并略有回升。
-- 该结论用于下一轮参数试验，不等同于已经修改生产默认值。
+- 该结论已用于当前生产默认值：二简 `300`，三简 `1300`。
 
 常用命令：
 
@@ -420,7 +420,7 @@ one_code_tc.txt   繁体专精一简
 
 | 文件 | 内容 | 维护方式 |
 | :--- | :--- | :--- |
-| `root_code.txt` | 字根字、特殊键本体码，例如 `重	zz` | 极少改动，人工维护 |
+| `root_code.txt` | 字根字、特殊键本体码，例如 `日	az` | 极少改动，人工维护 |
 | `one_code.txt` | 单键一码直达，包含最终定稿的 `a-z` | 人工定稿 |
 | `fixed_prefix_code.txt` | 旧固定 `z?`、`x?` 二码补丁；默认不加载 | 显式启用 |
 | `prefix_code_2.txt` | `z?`、`x?` 高频前缀短码审阅产物 | 构建末尾自动覆盖生成 |
@@ -525,7 +525,7 @@ python scripts/cangjie/core/shortcut_gain.py --layer fixed-prefix --code xp --ch
 
 ## 10. 当前默认构建样例
 
-基于 2026-05-25 当前默认命令：
+基于 2026-06-08 当前默认命令：
 
 ```powershell
 python scripts/cangjie/gen_wucang5.py
@@ -535,27 +535,28 @@ python scripts/cangjie/gen_wucang5.py
 
 | 项目 | 数量 |
 | :--- | ---: |
-| 字根/特殊键本体码 | 31 |
-| 一简 | 25 |
+| 字根/特殊键本体码 | 30 |
+| 一简 | 26 |
 | 二简 | 300 |
-| 三简 | 800 |
+| 三简 | 1300 |
 | 四简 | 0 |
-| 最终简码条目 | 1156 |
+| 最终简码条目 | 1656 |
 | 最终全码条目 | 107235 |
-| 后缀消重条目 | 11582 |
-| 总条目 | 119973 |
+| z/x 前缀消重条目 | 688 |
+| z/x 后缀消重条目 | 805 |
+| 总条目 | 110386 |
 
-`最终简码条目` 使用 builder 口径，包含 `root_code` 字根/特殊键本体码、一简、二简、三简：`31 + 25 + 300 + 800 = 1156`。
+`最终简码条目` 使用 builder 口径，包含 `root_code` 字根/特殊键本体码、一简、二简、三简：`30 + 26 + 300 + 1300 = 1656`。
 
 当前 `summary.py` 摘要：
 
 | 语料 | 频率降序-全码 | 频率降序-简码 | 原始码表-全码 | 原始码表-简码 | 简全联用-实际 |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| 知乎简体 | 19.54‱ | 68.83‱ | 687.82‱ | 79.28‱ | 7.12‱ |
-| 北语简体 | 12.65‱ | 85.56‱ | 744.95‱ | 94.72‱ | 5.46‱ |
-| 台标繁体 | 4.05‱ | 49.24‱ | 421.93‱ | 201.27‱ | 23.87‱ |
-| 古籍繁体 | 9.28‱ | 77.94‱ | 255.19‱ | 274.36‱ | 22.63‱ |
-| 繁简联合 | 23.05‱ | 98.95‱ | 553.33‱ | 164.24‱ | 19.58‱ |
+| 知乎简体 | 13.24‱ | 48.03‱ | 509.86‱ | 56.24‱ | 2.08‱ |
+| 北语简体 | 5.22‱ | 67.65‱ | 589.66‱ | 95.11‱ | 3.45‱ |
+| 台标繁体 | 4.54‱ | 29.03‱ | 328.27‱ | 72.08‱ | 2.16‱ |
+| 古籍繁体 | 7.35‱ | 41.89‱ | 408.02‱ | 115.61‱ | 6.32‱ |
+| 繁简联合 | 14.27‱ | 71.20‱ | 429.71‱ | 89.62‱ | 2.59‱ |
 
 注意：默认保护原生码位并采用全码一位让位后，`原始码表-全码` 会承担更多定重码职责；真实打字体验仍优先看 `简全联用-实际`。
 
@@ -571,21 +572,22 @@ python scripts/cangjie/gen_sicang5.py
 
 | 项目 | 数量 |
 | :--- | ---: |
-| 最终简码条目 | 1156 |
+| 最终简码条目 | 1656 |
 | 最终全码条目 | 106186 |
-| z 后缀消重条目 | 3289 |
+| z/x 前缀消重条目 | 1027 |
+| z/x 后缀消重条目 | 480 |
 | 结构后缀消重条目 | 0 |
-| 总条目 | 110631 |
+| 总条目 | 109351 |
 
 当前 `summary.py` 实际选重率：
 
 | 语料 | 简全联用-实际 |
 | :--- | ---: |
-| 知乎简体 | 17.01‱ |
-| 北语简体 | 19.55‱ |
-| 台标繁体 | 198.56‱ |
-| 古籍繁体 | 212.89‱ |
-| 繁简联合 | 143.66‱ |
+| 知乎简体 | 2.62‱ |
+| 北语简体 | 4.42‱ |
+| 台标繁体 | 5.60‱ |
+| 古籍繁体 | 13.54‱ |
+| 繁简联合 | 5.66‱ |
 
 ## 12. 词组取码动态配额
 
