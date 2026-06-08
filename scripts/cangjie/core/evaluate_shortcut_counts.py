@@ -49,7 +49,13 @@ from utils import get_charset_filter, load_freq, merge_freq  # noqa: E402
 
 
 LETTERS = "abcdefghijklmnopqrstuvwy"  # 保留 x/z 给救援层使用。
-DYNAMIC_FREQ_CHOICES = ("Zhihu", "BLCU", "Taiwan", "Guji", "combined")
+ASSESS_PROFILES = {
+    "zhihu": ("Zhihu", "GB2312"),
+    "blcu": ("BLCU", "GB2312"),
+    "taiwan": ("Taiwan", "GUOZI"),
+    "guji": ("Guji", "CJK_BASIC"),
+    "combined": ("combined", "CJK_BASIC"),
+}
 
 
 @dataclass(frozen=True)
@@ -140,7 +146,7 @@ def collect_level_candidates(
     raise ValueError("level 只能是 2 或 3")
 
 
-def load_mixed_freq(name: str) -> dict[str, float]:
+def load_assess_freq(name: str) -> dict[str, float]:
     if name == "combined":
         blcu, _ = load_freq(str(FREQ_PATHS["BLCU"]))
         taiwan, _ = load_freq(str(FREQ_PATHS["Taiwan"]))
@@ -148,7 +154,7 @@ def load_mixed_freq(name: str) -> dict[str, float]:
         return merged
     path = FREQ_PATHS.get(name)
     if path is None:
-        raise ValueError(f"--dynamic-freq 只能是 {', '.join(DYNAMIC_FREQ_CHOICES)}")
+        raise ValueError(f"评估字频只能是 {', '.join({value[0] for value in ASSESS_PROFILES.values()})}")
     norm, _ = load_freq(str(path))
     return norm
 
@@ -313,7 +319,7 @@ def build_sicang_assess_entries(
 def mixed_dynamic_rate(
     selected: list[ShortcutCandidate],
     *,
-    dynamic_freq: dict[str, float],
+    assess_freq: dict[str, float],
     charset: str,
     char_scores: dict[str, int],
     weights: str,
@@ -331,7 +337,7 @@ def mixed_dynamic_rate(
         "",
         charset_filter=charset_filter,
         mode="mixed",
-        _preloaded_freq=dynamic_freq,
+        _preloaded_freq=assess_freq,
         _preloaded_entries=rows,
     )
     return result["dynamic_rate"]
@@ -373,10 +379,8 @@ def main() -> None:
                         help="扫描候选数量列表")
     parser.add_argument("--min-scores", default="3000",
                         help="扫描入选最低分列表；每个值会重新生成候选池")
-    parser.add_argument("--dynamic-freq", choices=DYNAMIC_FREQ_CHOICES, default="combined",
-        help="简全联用动态选重率用字频；combined=北语简体与台标繁体取较大值")
-    parser.add_argument("--dynamic-charset", default="CJK_BASIC",
-                        help="传给 scripts/assess 的字符集过滤名，如 GB2312/CJK_BASIC/GUOZI")
+    parser.add_argument("--assess-profile", choices=tuple(ASSESS_PROFILES), default="combined",
+                        help="动态选重率评估口径，自动使用与 summary.py 相同的字频和字符集")
     parser.add_argument("--dedup-layers", choices=("none", "prefix", "suffix", "all"), default="none",
                         help="动态选重率是否计入 z/x 前缀、后缀消重层；none 用于评估二三简本身，all 用于对齐最终方案")
     parser.add_argument("--top", type=int, default=8, help="打印前 N 个候选样例")
@@ -388,14 +392,15 @@ def main() -> None:
     counts = parse_csv_numbers(args.counts, cast=int)
     min_scores = parse_csv_numbers(args.min_scores, cast=float)
     char_scores = get_weighted_frequencies(get_weight_profile(args.weights))
-    dynamic_freq = load_mixed_freq(args.dynamic_freq)
+    assess_freq_name, assess_charset = ASSESS_PROFILES[args.assess_profile]
+    assess_freq = load_assess_freq(assess_freq_name)
 
     print("\n--- 参数化候选与简全联用动态选重率 ---")
     print(
         f"权重={args.weights} 保护原生码={args.protect_native} "
         f"保护字符集={args.protect_native_charset} 保护最低分={args.protect_native_min_score:g} "
-        f"仅绝对空位={args.absolute_empty_only} 动态字频={args.dynamic_freq} "
-        f"动态字符集={args.dynamic_charset} 消重层={args.dedup_layers}"
+        f"仅绝对空位={args.absolute_empty_only} 评估口径={args.assess_profile} "
+        f"评估字频={assess_freq_name} 评估字符集={assess_charset} 消重层={args.dedup_layers}"
     )
 
     for min_score in min_scores:
@@ -432,8 +437,8 @@ def main() -> None:
             selected.extend(s3)
             rate = mixed_dynamic_rate(
                 selected,
-                dynamic_freq=dynamic_freq,
-                charset=args.dynamic_charset,
+                assess_freq=assess_freq,
+                charset=assess_charset,
                 char_scores=char_scores,
                 weights=args.weights,
                 dedup_layers=args.dedup_layers,
