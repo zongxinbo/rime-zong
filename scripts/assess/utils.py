@@ -62,6 +62,8 @@ def is_cjk_text(text):
 
 def split_dict_line(line):
     """拆分码表行，兼容 Tab 与空格分隔。"""
+    if "\t" in line:
+        return line.split("\t")
     return line.split()
 
 
@@ -82,8 +84,10 @@ def parse_rime_dict(dict_path):
     
     if '...' in content:
         header, body = content.split('...', 1)
+        has_rime_header = True
     else:
         header, body = "", content
+        has_rime_header = False
         
     entries = []
     for line in body.split('\n'):
@@ -94,10 +98,11 @@ def parse_rime_dict(dict_path):
         if len(parts) >= 2:
             char, code = parse_entry_fields(parts)
             weight = 0
-            for part in parts[2:]:
-                if part.isdigit():
-                    weight = int(part)
-                    break
+            if has_rime_header:
+                for part in parts[2:]:
+                    if part.isdigit():
+                        weight = int(part)
+                        break
             entries.append((char, code, weight))
             
     return header, entries
