@@ -2,7 +2,7 @@
 # 由 cangjie_builder.py 生成
 ---
 name: wucang5
-version: '2026-06-08'
+version: '2026-06-11'
 sort: by_weight
 ...
 
@@ -102645,6 +102645,7 @@ sort: by_weight
 纓	xvf
 缡	xvm
 囮	xw
+〇	xxxxx
 达	xy
 顔	xyh
 鵁	xyk

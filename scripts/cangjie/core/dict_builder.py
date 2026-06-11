@@ -54,13 +54,31 @@ def collect_char_full_codes(
     only_first_full_code: bool,
 ) -> dict[str, list[str]]:
     raw_entries = parse_cangjie_dict(source_dict)
+    ordinary_codes_by_char: dict[str, list[str]] = defaultdict(list)
+    for entry in raw_entries:
+        if not entry.code.startswith(("x", "z")):
+            ordinary_codes_by_char[entry.text].append(entry.code)
+
+    def has_corresponding_ordinary_code(char: str, x_code: str) -> bool:
+        body = x_code.lstrip("x")
+        return bool(body) and any(
+            ordinary_code.startswith(body)
+            for ordinary_code in ordinary_codes_by_char.get(char, [])
+        )
+
     char_full_codes: dict[str, list[str]] = defaultdict(list)
     for entry in raw_entries:
         is_allowed = is_common_han_char(entry.text) if exclude_extended else is_han_char(entry.text)
-        if is_allowed and not (entry.code.startswith("z") or entry.code.startswith("x")):
-            if only_first_full_code and entry.text in char_full_codes:
+        if entry.code.startswith("z"):
+            continue
+        if entry.code.startswith("x"):
+            if has_corresponding_ordinary_code(entry.text, entry.code):
                 continue
-            char_full_codes[entry.text].append(entry.code)
+        elif not is_allowed:
+            continue
+        if only_first_full_code and entry.text in char_full_codes:
+            continue
+        char_full_codes[entry.text].append(entry.code)
     return char_full_codes
 
 
