@@ -184,6 +184,8 @@ def main():
         suffix_structure_occupied_policy=args.suffix_structure_occupied_policy,
         suffix_structure_protect_min_score=args.suffix_structure_protect_min_score,
         suffix_structure_keymap=args.suffix_structure_keymap,
+        z_special=True,
+        z_special_code_length=4,
         weights=args.weights,
     )
 

@@ -204,6 +204,7 @@ def main():
             4: prefix_full_scores,
         },
         dedup_prefix_full_char_freqs=prefix_full_scores,
+        z_special=True,
         weights=args.weights,
     )
 

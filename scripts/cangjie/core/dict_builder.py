@@ -21,6 +21,10 @@ from .paths import (
 )
 
 
+Z_SPECIAL_PREFIXES = frozenset(("zc", "zr", "zs", "zi", "zn", "zf"))
+Z_SPECIAL_TIER = 6
+
+
 def load_shortcut_entries(shortcut_paths: dict) -> tuple[list[tuple[str, str, int | float]], set[str]]:
     """加载字根码和 S1/S2/S3/S4 简码原型。"""
     shortcut_entries: list[tuple[str, str, int | float]] = []
@@ -80,6 +84,29 @@ def collect_char_full_codes(
             continue
         char_full_codes[entry.text].append(entry.code)
     return char_full_codes
+
+
+def collect_z_special_entries(
+    source_dict: Path,
+    *,
+    code_length: int | None = None,
+) -> list[tuple[str, str, int]]:
+    """收集 z 特殊区码；指定 code_length 时取前 N 码，否则保留原码。"""
+    if code_length is not None and code_length < 1:
+        raise ValueError("z_special_code_length 必须为正整数")
+
+    z_special_entries: list[tuple[str, str, int]] = []
+    seen_text_code: set[tuple[str, str]] = set()
+    for order, entry in enumerate(parse_cangjie_dict(source_dict)):
+        if entry.code[:2] not in Z_SPECIAL_PREFIXES:
+            continue
+        code = entry.code[:code_length] if code_length is not None else entry.code
+        text_code = (entry.text, code)
+        if text_code in seen_text_code:
+            continue
+        seen_text_code.add(text_code)
+        z_special_entries.append((entry.text, code, order))
+    return z_special_entries
 
 
 def build_fullcode_entries(
@@ -315,6 +342,8 @@ def generate_dict(
     suffix_structure_occupied_policy: str = "protect-min-score",
     suffix_structure_protect_min_score: float = 100000,
     suffix_structure_keymap: str = "zxwa",
+    z_special: bool = False,
+    z_special_code_length: int | None = None,
     weights: str | None = None,
 ):
     """生成最终字典。"""
@@ -585,6 +614,24 @@ def generate_dict(
         all_entries.sort()
         print(f"结构后缀消重：生成 {structure_suffix_count} 个结构后缀条目")
 
+    z_special_count = 0
+    if z_special:
+        z_special_entries = [
+            (code, Z_SPECIAL_TIER, order, 0, char)
+            for char, code, order in collect_z_special_entries(
+                source_dict,
+                code_length=z_special_code_length,
+            )
+        ]
+        z_special_count = len(z_special_entries)
+        all_entries.extend(z_special_entries)
+        all_entries.sort()
+    print(
+        f"z 特殊区码：生成 {z_special_count} 个条目"
+        f" 取码={'前' + str(z_special_code_length) + '码' if z_special and z_special_code_length is not None else '原码' if z_special else '关'}"
+        f" 排序层级={Z_SPECIAL_TIER}"
+    )
+
     write_final_dict(
         output_path,
         all_entries,
@@ -598,6 +645,7 @@ def generate_dict(
     print(
         f"完成：简码={sc_count} 全码={fc_count}"
         f" zx后缀={z_suffix_count} zx前缀={dedup_prefix_count} 结构后缀={structure_suffix_count}"
+        f" z特殊={z_special_count}"
         f" 全码让位={'开' if fullcode_yield else '关'}"
         f" 全码让位门槛={fullcode_yield_min_score:g}"
         f" 总计={len(all_entries)} 输出={output_path}"
