@@ -15,9 +15,6 @@ from .paths import (
     DEFAULT_FULLCODE_YIELD_MIN_SCORE,
     PREFIX_CODE_2_PATH,
     PREFIX_CODE_3_PATH,
-    PREFIX_CODE_4_SICANG5_PATH,
-    PREFIX_CODE_4_WUCANG5_PATH,
-    PREFIX_CODE_5_WUCANG5_PATH,
 )
 
 
@@ -332,9 +329,9 @@ def generate_dict(
     dedup_prefix_full_source_length: int = 4,
     dedup_prefix_deep_rank_multiplier: float = 1.5,
     dedup_prefix_source_max_code_length: int | None = 4,
-    dedup_prefix_scheme: str | None = None,
-    dedup_prefix_scheme_short_levels: tuple[int, ...] = (),
-    dedup_prefix_scheme_full_source_length: int | None = None,
+    dedup_prefix_deep_paths: dict[int, Path] | None = None,
+    dedup_prefix_deep_short_levels: tuple[int, ...] = (),
+    dedup_prefix_deep_full_source_length: int | None = None,
     dedup_prefix_short_level_char_freqs: dict[int, dict[str, int]] | None = None,
     dedup_prefix_full_char_freqs: dict[str, int] | None = None,
     suffix_structure: bool = False,
@@ -474,7 +471,7 @@ def generate_dict(
             append_prefix_entries(shared_entries_with_levels)
 
         scheme_entries_with_levels: list[tuple[int, tuple[str, int | float, int, int, str]]] = []
-        if dedup_prefix_scheme == "sicang5":
+        if dedup_prefix_full or dedup_prefix_deep_short_levels:
             scheme_source_entries = shortcut_source_entries
             scheme_entries_with_levels = build_dedup_prefix_entries(
                 scheme_source_entries,
@@ -487,58 +484,17 @@ def generate_dict(
                 max_code_length=max_code_length,
                 charset=dedup_prefix_charset,
                 min_score=dedup_prefix_min_score,
-                short=False,
+                short=bool(dedup_prefix_deep_short_levels),
                 full=dedup_prefix_full,
-                short_levels=(),
-                full_source_length=dedup_prefix_scheme_full_source_length or dedup_prefix_full_source_length,
+                short_levels=dedup_prefix_deep_short_levels,
+                full_source_length=dedup_prefix_deep_full_source_length or dedup_prefix_full_source_length,
                 deep_rank_multiplier=dedup_prefix_deep_rank_multiplier,
             )
-            prefix_counts.update(write_prefix_prototypes(
-                scheme_entries_with_levels,
-                {4: PREFIX_CODE_4_SICANG5_PATH},
-            ))
-        elif dedup_prefix_scheme == "wucang5":
-            scheme_source_entries = shortcut_source_entries
-            scheme_entries_with_levels = build_dedup_prefix_entries(
-                scheme_source_entries,
-                occupied_entries=scheme_source_entries,
-                used_text_code=used_text_code,
-                shortcut_leader_chars=shortcut_leader_chars,
-                char_freqs=char_freqs,
-                short_level_char_freqs=dedup_prefix_short_level_char_freqs,
-                full_char_freqs=dedup_prefix_full_char_freqs,
-                max_code_length=max_code_length,
-                charset=dedup_prefix_charset,
-                min_score=dedup_prefix_min_score,
-                short=bool(dedup_prefix_scheme_short_levels),
-                full=dedup_prefix_full,
-                short_levels=dedup_prefix_scheme_short_levels,
-                full_source_length=dedup_prefix_scheme_full_source_length or max_code_length,
-                deep_rank_multiplier=dedup_prefix_deep_rank_multiplier,
-            )
-            prefix_counts.update(write_prefix_prototypes(
-                scheme_entries_with_levels,
-                {
-                    4: PREFIX_CODE_4_WUCANG5_PATH,
-                    5: PREFIX_CODE_5_WUCANG5_PATH,
-                },
-            ))
-        elif dedup_prefix_full:
-            scheme_source_entries = shortcut_source_entries
-            scheme_entries_with_levels = build_dedup_prefix_entries(
-                scheme_source_entries,
-                occupied_entries=scheme_source_entries,
-                used_text_code=used_text_code,
-                shortcut_leader_chars=shortcut_leader_chars,
-                char_freqs=char_freqs,
-                short=False,
-                full=True,
-                max_code_length=max_code_length,
-                charset=dedup_prefix_charset,
-                min_score=dedup_prefix_min_score,
-                full_source_length=dedup_prefix_full_source_length,
-                deep_rank_multiplier=dedup_prefix_deep_rank_multiplier,
-            )
+            if dedup_prefix_deep_paths:
+                prefix_counts.update(write_prefix_prototypes(
+                    scheme_entries_with_levels,
+                    dedup_prefix_deep_paths,
+                ))
 
         if scheme_entries_with_levels:
             append_prefix_entries(scheme_entries_with_levels)
@@ -548,9 +504,8 @@ def generate_dict(
         f" 短码={'开' if dedup_prefix_short else '关'}"
         f" 共享层级={','.join(str(level) for level in dedup_prefix_short_levels)}"
         f" 共享基线={dedup_prefix_source_max_code_length if dedup_prefix_source_max_code_length is not None else max_code_length}"
-        f" 方案={dedup_prefix_scheme or 'legacy'}"
-        f" 方案短码层级={','.join(str(level) for level in dedup_prefix_scheme_short_levels) or '-'}"
-        f" 方案选重源长={dedup_prefix_scheme_full_source_length or dedup_prefix_full_source_length}"
+        f" 深层短码层级={','.join(str(level) for level in dedup_prefix_deep_short_levels) or '-'}"
+        f" 深层选重源长={dedup_prefix_deep_full_source_length or dedup_prefix_full_source_length}"
     )
     if dedup_prefix:
         print(
