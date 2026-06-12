@@ -173,7 +173,7 @@
 买	ny
 但	oa
 份	oc
-保	or
+假	or
 無	ot
 似	ov
 每	ow
@@ -218,7 +218,7 @@
 别	rs
 哎	rt
 民	rv
-嘿	rw
+嗯	rw
 嘴	ry
 刷	sb
 騎	sf
