@@ -72,8 +72,9 @@ SC_BALANCED_FREQ_WEIGHTS = {
     "Guji": 0.18
 }
 SC_DAILY_FREQ_WEIGHTS = {
-    "Zhihu": 0.44,
-    "BLCU": 0.36,
+    "Dialogue": 0.03,
+    "Zhihu": 0.4235,
+    "BLCU": 0.3465,
     "Taiwan": 0.11,
     "Guji": 0.09
 }

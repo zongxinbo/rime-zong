@@ -2,7 +2,7 @@
 # 由 cangjie_builder.py 生成
 ---
 name: sicang5
-version: '2026-06-11'
+version: '2026-06-12'
 sort: by_weight
 ...
 
@@ -19709,6 +19709,7 @@ sort: by_weight
 𥹱	fdvs
 𥽄	fdvu
 𥽵	fdvu
+籹	fdvz
 畨	fdw
 𫂺	fdw
 𰣘	fdw
@@ -37564,8 +37565,8 @@ sort: by_weight
 𢳁	ilyq
 𪘷	ilyu
 次	im
-亠	im
 冫	im
+亠	im
 𪭉	im
 𭟮	im
 𢧋	ima
@@ -38009,7 +38010,7 @@ sort: by_weight
 𠗃	imwk
 𠖹	imwl
 凅	imwr
-冫	imx
+亠	imx
 凉	imy
 𢇗	imy
 𠗥	imya
@@ -38056,7 +38057,7 @@ sort: by_weight
 𠖺	imyy
 𠘢	imyy
 𭂔	imyy
-亠	imz
+冫	imz
 之	in
 冖	in
 𢎜	in
@@ -40373,7 +40374,6 @@ sort: by_weight
 𥨰	jcpt
 窀	jcpu
 窇	jcpu
-窥	jcq
 𥤺	jcq
 𥨱	jcqb
 𥨸	jcqb
@@ -44244,7 +44244,6 @@ sort: by_weight
 㹰	khfu
 𤠋	khfv
 𤢎	khfw
-猿	khg
 𱱋	khg
 𤝫	khgb
 𤢺	khgc
@@ -48233,8 +48232,8 @@ sort: by_weight
 𫋈	lihs
 䗗	liht
 𮔆	liht
-蜺	lihu
 蚝	lihu
+蜺	lihu
 蚅	lihu
 螔	lihu
 𧑂	lihu
@@ -49040,8 +49039,8 @@ sort: by_weight
 𧓸	litl
 𮔂	litl
 蚶	litm
-螼	litm
 蠛	litm
+螼	litm
 䗒	litm
 𧏞	litm
 𧓡	litm
@@ -54867,8 +54866,8 @@ sort: by_weight
 𰡶	mgyy
 圧	mgz
 厂	mh
-丆	mh
 乛	mh
+丆	mh
 𪛙	mh
 原	mha
 𫝗	mhad
@@ -55053,6 +55052,7 @@ sort: by_weight
 𮗿	mhyr
 𲀧	mhyv
 𲀰	mhyv
+乛	mhz
 动	mi
 𠫔	mi
 𢦌	mi
@@ -60560,8 +60560,8 @@ sort: by_weight
 𥎁	ndyr
 𫲭	ndyu
 丞	ne
-氶	ne
 氹	ne
+氶	ne
 𢎤	ne
 𣱹	ne
 𭆥	ne
@@ -60629,10 +60629,11 @@ sort: by_weight
 𢀷	nesu
 𢌼	net
 㞼	neu
+氶	nex
 㪖	neye
 𰙟	neym
 𰆾	neyt
-氶	nez
+氹	nez
 尔	nf
 𠃝	nf
 𡭖	nf
@@ -61163,6 +61164,7 @@ sort: by_weight
 𩻨	nflw
 鱐	nflx
 鯡	nfly
+玺	nfm
 魟	nfm
 𩺏	nfma
 𩻛	nfma
@@ -61270,6 +61272,7 @@ sort: by_weight
 鯂	nfmw
 鱩	nfmw
 𫙘	nfmw
+魟	nfmz
 𩽈	nfna
 䱬	nfnb
 䲊	nfnb
@@ -64138,6 +64141,7 @@ sort: by_weight
 𡖞	nnyr
 𥪷	nnyt
 𧙭	nnyv
+亇	nnz
 𠄏	nnz
 𫸪	nnz
 飞	no
@@ -64959,6 +64963,7 @@ sort: by_weight
 𱃶	nvwo
 𬲾	nvwr
 𫗭	nvwv
+饺	nvy
 𬲥	nvy
 𬳓	nvyg
 𬲸	nvyi
@@ -65656,8 +65661,8 @@ sort: by_weight
 汆	oez
 伙	of
 尓	of
-仦	of
 尒	of
+仦	of
 𡭗	of
 𤆅	of
 𤆋	of
@@ -65769,6 +65774,7 @@ sort: by_weight
 𠈤	ofv
 𫣫	ofvk
 𠐹	ofwt
+尒	ofx
 𠋓	ofxh
 𦈁	ofyj
 𦈀	ofyn
@@ -68163,8 +68169,8 @@ sort: by_weight
 仝	omz
 亿	on
 乞	on
-㐈	on
 亇	on
+㐈	on
 𠆤	on
 𢎦	on
 𰁣	on
@@ -69546,7 +69552,7 @@ sort: by_weight
 𢆫	oqyh
 𠉝	oqyn
 𭙄	oqyr
-保	or
+假	or
 㐰	or
 𭆹	or
 智	ora
@@ -69735,7 +69741,6 @@ sort: by_weight
 𠋨	orru
 𮟺	orru
 𱌄	orru
-假	ors
 𠟐	orsc
 假	orse
 𫤆	orse
@@ -74067,7 +74072,6 @@ sort: by_weight
 捎	qfbz
 𢱣	qfcb
 𫽥	qfcq
-搂	qfd
 𢬊	qfd
 𥸮	qfd
 𢹔	qfdc
@@ -77911,6 +77915,7 @@ sort: by_weight
 𠾔	rhdu
 唩	rhdv
 噃	rhdw
+咯	rhe
 𠯘	rhe
 㖓	rhej
 咚	rhem
@@ -81842,6 +81847,7 @@ sort: by_weight
 𰈞	rvld
 𱈠	rvlf
 𠲠	rvlk
+哟	rvm
 𭌮	rvmb
 巺	rvmc
 𭉐	rvmg
@@ -81883,7 +81889,7 @@ sort: by_weight
 𠮰	rvvv
 𡂏	rvvv
 𫪰	rvwy
-嘿	rw
+嗯	rw
 𰇐	rw
 喟	rwb
 𡅑	rwbc
@@ -97601,6 +97607,7 @@ sort: by_weight
 𡚺	vkni
 𫰓	vknj
 𡚺	vknk
+嫉	vko
 𮇬	vkod
 嫉	vkok
 㡮	vkon
@@ -98012,8 +98019,8 @@ sort: by_weight
 𤖡	vmjf
 𰬱	vmjf
 𫟄	vmji
-䌾	vmjj
 姸	vmjj
+䌾	vmjj
 𰬴	vmjj
 续	vmjk
 㜟	vmjk
@@ -106517,7 +106524,6 @@ sort: by_weight
 𣃺	yscr
 㿶	ysde
 𣃣	ysde
-遲	yse
 𠬣	yse
 𨓪	yse
 遲	yseq
@@ -109572,6 +109578,7 @@ sort: by_weight
 棗	zdb
 棁	zdc
 檒	zdd
+鬰	zddb
 㮏	zddm
 麨	zde
 梔	zdh

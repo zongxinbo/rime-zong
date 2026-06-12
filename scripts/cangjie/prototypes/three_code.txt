@@ -470,7 +470,6 @@
 究	jck
 容	jco
 窃	jcp
-窥	jcq
 窝	jcr
 勃	jdk
 教	jdo
@@ -534,7 +533,6 @@
 刹	kdl
 狠	kha
 疼	khe
-猿	khg
 狐	khh
 狼	khi
 猪	khj
@@ -712,6 +710,7 @@
 孤	ndh
 孩	ndy
 剥	nel
+玺	nfm
 鮮	nft
 疆	ngm
 務	nhh
@@ -761,6 +760,7 @@
 饰	nvo
 饱	nvp
 饼	nvt
+饺	nvy
 弦	nyv
 复	oah
 俱	obm
@@ -826,7 +826,6 @@
 侃	orh
 創	orl
 舒	orn
-假	ors
 促	ory
 侵	osm
 儀	otg
@@ -887,7 +886,6 @@
 耕	qdt
 摊	qeo
 撑	qfb
-搂	qfd
 播	qhd
 括	qhj
 抓	qhl
@@ -955,6 +953,7 @@
 嗓	ree
 嘻	rgr
 响	rhb
+咯	rhe
 呼	rhf
 哦	rhq
 啤	rhw
@@ -998,6 +997,7 @@
 號	rsy
 导	rud
 喘	rum
+哟	rvm
 吳	rvn
 喂	rwm
 鄙	rwn
@@ -1152,6 +1152,7 @@
 姥	vjk
 嫁	vjm
 婉	vjn
+嫉	vko
 姚	vlm
 姊	vlx
 響	vly
@@ -1279,7 +1280,6 @@
 選	yru
 謂	yrw
 識	yry
-遲	yse
 避	ysr
 遂	ytp
 靖	ytq

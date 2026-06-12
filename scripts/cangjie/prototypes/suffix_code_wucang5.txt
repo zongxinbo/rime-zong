@@ -184,6 +184,7 @@
 炯	fbrz
 挙	fcqz
 炔	fdkz
+籹	fdvz
 焇	ffbz
 歘	ffnoz
 氺	ffz
@@ -274,8 +275,8 @@
 戋	ijz
 犬	ikx
 庆	ikz
-冫	imx
-亠	imz
+亠	imx
+冫	imz
 楽	iodx
 庥	iodz
 垐	iogz
@@ -376,6 +377,7 @@
 珌	mgphz
 玭	mgppz
 圧	mgz
+乛	mhz
 䢵	minlz
 擪	mkqz
 历	mksz
@@ -404,7 +406,9 @@
 觔	nbksz
 奂	nbkz
 亟	nemz
-氶	nez
+氶	nex
+氹	nez
+魟	nfmz
 夕	niz
 阝	nlx
 弔	nlz
@@ -415,6 +419,7 @@
 孒	nnmx
 孑	nnmz
 弞	nnoz
+亇	nnz
 墬	nogx
 墜	nogz
 欠	nox
@@ -427,6 +432,7 @@
 烋	odfz
 氽	oex
 汆	oez
+尒	ofx
 尓	ofz
 隻	ogez
 犫	oghqz
