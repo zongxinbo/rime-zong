@@ -595,7 +595,6 @@
 螺	liw
 暢	lla
 肃	llf
-牌	llh
 师	llm
 临	llo
 归	lls
@@ -605,7 +604,7 @@
 非	lms
 兆	lmu
 费	lnb
-版	lnh
+牌	lnh
 酱	lnm
 鬧	lny
 袍	lpr
@@ -1280,6 +1279,7 @@
 選	yru
 謂	yrw
 識	yry
+遲	yse
 避	ysr
 遂	ytp
 靖	ytq

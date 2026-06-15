@@ -11083,15 +11083,9 @@
   ],
   "片": [
     {
-      "big5": "A4F9",
-      "code": "llml",
-      "gbk": "C6AC",
-      "hkscs": ""
-    },
-    {
       "big5": "",
-      "code": "llms",
-      "gbk": "",
+      "code": "llmn",
+      "gbk": "MANUAL",
       "hkscs": ""
     }
   ],
@@ -11129,15 +11123,9 @@
   ],
   "牌": [
     {
-      "big5": "B550",
-      "code": "llhwj",
-      "gbk": "C5C6",
-      "hkscs": ""
-    },
-    {
       "big5": "",
-      "code": "lshwj",
-      "gbk": "",
+      "code": "lnhwj",
+      "gbk": "MANUAL",
       "hkscs": ""
     }
   ],
@@ -28057,9 +28045,9 @@
   ],
   "鼎": [
     {
-      "big5": "B9A9",
-      "code": "buvml",
-      "gbk": "B6A6",
+      "big5": "",
+      "code": "buvmn",
+      "gbk": "MANUAL",
       "hkscs": ""
     }
   ],
