@@ -101,7 +101,7 @@
 盷	bupim
 睈	burmg
 眹	butk
-鼎	buvml
+鼎	buvmn
 鎾	cabt
 銏	cbbm
 錭	cbgr
@@ -1107,10 +1107,9 @@
 螊	litxc
 蟣	livik
 裺	lklu
-牌	llhwj
 褸	lllv
 师	llmb
-片	llml
+片	llmn
 畃	llpi
 归	llsm
 婁	llv
@@ -1122,6 +1121,7 @@
 牘	lngwc
 版	lnhe
 牐	lnhjx
+牌	lnhwj
 牕	lnhwp
 鬮	lnhxu
 牔	lnibi
