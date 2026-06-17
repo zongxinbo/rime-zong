@@ -85,6 +85,54 @@ def is_gbk(text: str) -> bool:
     return True
 
 
+def han_charset_priority(text: str) -> int:
+    """返回零频候选的汉字常用度优先级，数值越大越优先。"""
+    if is_gb2312(text):
+        return 700
+    if is_gbk(text):
+        return 600
+    if len(text) != 1:
+        return 0
+    cp = ord(text)
+    # CJK 统一表意文字基本区，最常用的汉字主体区。
+    if 0x4E00 <= cp <= 0x9FFF:
+        return 500
+    # CJK 统一表意文字扩展 A。
+    if 0x3400 <= cp <= 0x4DBF:
+        return 400
+    # CJK 统一表意文字扩展 B。
+    if 0x20000 <= cp <= 0x2A6DF:
+        return 300
+    # CJK 统一表意文字扩展 C。
+    if 0x2A700 <= cp <= 0x2B73F:
+        return 250
+    # CJK 统一表意文字扩展 D。
+    if 0x2B740 <= cp <= 0x2B81F:
+        return 240
+    # CJK 统一表意文字扩展 E。
+    if 0x2B820 <= cp <= 0x2CEAF:
+        return 230
+    # CJK 统一表意文字扩展 F。
+    if 0x2CEB0 <= cp <= 0x2EBEF:
+        return 220
+    # CJK 统一表意文字扩展 I。
+    if 0x2EBF0 <= cp <= 0x2EE5F:
+        return 210
+    # CJK 统一表意文字扩展 G。
+    if 0x30000 <= cp <= 0x3134F:
+        return 200
+    # CJK 统一表意文字扩展 H。
+    if 0x31350 <= cp <= 0x323AF:
+        return 190
+    # CJK 兼容表意文字。
+    if 0xF900 <= cp <= 0xFAFF:
+        return 100
+    # CJK 兼容表意文字补充。
+    if 0x2F800 <= cp <= 0x2FA1F:
+        return 90
+    return 0
+
+
 def shortcut_charset_allows(text: str, charset: str, *, score: int | float) -> bool:
     """判断字符是否属于简码策略指定的候选字集。"""
     if charset == "all":

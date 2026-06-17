@@ -2,13 +2,26 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from .charset import is_gb2312, is_gbk
+from .charset import han_charset_priority, is_gb2312, is_gbk
 
 
 DictEntry = tuple[str, int | float, int, int, str]
 PrefixEntry = tuple[int, DictEntry]
 RankSuffix = tuple[int, str]
-PrefixCandidate = tuple[float, int, str, str, str]
+PrefixCandidate = tuple[float, int, float, int, str, str]
+EXACT_SHORT_SOURCE_MULTIPLIER = 3.0
+SICANG5_CANDIDATE_PREFIXES = {
+    2: ("z", "zz", "zzz"),
+    3: ("x", "xx", "xxx"),
+    4: ("zx", "zxx"),
+    5: ("xz", "xzz"),
+}
+WUCANG5_CANDIDATE_PREFIXES = {
+    2: ("z", "zz", "zzz", "zzzz"),
+    3: ("x", "xx", "xxx", "xxxx"),
+    4: ("zx", "zxx", "zxxx"),
+    5: ("xz", "xzz", "xzzz"),
+}
 ONE_CODE_BODY_LETTERS = set("abcdefghijklmnopqrstuvwxyz")
 ONE_CODE_RADICALS = {
     "a": "日", "b": "月", "c": "金", "d": "木", "e": "水", "f": "火", "g": "土",
@@ -161,6 +174,17 @@ def dedup_prefix_charset_allows(
     return charset_allows(char, charset, score=score)
 
 
+def dedup_prefix_priority(
+    char: str,
+    score: int | float,
+    multiplier: float,
+) -> tuple[float, int, float]:
+    """返回前缀候选排序键：真实字频优先，零频字按字符集兜底。"""
+    if score > 0:
+        return score * multiplier, han_charset_priority(char), 0.0
+    return 0.0, han_charset_priority(char), multiplier
+
+
 def natural_dedup_prefix_codes(code: str) -> tuple[str, ...]:
     """返回可由原码直接推导的 z/x 前缀码，优先使用较短路径。"""
     return (
@@ -181,35 +205,39 @@ def parse_prefix_levels(text: str) -> tuple[int, ...]:
         if not item.isdigit():
             raise ValueError("--dedup-prefix-short-levels 必须形如 2,3")
         level = int(item)
-        if level not in {2, 3, 4}:
-            raise ValueError("--dedup-prefix-short-levels 目前只支持 2、3 和 4")
+        if level not in {2, 3, 4, 5}:
+            raise ValueError("--dedup-prefix-short-levels 目前只支持 2、3、4 和 5")
         levels.append(level)
     if not levels:
         raise ValueError("--dedup-prefix-short-levels 至少需要一个层级")
     return tuple(dict.fromkeys(levels))
 
 
-def rank_prefix(rank: int) -> str | None:
-    """按全码候选位返回固定 z/x 前缀。"""
-    if rank == 2:
-        return "z"
-    if rank == 3:
-        return "x"
-    return None
+def candidate_prefix_markers(candidate_position: int, max_code_length: int) -> tuple[str, ...]:
+    """按原码候选位返回 Sicang5/Wucang5 的 z/x 前缀 marker。"""
+    if max_code_length <= 4:
+        return SICANG5_CANDIDATE_PREFIXES.get(candidate_position, ())
+    return WUCANG5_CANDIDATE_PREFIXES.get(candidate_position, ())
 
 
-def short_prefix_codes(code: str, level: int, rank: int) -> tuple[str, ...]:
+def short_prefix_codes(
+    code: str,
+    level: int,
+    candidate_position: int,
+    max_code_length: int,
+) -> tuple[str, ...]:
     """返回自动 z/x 前缀短码候选，保持可由原码和候选位推导。"""
-    prefix = rank_prefix(rank)
-    if prefix is None:
-        return ()
-    if level == 2:
-        return (prefix + code[0],)
-    if level == 3:
-        return (prefix + code[:2],)
-    if level == 4:
-        return (prefix + code[:3],)
-    raise ValueError("前缀短码层级只能是 2、3 或 4")
+    if level not in {2, 3, 4, 5}:
+        raise ValueError("前缀短码层级只能是 2、3、4 或 5")
+    codes = []
+    for marker in candidate_prefix_markers(candidate_position, max_code_length):
+        fragment_length = level - len(marker)
+        if fragment_length < 1 or len(code) < fragment_length:
+            continue
+        new_code = marker + code[:fragment_length]
+        if len(new_code) <= max_code_length:
+            codes.append(new_code)
+    return tuple(dict.fromkeys(codes))
 
 
 def prefix_level2_anchor_keys(code: str) -> list[tuple[str, float]]:
@@ -299,16 +327,15 @@ def build_dedup_prefix_entries(
         if code.startswith(("z", "x")):
             continue
 
-        for rank, entry in enumerate(unique_seen_entries(entries), start=1):
-            prefix = rank_prefix(rank)
-            if prefix is None:
+        for candidate_position, entry in enumerate(unique_seen_entries(entries), start=1):
+            if not candidate_prefix_markers(candidate_position, max_code_length):
                 continue
             if entry[1] != 5:
                 continue
             char = entry[4]
             if char in shortcut_leader_chars:
                 continue
-            rank_multiplier = deep_rank_multiplier if rank >= 3 else 1.0
+            rank_multiplier = deep_rank_multiplier if candidate_position >= 3 else 1.0
             if short:
                 for level in short_levels:
                     level_freqs = short_level_char_freqs.get(level, char_freqs)
@@ -317,46 +344,89 @@ def build_dedup_prefix_entries(
                         continue
                     if not dedup_prefix_charset_allows(char, charset, score=level_score):
                         continue
-                    if len(code) < level:
-                        continue
                     if level == 2:
                         anchor_keys = prefix_level2_anchor_keys(code)
                         for anchor_key, anchor_factor in anchor_keys:
-                            priority_score = level_score * anchor_factor * rank_multiplier
-                            short_candidates_by_level[level].append((priority_score, rank, anchor_key, char, ""))
+                            if not short_prefix_codes(anchor_key, level, candidate_position, max_code_length):
+                                continue
+                            priority_score, charset_priority, fallback_score = dedup_prefix_priority(
+                                char,
+                                level_score,
+                                anchor_factor * rank_multiplier,
+                            )
+                            short_candidates_by_level[level].append((
+                                priority_score,
+                                charset_priority,
+                                fallback_score,
+                                candidate_position,
+                                anchor_key,
+                                char,
+                            ))
+                        continue
+                    if not short_prefix_codes(code, level, candidate_position, max_code_length):
                         continue
                     saved_keys = max(len(code) - level, 0)
                     saved_multiplier = saved_keys + 1
-                    priority_score = level_score * saved_multiplier * rank_multiplier
-                    short_candidates_by_level[level].append((priority_score, rank, code, char, ""))
+                    if len(code) == level - 1 and len(code) >= 2:
+                        saved_multiplier *= EXACT_SHORT_SOURCE_MULTIPLIER
+                    priority_score, charset_priority, fallback_score = dedup_prefix_priority(
+                        char,
+                        level_score,
+                        saved_multiplier * rank_multiplier,
+                    )
+                    short_candidates_by_level[level].append((
+                        priority_score,
+                        charset_priority,
+                        fallback_score,
+                        candidate_position,
+                        code,
+                        char,
+                    ))
             if full and len(code) == full_source_length:
-                target_code = prefix + code[: full_source_length - 1]
                 full_score = full_char_freqs.get(char, 0)
                 if full_score < min_score:
                     continue
                 if not dedup_prefix_charset_allows(char, charset, score=full_score):
                     continue
-                priority_score = full_score * rank_multiplier
-                full_candidates.append((priority_score, rank, code, char, target_code))
+                priority_score, charset_priority, fallback_score = dedup_prefix_priority(
+                    char,
+                    full_score,
+                    rank_multiplier,
+                )
+                full_candidates.append((
+                    priority_score,
+                    charset_priority,
+                    fallback_score,
+                    candidate_position,
+                    code,
+                    char,
+                ))
 
     prefix_entries: list[PrefixEntry] = []
     allocated_chars = set()
     allocated_codes = set()
 
-    def allocate(candidates: list[PrefixCandidate], *, short_level: int | None = None) -> None:
-        candidates.sort(key=lambda item: (-item[0], item[1], item[2], item[3]))
-        for priority_score, rank, source_code, char, fixed_code in candidates:
+    def allocate(
+        candidates: list[PrefixCandidate],
+        *,
+        target_level: int,
+        blocker_freqs: dict[str, int],
+    ) -> None:
+        candidates.sort(key=lambda item: (-item[0], -item[1], -item[2], item[3], item[4], item[5]))
+        for priority_score, _, _, candidate_position, source_code, char in candidates:
             if char in allocated_chars:
                 continue
-            target_codes = (fixed_code,) if fixed_code else short_prefix_codes(source_code, short_level, rank)
+            target_codes = short_prefix_codes(
+                source_code,
+                target_level,
+                candidate_position,
+                max_code_length,
+            )
             for new_code in target_codes:
+                if len(new_code) > max_code_length:
+                    continue
                 if new_code in allocated_codes or (char, new_code) in used_text_code:
                     continue
-                blocker_freqs = (
-                    full_char_freqs
-                    if fixed_code and short_level is None
-                    else short_level_char_freqs.get(short_level, char_freqs)
-                )
                 if is_blocked(new_code, blocker_freqs):
                     continue
                 prefix_entries.append((len(new_code), (new_code, 1, 0, -int(priority_score), char)))
@@ -366,7 +436,15 @@ def build_dedup_prefix_entries(
                 break
 
     for level in sorted(short_candidates_by_level):
-        allocate(short_candidates_by_level[level], short_level=level)
-    allocate(full_candidates)
+        allocate(
+            short_candidates_by_level[level],
+            target_level=level,
+            blocker_freqs=short_level_char_freqs.get(level, char_freqs),
+        )
+    allocate(
+        full_candidates,
+        target_level=full_source_length,
+        blocker_freqs=full_char_freqs,
+    )
 
     return prefix_entries

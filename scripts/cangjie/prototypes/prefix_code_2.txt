@@ -22,6 +22,7 @@
 晩	xu
 縯	xv
 囮	xw
+𠑑	xx
 达	xy
 缩	za
 赋	zb
@@ -48,3 +49,4 @@
 困	zw
 潚	zx
 头	zy
+𫸪	zz
