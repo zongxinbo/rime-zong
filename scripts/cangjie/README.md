@@ -158,16 +158,16 @@ python scripts/cangjie/gen_sicang5.py --dedup-prefix --no-dedup-prefix-short --d
 # 显式加载旧 fixed_prefix_code.txt 补丁层
 python scripts/cangjie/gen_sicang5.py --fixed-prefix
 
-# 调整 z/x 前缀候选字集和最低综合字频
-python scripts/cangjie/gen_sicang5.py --dedup-prefix-charset gbk --dedup-prefix-min-score 1
+# 收窄 z/x 前缀候选字集和最低综合字频
+python scripts/cangjie/gen_sicang5.py --dedup-prefix-charset frequency --dedup-prefix-min-score 1
 ```
 
 `--protect-native-charset` 支持：
 
-- `gbk`：默认值，保护 GBK 可编码字符，兼顾常见繁简字。
+- `all`：默认值，不限制汉字范围；零频字按字符集常用度兜底排序。
+- `gbk`：处理 GBK 可编码字符，兼顾常见繁简字。
 - `gb2312`：仅保护 GB2312 汉字。
 - `frequency`：仅保护当前综合字频中出现的字。
-- `all`：不限制汉字范围，适合实验。
 
 `z/x` 后缀参数：
 
@@ -191,10 +191,10 @@ python scripts/cangjie/gen_sicang5.py --dedup-prefix-charset gbk --dedup-prefix-
 
 `--dedup-prefix-charset` 支持：
 
-- `frequency`：默认值，仅处理当前综合字频中出现的字。
+- `all`：默认值，不限制汉字范围；零频字按字符集常用度兜底排序。
+- `frequency`：仅处理当前综合字频中出现的字。
 - `gbk`：处理 GBK 可编码字符，兼顾常见繁简字。
 - `gb2312`：仅处理 GB2312 汉字。
-- `all`：不限制汉字范围，适合实验。
 
 前缀层常用参数：
 

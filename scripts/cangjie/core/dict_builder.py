@@ -491,8 +491,13 @@ def generate_dict(
                 deep_rank_multiplier=dedup_prefix_deep_rank_multiplier,
             )
             if dedup_prefix_deep_paths:
+                deep_review_entries = [
+                    item
+                    for item in shared_entries_with_levels
+                    if item[0] in dedup_prefix_deep_paths
+                ] + scheme_entries_with_levels
                 prefix_counts.update(write_prefix_prototypes(
-                    scheme_entries_with_levels,
+                    deep_review_entries,
                     dedup_prefix_deep_paths,
                 ))
 
@@ -542,6 +547,12 @@ def generate_dict(
         shortcut_source_entries.extend(suffix_entries)
         shortcut_source_entries.sort()
         shortcut_leader_chars = build_shortcut_leader_chars(all_entries)
+    elif suffix_code_path is not None:
+        write_code_prototype(
+            [],
+            suffix_code_path,
+            title="自动 z/x 后缀审阅文件",
+        )
     print(
         f"z/x 后缀消重：生成 {z_suffix_count} 个条目"
         f" 字集={suffix_z_charset} 最低分={suffix_z_min_score:g}"

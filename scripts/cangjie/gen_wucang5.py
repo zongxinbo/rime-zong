@@ -56,7 +56,8 @@ def main():
     parser.add_argument("--fullcode-yield-min-score", type=float, default=1000, help="全码简码让位：可顶位字的最低综合字频")
     parser.add_argument("--fixed-prefix", action=argparse.BooleanOptionalAction, default=False,
                         help="是否加载 fixed_prefix_code.txt 中的 z?/x? 固定前缀码（默认关闭）")
-    parser.add_argument("--suffix-z", action=argparse.BooleanOptionalAction, default=True, help="是否为无首选简码的短码候选生成 z/x 后缀直达码（默认开启）")
+    parser.add_argument("--suffix-z", action=argparse.BooleanOptionalAction, default=False,
+                        help="是否为无首选简码的短码候选生成 z/x 后缀直达码（默认关闭；保留为旧规则兼容）")
     parser.add_argument("--suffix-z-charset", choices=("all", "frequency", "gbk", "gb2312"), default="frequency",
                         help="z/x 后缀候选字集：all=不限，frequency=仅综合字频中出现的字，gbk=常见繁简字，gb2312=简体常用字")
     parser.add_argument("--suffix-z-min-score", type=float, default=1,
@@ -70,10 +71,10 @@ def main():
                         help="z/x 后缀目标码占用策略：strict=任意占用即跳过；ignore-nonfrequency-or-shortcut=忽略字集外或已有普通简码的占用")
     parser.add_argument("--dedup-prefix", action=argparse.BooleanOptionalAction, default=True,
                         help="是否自动生成 z/x 前缀短码和四码前缀选重码（默认开启）")
-    parser.add_argument("--dedup-prefix-charset", choices=("all", "frequency", "gbk", "gb2312"), default="frequency",
+    parser.add_argument("--dedup-prefix-charset", choices=("all", "frequency", "gbk", "gb2312"), default="all",
                         help="z/x 前缀候选字集：all=不限，frequency=仅综合字频中出现的字，gbk=常见繁简字，gb2312=简体常用字")
-    parser.add_argument("--dedup-prefix-min-score", type=float, default=1,
-                        help="z/x 前缀候选最低综合字频；默认 1")
+    parser.add_argument("--dedup-prefix-min-score", type=float, default=0,
+                        help="z/x 前缀候选最低综合字频；默认 0")
     parser.add_argument("--dedup-prefix-short", action=argparse.BooleanOptionalAction, default=True,
                         help="是否生成 z?/x?、z??/x?? 高频前缀短码（默认开启；需 --dedup-prefix 生效）")
     parser.add_argument("--dedup-prefix-full", action=argparse.BooleanOptionalAction, default=True,
@@ -85,7 +86,7 @@ def main():
     parser.add_argument("--dedup-prefix-deep-rank-multiplier", type=float, default=1.5,
                         help="第 3 候选及以后进入前缀短码层时的痛点倍率；默认 1.5")
     parser.add_argument("--dedup-prefix-source-max-code-length", type=int, default=4,
-                        help="z/x 前缀生成使用的投影基线码长；默认 4，保证 Sicang5/Wucang5 前缀码一致")
+                        help="z/x 前缀生成使用的投影基线码长；默认 4，保证 Sicang5/Wucang5 共享短前缀口径一致")
     parser.add_argument("--dedup-prefix-level2-weights", choices=["sc", "sc_daily", "sc_balanced"], default="sc",
                         help="z?/x? 二码前缀权重；默认 sc，对标普通一码")
     parser.add_argument("--dedup-prefix-level3-weights", choices=["sc", "sc_daily", "sc_balanced"], default="sc_daily",
@@ -201,12 +202,13 @@ def main():
             4: PREFIX_CODE_4_WUCANG5_PATH,
             5: PREFIX_CODE_5_WUCANG5_PATH,
         },
-        dedup_prefix_deep_short_levels=(4,),
+        dedup_prefix_deep_short_levels=(4, 5),
         dedup_prefix_deep_full_source_length=5,
         dedup_prefix_short_level_char_freqs={
             2: prefix_level2_scores,
             3: prefix_level3_scores,
             4: prefix_full_scores,
+            5: prefix_full_scores,
         },
         dedup_prefix_full_char_freqs=prefix_full_scores,
         z_special=True,
