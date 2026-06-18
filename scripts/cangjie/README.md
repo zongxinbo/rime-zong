@@ -257,7 +257,7 @@ python scripts/cangjie/gen_wucang5_words.py
 - 三字词：取第一、二字的第一码，第三字的前两码。
 - 四字及以上词：取第一、二、三、末字的第一码。
 
-词条只取 `mixed.words.dict.yaml` 中同时能在 `essay-zh-hans.txt` 匹配到频率的词。繁体词先用 OpenCC `t2s` 转简，再到 `essay-zh-hans.txt` 取词频；简繁词同码同频时简体词优先。单字和词同码时，按词频与单字频率映射结果合并排序，单字之间保持原单字码表顺序。
+词条只取 `mixed.words.dict.yaml` 中同时能在 `essay-zh-hans.txt` 匹配到频率的词。繁体词先用 OpenCC `t2s` 转简，再到 `essay-zh-hans.txt` 取词频；简繁词同码同频时简体词优先。单字和词同码时，按词频与单字频率映射结果合并排序，单字之间保持原单字码表顺序；若单字已有简码，则该字的全码在字词方案中给同码词语让位。
 
 常用参数：
 

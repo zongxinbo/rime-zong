@@ -22,6 +22,7 @@ class DictRow:
     score: int
     phrase_order: int = 0
     phrase_variant_order: int = 0
+    demote_full_code_for_phrase: bool = False
 
 
 def read_words_dict(path: Path) -> list[str]:
@@ -43,6 +44,8 @@ def read_words_dict(path: Path) -> list[str]:
 
 def read_prototype_codes(path: Path) -> dict[str, str]:
     codes: dict[str, str] = {}
+    if not path.exists():
+        return codes
     for line in path.read_text(encoding="utf-8").splitlines():
         if not line or line.startswith("#") or "\t" not in line:
             continue
@@ -174,13 +177,28 @@ def merge_code_group(rows: list[DictRow]) -> list[DictRow]:
     merged: list[DictRow] = []
     phrase_index = 0
     for single in singles:
-        while phrase_index < len(phrases) and phrases[phrase_index].score > single.score:
+        while (
+            phrase_index < len(phrases)
+            and (single.demote_full_code_for_phrase or phrases[phrase_index].score > single.score)
+        ):
             merged.append(phrases[phrase_index])
             phrase_index += 1
         merged.append(single)
     merged.extend(phrases[phrase_index:])
     return merged
 
+
+def collect_shorter_code_flags(entries) -> dict[tuple[str, str], bool]:
+    codes_by_char: dict[str, set[str]] = {}
+    for entry in entries:
+        if len(entry.text) == 1 and entry.code and not entry.code.startswith(("z", "x")):
+            codes_by_char.setdefault(entry.text, set()).add(entry.code)
+
+    flags: dict[tuple[str, str], bool] = {}
+    for text, codes in codes_by_char.items():
+        for code in codes:
+            flags[(text, code)] = any(len(other) < len(code) for other in codes)
+    return flags
 
 def build_word_dict(
     *,
@@ -197,6 +215,7 @@ def build_word_dict(
     root_codes = read_prototype_codes(root_code_path)
     one_codes = read_prototype_codes(one_code_path)
     preferred_codes = read_prototype_codes(preferred_code_path)
+    shorter_code_flags = collect_shorter_code_flags(entries)
     base_codes, preferred_used = choose_base_codes(
         entries,
         root_codes=root_codes,
@@ -224,6 +243,7 @@ def build_word_dict(
             )
             phrase_order = 0
             phrase_variant_order = 0
+            demote_full_code_for_phrase = shorter_code_flags.get((entry.text, entry.code), False)
         else:
             score, phrase_order, phrase_variant_order = phrase_score(
                 entry.text,
@@ -231,6 +251,7 @@ def build_word_dict(
                 essay_phrase_scores=essay_phrase_scores,
                 essay_phrase_order=essay_phrase_order,
             )
+            demote_full_code_for_phrase = False
 
         row = DictRow(
             text=entry.text,
@@ -240,6 +261,7 @@ def build_word_dict(
             score=score,
             phrase_order=phrase_order,
             phrase_variant_order=phrase_variant_order,
+            demote_full_code_for_phrase=demote_full_code_for_phrase,
         )
         key = (row.text, row.code)
         if key in seen_text_code:
