@@ -246,7 +246,7 @@ def write_final_dict(
             "---",
             f"name: {dict_name}",
             f"version: '{_dt.date.today().isoformat()}'",
-            "sort: by_weight",
+            "sort: by_original",
         ]
         if vocabulary:
             header_lines.append(f"vocabulary: {vocabulary}")

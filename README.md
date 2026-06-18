@@ -6,8 +6,8 @@ Rime 方案集合，包含拼音、自然码、仓颉、郑码、四角号码和
 
 | Schema | 名称 |
 | --- | --- |
-| [`wucang5`](schemas/cangjie/wucang5/wucang5.schema.yaml) | 五码仓颉·五代 |
-| [`sancang5`](schemas/cangjie/sancang5/sancang5.schema.yaml) | 三码仓颉·五代 |
+| [`wucang5`](schemas/cangjie/wucang5/wucang5.schema.yaml) | 五码仓颉 |
+| [`sancang5`](schemas/cangjie/sancang5/sancang5.schema.yaml) | 三码仓颉 |
 | [`cangjie5_ice`](schemas/cangjie/cangjie5/cangjie5_ice.schema.yaml) | 倉頡五代·雾凇 |
 | [`pinyin_ice_cangjie5`](schemas/pinyin_ice/pinyin_ice_cangjie5.schema.yaml) | 雾凇拼音·倉頡 |
 | [`zrm`](schemas/shuangpin/zrm/zrm.schema.yaml) | 自然码·仓颉 |
@@ -24,9 +24,11 @@ Rime 方案集合，包含拼音、自然码、仓颉、郑码、四角号码和
 | [`pinyin_ice`](schemas/pinyin_ice/pinyin_ice.schema.yaml)<br>雾凇拼音 | `cangjie5` | [雾凇拼音](https://github.com/iDvel/rime-ice) 精简版，保留雾凇词库、用户短语、简繁转换。正常拼音输入，输入 `` `仓颉码 `` 可用仓颉五代反查。 |
 | [`pinyin_ice_cangjie5`](schemas/pinyin_ice/pinyin_ice_cangjie5.schema.yaml)<br>雾凇拼音·倉頡 | `cangjie5` | 默认启用。雾凇拼音主输入，仓颉五代作辅助码。拼音后输入 `;` 或 `,` 接仓颉辅码过滤候选，例如 `ni;ab`；单字取仓颉首尾码，词语取首字首码 + 末字首码；输入 `` `仓颉码 `` 使用完整仓颉反查。 |
 | [`cangjie5`](schemas/cangjie/cangjie5/cangjie5.schema.yaml)<br>倉頡五代 | `pinyin_simp` | [倉頡五代](https://github.com/Jackchows/Cangjie5) 单字方案，简化字优先。不造词、不学习，五码不自动上屏；空格有候选时上屏、无匹配时清码；`Tab` 清码；输入 `` `拼音 `` 可拼音反查。 |
-| [`sancang5`](schemas/cangjie/sancang5/sancang5.schema.yaml)<br>三码仓颉·五代 | `pinyin_simp` | 默认启用。参考 [三码仓颉](https://github.com/lotem/rime-sancang) 思路，由仓颉五代码表按三码规则取码生成。单字一至三码保留原码，四码及以上取首码、次码、末码；支持整句连打（语句流）、拼音反查、扩展字符集、简繁转换和八股文简化字语法模型；输入 `` `拼音 `` 可拼音反查。 |
-| [`sicang5`](schemas/cangjie/sicang5/sicang5.schema.yaml)<br>四码仓颉·五代 | `pinyin_simp` | 纯单字四码仓颉，由仓颉五代码表按四码规则（一二三末码）提取生成，默认 `150` 个二简、`300` 个三简；一简使用单独校准表，二简/三简按净收益生成，二简保护高频 GB2312 原生二码字，三简保护原生三码位，全码采用简码让位，已有简码字让位给同码且达到常用门槛的无简码字。最长四码不自动上屏，不支持整句连打；支持 `z` 字根码、`z/x` 前缀消重（第 2 救援候选走 `z/zz`，第 3 救援候选走 `x/xx`）、拼音反查、扩展字符集和简繁转换。 |
-| [`wucang5`](schemas/cangjie/wucang5/wucang5.schema.yaml)<br>五码仓颉·五代 | `pinyin_simp` | 默认启用。基于仓颉五代码表生成的纯单字五码方案，默认 `150` 个二简、`300` 个三简，不启用四简；一简使用单独校准表，二简/三简按净收益生成，二简保护高频 GB2312 原生二码字，三简保护原生三码位，全码采用简码让位，已有简码字让位给同码且达到常用门槛的无简码字。支持 `z` 字根码、`z/x` 前缀消重（第 2 救援候选走 `z/zz`，第 3 救援候选走 `x/xx`）、拼音反查、扩展字符集和简繁转换。五码不自动上屏；输入 `` `拼音 `` 可拼音反查。 |
+| [`sancang5`](schemas/cangjie/sancang5/sancang5.schema.yaml)<br>三码仓颉 | `pinyin_simp` | 默认启用。参考 [三码仓颉](https://github.com/lotem/rime-sancang) 思路，由仓颉五代码表按三码规则取码生成。单字一至三码保留原码，四码及以上取首码、次码、末码；支持整句连打（语句流）、拼音反查、扩展字符集、简繁转换和八股文简化字语法模型；输入 `` `拼音 `` 可拼音反查。 |
+| [`sicang5`](schemas/cangjie/sicang5/sicang5.schema.yaml)<br>四码仓颉 | `pinyin_simp` | 纯单字四码仓颉，由仓颉五代码表按四码规则（一二三末码）提取生成；默认二简 `300`、三简 `1300`，不造词、不学习。字根字使用 `z` 系本体码；一简使用人工校准表；二简/三简按净收益生成并保护高频原生码位。默认启用 `z/x` 前缀消重：第 2 候选走 `z` 系，第 3 候选走 `x` 系，第 4 候选走 `zx` 系，第 5 候选走 `xz` 系；最长四码不自动上屏，支持拼音反查、扩展字符集和简繁转换。 |
+| [`sicang5_words`](schemas/cangjie/sicang5/sicang5_words.schema.yaml)<br>四码仓颉·字词 | `pinyin_simp` | 四码仓颉固定字词方案。直接合并 `sicang5.dict.yaml` 与 `mixed.words.dict.yaml` 生成入码表，不依赖 `import_tables`，不造词、不学习。构词时不取任何 `z/x` 开头消重码；字根用 `root_code.txt`，一简字跳过一简取全码，多编码字优先用 `sc_glyph_preferred_code.txt` 的大陆字形偏好码。词频使用 `essay-zh-hans.txt`，繁体词转简后取频，同码同频简体优先。 |
+| [`wucang5`](schemas/cangjie/wucang5/wucang5.schema.yaml)<br>五码仓颉 | `pinyin_simp` | 默认启用。基于仓颉五代码表生成的纯单字五码方案；默认二简 `300`、三简 `1300`，四简默认关闭，可显式开启。单字排序、简码分配和 `z/x` 前缀消重规则与四码仓颉一致，但保留五码完整输入空间；五码不自动上屏，支持拼音反查、扩展字符集和简繁转换。 |
+| [`wucang5_words`](schemas/cangjie/wucang5/wucang5_words.schema.yaml)<br>五码仓颉·字词 | `pinyin_simp` | 五码仓颉固定字词方案。直接合并 `wucang5.dict.yaml` 与 `mixed.words.dict.yaml` 生成入码表，不造词、不学习。构词规则与四码字词方案一致：二字词每字前两码，三字词取一二字首码和第三字前两码，四字及以上取一二三末字首码；构词基码跳过一简和 `z/x` 消重码，并优先使用大陆字形偏好码。 |
 | [`cangjie5_pinyin`](schemas/cangjie/cangjie5/cangjie5_pinyin.schema.yaml)<br>倉頡五代·拼音 | `pinyin_simp` | 仓颉五代 + 袖珍简化字拼音混合输入。仓颉候选保持单字，拼音候选可出词；输入 `` `拼音 `` 可拼音反查。 |
 | [`cangjie5_ice`](schemas/cangjie/cangjie5/cangjie5_ice.schema.yaml)<br>倉頡五代·雾凇 | `pinyin_ice` | 默认启用。仓颉五代 + 雾凇拼音混合输入。仓颉码和雾凇拼音都可参与候选，适合以仓颉为主、雾凇拼音补词；输入 `` `拼音 `` 使用雾凇拼音反查。 |
 | [`zrm`](schemas/shuangpin/zrm/zrm.schema.yaml)<br>自然码·仓颉 | `pinyin_simp` | 默认启用。自然码双拼作主码，仓颉五代首尾码作辅助码，一位辅助码末尾补 `z`；单字短码按分组首选和高频次选生成，词语支持全双拼码及其辅码定重码；输入 `o` 加完整仓颉五代码可作仓颉兜底，同字多码全部保留，必要时补 `z` 可直达仓颉候选。 |
@@ -63,12 +65,14 @@ Rime 方案集合，包含拼音、自然码、仓颉、郑码、四角号码和
 | [`scripts/cangjie/gen_sancang5.py`](scripts/cangjie/gen_sancang5.py) | 基于 `cangjie_builder.py`，生成三码仓颉五代码表（sancang5）。可选生成带词语的便携码表。 |
 | [`scripts/cangjie/gen_sicang5.py`](scripts/cangjie/gen_sicang5.py) | 基于 `cangjie_builder.py`，生成带受保护二简、三简和前缀消重的纯单字四码仓颉码表（sicang5）。 |
 | [`scripts/cangjie/gen_wucang5.py`](scripts/cangjie/gen_wucang5.py) | 基于 `cangjie_builder.py`，生成带受保护二简、三简和前缀消重的纯单字五码仓颉码表（wucang5）。 |
+| [`scripts/cangjie/gen_sicang5_words.py`](scripts/cangjie/gen_sicang5_words.py) | 合并 Sicang5 单字码表和固定混合词库，生成四码仓颉字词方案。 |
+| [`scripts/cangjie/gen_wucang5_words.py`](scripts/cangjie/gen_wucang5_words.py) | 合并 Wucang5 单字码表和固定混合词库，生成五码仓颉字词方案。 |
 | [`scripts/scheme_dependencies.py`](scripts/scheme_dependencies.py) | 扫描正式方案并生成 [`schemas/common/dependencies.yaml`](schemas/common/dependencies.yaml)。 |
 | [`scripts/export_schemes.py`](scripts/export_schemes.py) | 按一个或多个 `schema_id` 导出依赖到 `_output` 或指定下划线目录。 |
 
 仓颉普通一简审阅默认使用 `--weights sc`；Sicang5/Wucang5 生产构建默认使用 `--weights sc_daily` 生成二简、三简、全码排序和前缀消重，并在显式开启 `--s4` 时用于四简。60/40 的 `sc_balanced` 保留为显式实验口径。
 
-详细参数见 [`scripts/README.md`](scripts/README.md)。
+详细参数见 [`scripts/cangjie/README.md`](scripts/cangjie/README.md)。
 
 ## 通用按键
 

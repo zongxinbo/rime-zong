@@ -3,7 +3,7 @@
 
 schema:
   schema_id: sicang5_fluency
-  name: 四码仓颉·五代·语句流
+  name: 四码仓颉·语句流
   version: "2026.04.27"
   author:
     - zongxinbo <https://github.com/zongxinbo>

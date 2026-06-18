@@ -2,22 +2,21 @@
 # encoding: utf-8
 
 schema:
-  schema_id: sicang5
-  name: 四码仓颉
-  version: "2026.04.27"
+  schema_id: wucang5_words
+  name: 五码仓颉·字词
+  version: "2026.04.29"
   author:
     - zongxinbo <https://github.com/zongxinbo>
   description: |
-    四码仓颉五代，由仓颉五代码表按四码规则提取一二三末码取码生成。
     码表来源：仓颉五代补完计划 https://github.com/Jackchows/Cangjie5
     当前方案：https://github.com/zongxinbo/rime-zong
     仓颉输入法发明人：朱邦复先生。
 
-    四码仓颉单字方案
+    五码仓颉带词方案
     特点：
-      只打单字，不造词，不学习；
-      最长四码，四码不自动上屏；
-      支持 z/x 前缀消重：第 2 救援候选走 z/zz，第 3 救援候选走 x/xx；
+      使用固定词库，不造词，不学习；
+      最长五码，五码不自动上屏；
+      支持 z/x 前缀消重，构词时不取 z/x 开头的消重码；
       支持拼音反查、扩展字符和简繁转换。
     操作：
       空格：有候选时上屏，无匹配时清码；
@@ -68,24 +67,23 @@ engine:
     - simplifier
     - simplifier@traditionalization
     - uniquifier
-    - single_char_filter
 
 speller:
   alphabet: zyxwvutsrqponmlkjihgfedcba
   delimiter: " ;"
-  max_code_length: 4
+  max_code_length: 5
   auto_select: false
   auto_select_unique_candidate: false
 
 translator:
-  dictionary: sicang5
+  dictionary: wucang5_words
   enable_charset_filter: true
   encode_commit_history: false
   enable_encoder: false
   enable_completion: true
   enable_user_dict: false
   enable_sentence: false
-  max_phrase_length: 1
+  max_phrase_length: 10
   preedit_format:
     - "xlit|abcdefghijklmnopqrstuvwxyz|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜重|"
   comment_format:

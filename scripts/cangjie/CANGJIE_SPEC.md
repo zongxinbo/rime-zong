@@ -29,6 +29,8 @@
 | `core/dedup.py` | 自然 `z/x` 前缀消重与可选 `z/x` 后缀兼容层 |
 | `gen_wucang5.py` | Wucang5 一键构建入口 |
 | `gen_sicang5.py` | Sicang5 一键构建入口 |
+| `gen_wucang5_words.py` | Wucang5 字词码表构建入口 |
+| `gen_sicang5_words.py` | Sicang5 字词码表构建入口 |
 
 ## 4. 简码原型文件
 
@@ -597,21 +599,51 @@ python scripts/cangjie/gen_sicang5.py
 | 古籍繁体 | 13.47‱ |
 | 繁简联合 | 5.32‱ |
 
-## 12. 词组取码动态配额
+## 12. 字词方案
 
-Sicang5 语句流采用动态配额算法，根据单字码长分配 4 码位。
+Sicang5/Wucang5 字词方案是独立 schema，不改动原单字版。它直接把已生成的单字码表与 `schemas/common/words/mixed.words.dict.yaml` 合并成入码表，不使用 `import_tables`，也不启用 `enable_encoder`、`enable_sentence` 或 `enable_user_dict`。
 
-| 词长 | 结构配额 | 取码明细 | 示例 |
-| :--- | :--- | :--- | :--- |
-| 二字词 | 2 + 2 | A首+A尾 + B首+B尾 | 实际 -> pmnf |
-| 二字词 | 1 + 3 | A首 + B首+B次+B尾 | 中国 -> lwim |
-| 二字词 | 2 + 1 | A首+A尾 + B首 | 某个 -> mwg |
-| 三字词 | 2 + 1 + 1 | A首+A尾 + B首 + C尾 | 实际上 -> pmnm |
-| 三字词 | 1 + 2 + 1 | A首 + B首+B尾 + C尾 | 输入法 -> johy |
-| 三字词 | 1 + 1 + 2 | A首 + B首 + C首+C尾 | 这种人 -> yhoo |
-| 四字词+ | 1 + 1 + 1 + 1 | A首 + B首 + C首 + Z首 | 社会保障 -> ioof |
+生成命令：
 
-原则：遵循仓颉五代顺位，动态消除同字内冗余码，首字不超过 2 码。
+```powershell
+python scripts/cangjie/gen_sicang5_words.py
+python scripts/cangjie/gen_wucang5_words.py
+```
+
+默认输出：
+
+```text
+schemas/cangjie/sicang5/sicang5_words.dict.yaml
+schemas/cangjie/wucang5/wucang5_words.dict.yaml
+```
+
+### 12.1 构词基码
+
+构词时先为每个单字确定一个基码：
+
+1. 字根字优先使用 `scripts/cangjie/prototypes/root_code.txt`。
+2. 一简字跳过 `scripts/cangjie/prototypes/one_code.txt` 中的一简码，改用该字全码。
+3. 普通字只使用非 `z/x` 开头的原码，所有前缀消重码不参与构词。
+4. 若一个字有多个可用普通编码，且 `scripts/cangjie/data/sc_glyph_preferred_code.txt` 中的偏好码存在于该字可用编码中，则使用偏好码。
+5. 否则使用单字码表中该字的第一个可用普通码。
+
+### 12.2 构词规则
+
+词码固定为最多四码：
+
+| 词长 | 取码 |
+| :--- | :--- |
+| 二字词 | 每字前两码 |
+| 三字词 | 第一、二字各取首码，第三字取前两码 |
+| 四字及以上词 | 第一、二、三、末字各取首码 |
+
+### 12.3 词库与排序
+
+词源来自 `schemas/common/words/mixed.words.dict.yaml`，但只保留能在 `schemas/common/essay-zh-hans.txt` 找到频率的词。繁体词不改写输出字形，但排序取频时会先用 OpenCC `t2s` 转成简体，再查 `essay-zh-hans.txt`。因此 `这样` 和 `這樣` 会共用 `这样` 的频率；同码同频时简体词优先。
+
+单字和词撞码时，词按 `essay-zh-hans.txt` 词频排序；单字频率优先取同一文件的单字频率，缺失时用 `sc_daily` 字频按分位映射到 essay 量级。单字内部保持原单字码表顺序，词会按频率插入到对应同码组中。
+
+字词码表写出 `sort: by_original`，让 Rime 按文件顺序编译。字词 schema 不启用 `single_char_filter`，否则内置过滤器会把单字候选整体提前，破坏字词同码排序。
 
 ## 13. 评估命令
 

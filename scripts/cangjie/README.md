@@ -225,3 +225,43 @@ python scripts/cangjie/gen_sicang5.py
 ## 4. 技术规范
 
 详见 [CANGJIE_SPEC.md](CANGJIE_SPEC.md) 了解详细的设计算法与取码规则。
+
+## 5. 生成字词方案
+
+Sicang5/Wucang5 的字词方案是在已生成的单字码表基础上，直接合并固定词库生成独立码表；原单字方案不变，不通过 `import_tables` 依赖词频文件，也不启用造词或用户词典。
+
+```powershell
+python scripts/cangjie/gen_sicang5_words.py
+python scripts/cangjie/gen_wucang5_words.py
+```
+
+默认输入：
+
+- 单字码表：`schemas/cangjie/sicang5/sicang5.dict.yaml`、`schemas/cangjie/wucang5/wucang5.dict.yaml`
+- 词库：`schemas/common/words/mixed.words.dict.yaml`
+- 词频：`schemas/common/essay-zh-hans.txt`
+- 字根构词码：`scripts/cangjie/prototypes/root_code.txt`
+- 一简表：`scripts/cangjie/prototypes/one_code.txt`
+- 简体字形偏好码：`scripts/cangjie/data/sc_glyph_preferred_code.txt`
+
+构词基码选择：
+
+- 字根字优先使用 `root_code.txt`。
+- 一简字构词时跳过一简码，改用全码。
+- 有多个普通编码的字，若 `sc_glyph_preferred_code.txt` 中的偏好码存在于该字可用编码中，则用偏好码。
+- 所有 `z/x` 开头的前缀消重码不参与构词。
+
+构词取码：
+
+- 二字词：取每个字构词基码的前两码。
+- 三字词：取第一、二字的第一码，第三字的前两码。
+- 四字及以上词：取第一、二、三、末字的第一码。
+
+词条只取 `mixed.words.dict.yaml` 中同时能在 `essay-zh-hans.txt` 匹配到频率的词。繁体词先用 OpenCC `t2s` 转简，再到 `essay-zh-hans.txt` 取词频；简繁词同码同频时简体词优先。单字和词同码时，按词频与单字频率映射结果合并排序，单字之间保持原单字码表顺序。
+
+常用参数：
+
+```powershell
+python scripts/cangjie/gen_sicang5_words.py --source-dict schemas/cangjie/sicang5/sicang5.dict.yaml --words-dict schemas/common/words/mixed.words.dict.yaml
+python scripts/cangjie/gen_wucang5_words.py --preferred-code scripts/cangjie/data/sc_glyph_preferred_code.txt
+```
