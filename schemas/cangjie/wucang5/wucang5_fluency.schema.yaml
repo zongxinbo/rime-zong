@@ -3,7 +3,7 @@
 
 schema:
   schema_id: wucang5_fluency
-  name: 五码仓颉·五代·语句流
+  name: 五码仓颉·语句流
   version: "2026.04.29"
   author:
     - zongxinbo <https://github.com/zongxinbo>
