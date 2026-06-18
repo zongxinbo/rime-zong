@@ -641,7 +641,7 @@ schemas/cangjie/wucang5/wucang5_words.dict.yaml
 
 词源来自 `schemas/common/words/mixed.words.dict.yaml`，但只保留能在 `schemas/common/essay-zh-hans.txt` 找到频率的词。繁体词不改写输出字形，但排序取频时会先用 OpenCC `t2s` 转成简体，再查 `essay-zh-hans.txt`。因此 `这样` 和 `這樣` 会共用 `这样` 的频率；同码同频时简体词优先。
 
-单字和词撞码时，词按 `essay-zh-hans.txt` 词频排序；单字频率优先取同一文件的单字频率，缺失时用 `sc_daily` 字频按分位映射到 essay 量级。单字内部保持原单字码表顺序，词会按频率插入到对应同码组中。
+单字和词撞码时，词按 `essay-zh-hans.txt` 词频排序；单字频率优先取同一文件的单字频率，缺失时用 `sc_daily` 字频按分位映射到 essay 量级。单字内部保持原单字码表顺序，词会按频率插入到对应同码组中。若一个单字已经有简码，则该字的全码不再压住同码词语；这个让位只作用于字词方案，不改变单字方案内部的全码排序。
 
 字词码表写出 `sort: by_original`，让 Rime 按文件顺序编译。字词 schema 不启用 `single_char_filter`，否则内置过滤器会把单字候选整体提前，破坏字词同码排序。
 
