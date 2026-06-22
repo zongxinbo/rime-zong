@@ -113,18 +113,61 @@ def build_fullcode_entries(
     used_text_code: set[tuple[str, str]],
     char_freqs: dict[str, int],
     max_code_length: int,
+    split_collision_projection: bool = False,
+    split_collision_min_size: int = 6,
+    split_collision_insert_protected: bool = False,
+    auxiliary_text_codes: set[tuple[str, str]] | None = None,
 ) -> list[tuple[str, str, int]]:
+    if split_collision_min_size < 2:
+        raise ValueError("split_collision_min_size must be at least 2")
+
     fullcode_entries: list[tuple[str, str, int]] = []
+    primary_groups: dict[str, list[tuple[str, str, str, str, int]]] = defaultdict(list)
+    initially_occupied_codes = {code for _, code in used_text_code}
     for char, full_codes in char_full_codes.items():
         if char in root_chars:
             full_codes = [code for code in full_codes if len(code) != 1]
         freq = char_freqs.get(char, 0)
         for full_code in full_codes:
             code_proj = project_code(full_code, max_code_length)
+            split_code = full_code[:max_code_length]
+            primary_groups[code_proj].append((char, full_code, code_proj, split_code, freq))
             if (char, code_proj) in used_text_code:
                 continue
             used_text_code.add((char, code_proj))
             fullcode_entries.append((char, code_proj, freq))
+
+    if not split_collision_projection:
+        return fullcode_entries
+
+    if auxiliary_text_codes is None:
+        auxiliary_text_codes = set()
+
+    protected_split_codes = {
+        code_proj
+        for code_proj, items in primary_groups.items()
+        if any(freq > 0 for _, _, _, _, freq in items)
+    }
+    protected_split_codes.update(initially_occupied_codes)
+    for code_proj, items in primary_groups.items():
+        split_items = [
+            item
+            for item in items
+            if len(item[1]) > max_code_length and item[3] != code_proj
+        ]
+        if len({full_code for _, full_code, _, _, _ in split_items}) < split_collision_min_size:
+            continue
+        if len({split_code for _, _, _, split_code, _ in split_items}) < 2:
+            continue
+        for char, _, _, split_code, freq in split_items:
+            if not split_collision_insert_protected and split_code in protected_split_codes:
+                continue
+            text_code = (char, split_code)
+            if text_code in used_text_code:
+                continue
+            used_text_code.add(text_code)
+            auxiliary_text_codes.add(text_code)
+            fullcode_entries.append((char, split_code, freq))
     return fullcode_entries
 
 
@@ -135,6 +178,7 @@ def build_base_entries(
     char_freqs: dict[str, int],
     fullcode_yield: bool,
     fullcode_yield_min_score: float,
+    auxiliary_text_codes: set[tuple[str, str]] | None = None,
 ) -> list[tuple[str, int | float, int, int, str]]:
     all_entries: list[tuple[str, int, int, int, str]] = []
     fullcode_order = build_fullcode_yield_order(
@@ -142,13 +186,42 @@ def build_base_entries(
         shortcut_entries if fullcode_yield else [],
         min_promote_score=fullcode_yield_min_score,
     )
+    auxiliary_text_codes = auxiliary_text_codes or set()
+
+    entries_by_code: dict[str, list[tuple[str, int]]] = defaultdict(list)
+    protected_by_code: dict[str, list[tuple[str, int]]] = defaultdict(list)
+    auxiliary_by_code: dict[str, list[tuple[str, int]]] = defaultdict(list)
+    for char, code, freq in fullcode_entries:
+        entries_by_code[code].append((char, freq))
+        if (char, code) in auxiliary_text_codes:
+            auxiliary_by_code[code].append((char, freq))
+        elif freq > 0:
+            protected_by_code[code].append((char, freq))
+
+    adjusted_order: dict[tuple[str, str], int] = {}
+    for code, items in auxiliary_by_code.items():
+        protected = protected_by_code.get(code, [])
+        protected.sort(key=lambda item: (-item[1], item[0]))
+        promoted_auxiliary = [item for item in items if item[1] > 0]
+        promoted_auxiliary.sort(key=lambda item: (-item[1], item[0]))
+        other = [
+            (char, freq)
+            for char, freq in entries_by_code[code]
+            if (char, code) not in auxiliary_text_codes and freq <= 0
+        ]
+        other.sort(key=lambda item: (fullcode_order[(item[0], code)], item[0]))
+        fallback_auxiliary = [item for item in items if item[1] <= 0]
+        fallback_auxiliary.sort(key=lambda item: (fullcode_order[(item[0], code)], item[0]))
+        for index, (char, _) in enumerate(protected + promoted_auxiliary + other + fallback_auxiliary):
+            adjusted_order[(char, code)] = index
 
     for char, code, priority in shortcut_entries:
         freq = char_freqs.get(char, 0)
         all_entries.append((code, priority, 0, -freq, char))
 
     for char, code, freq in fullcode_entries:
-        all_entries.append((code, 5, fullcode_order[(char, code)], -freq, char))
+        order = adjusted_order.get((char, code), fullcode_order[(char, code)])
+        all_entries.append((code, 5, order, -freq, char))
 
     all_entries.sort()
     return all_entries
@@ -339,6 +412,9 @@ def generate_dict(
     suffix_structure_occupied_policy: str = "protect-min-score",
     suffix_structure_protect_min_score: float = 100000,
     suffix_structure_keymap: str = "zxwa",
+    split_collision_projection: bool = False,
+    split_collision_min_size: int = 6,
+    split_collision_insert_protected: bool = False,
     z_special: bool = False,
     z_special_code_length: int | None = None,
     weights: str | None = None,
@@ -361,12 +437,17 @@ def generate_dict(
         print("使用预加载的加权字频数据进行排序...")
 
     used_text_code = {(char, code) for char, code, _ in shortcut_entries}
+    auxiliary_text_codes: set[tuple[str, str]] = set()
     fullcode_entries = build_fullcode_entries(
         char_full_codes,
         root_chars=root_chars,
         used_text_code=used_text_code,
         char_freqs=char_freqs,
         max_code_length=max_code_length,
+        split_collision_projection=split_collision_projection,
+        split_collision_min_size=split_collision_min_size,
+        split_collision_insert_protected=split_collision_insert_protected,
+        auxiliary_text_codes=auxiliary_text_codes,
     )
     all_entries = build_base_entries(
         shortcut_entries,
@@ -374,6 +455,7 @@ def generate_dict(
         char_freqs=char_freqs,
         fullcode_yield=fullcode_yield,
         fullcode_yield_min_score=fullcode_yield_min_score,
+        auxiliary_text_codes=auxiliary_text_codes,
     )
     shortcut_leader_chars = build_shortcut_leader_chars(all_entries)
     shortcut_source_entries = list(all_entries)
@@ -388,6 +470,7 @@ def generate_dict(
             if entry[1] < 5
             or entry[4] not in preferred_codes
             or entry[0] == preferred_codes[entry[4]]
+            or (entry[4], entry[0]) in auxiliary_text_codes
         ]
 
     natural_shortcut_source_entries = list(shortcut_source_entries)
@@ -408,6 +491,7 @@ def generate_dict(
                 used_text_code=prefix_used_text_code,
                 char_freqs=char_freqs,
                 max_code_length=source_max_code_length,
+                split_collision_projection=False,
             )
             prefix_all_entries = build_base_entries(
                 shortcut_entries,
@@ -472,10 +556,14 @@ def generate_dict(
 
         scheme_entries_with_levels: list[tuple[int, tuple[str, int | float, int, int, str]]] = []
         if dedup_prefix_full or dedup_prefix_deep_short_levels:
-            scheme_source_entries = shortcut_source_entries
+            scheme_source_entries = [
+                entry
+                for entry in shortcut_source_entries
+                if (entry[4], entry[0]) not in auxiliary_text_codes
+            ]
             scheme_entries_with_levels = build_dedup_prefix_entries(
                 scheme_source_entries,
-                occupied_entries=scheme_source_entries,
+                occupied_entries=shortcut_source_entries,
                 used_text_code=used_text_code,
                 shortcut_leader_chars=shortcut_leader_chars,
                 char_freqs=char_freqs,
@@ -520,6 +608,13 @@ def generate_dict(
             f" 4码={prefix_counts.get(4, 0)}"
             f" 5码={prefix_counts.get(5, 0)}"
         )
+
+    print(
+        f"split collision projection: generated {len(auxiliary_text_codes)} entries"
+        f" enabled={split_collision_projection}"
+        f" min_size={split_collision_min_size}"
+        f" insert_protected={split_collision_insert_protected}"
+    )
 
     if suffix_z:
         suffix_entries = build_z_suffix_entries(

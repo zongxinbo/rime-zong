@@ -96,6 +96,12 @@ def main():
                         help="结构后缀 protect-min-score 模式下，被占用码位首选字达到该综合字频则受保护")
     parser.add_argument("--suffix-structure-keymap", default="zxwa",
                         help="结构类别后缀键，按 左右/上下/包围/独体 顺序给 4 个小写字母；默认 zxwa")
+    parser.add_argument("--split-collision-projection", action=argparse.BooleanOptionalAction, default=True,
+                        help="是否为大规模 ABC?E -> ABCE 投影冲突额外保留 ABCD 分流码（默认开启）")
+    parser.add_argument("--split-collision-min-size", type=int, default=2,
+                        help="启用 ABCD 分流码的同一 ABCE 冲突簇最小源码数量；默认 2，即多个不同五码投影到同一四码即分流")
+    parser.add_argument("--split-collision-insert-protected", action=argparse.BooleanOptionalAction, default=False,
+                        help="是否允许 ABCD 分流码插入已有有频字的码位；开启时分流码排在已有有频字之后，默认关闭")
     parser.add_argument("--only-first-full-code", action=argparse.BooleanOptionalAction, default=False, help="仅取第一个全码（用于去重）")
     parser.add_argument("--weights", choices=["sc", "sc_daily", "sc_balanced"], default="sc_daily",
                         help="字频权重模式：sc=现代简体，sc_daily=简繁日常通用，sc_balanced=简繁均衡")
@@ -187,6 +193,9 @@ def main():
         suffix_structure_occupied_policy=args.suffix_structure_occupied_policy,
         suffix_structure_protect_min_score=args.suffix_structure_protect_min_score,
         suffix_structure_keymap=args.suffix_structure_keymap,
+        split_collision_projection=args.split_collision_projection,
+        split_collision_min_size=args.split_collision_min_size,
+        split_collision_insert_protected=args.split_collision_insert_protected,
         z_special=True,
         z_special_code_length=4,
         weights=args.weights,
