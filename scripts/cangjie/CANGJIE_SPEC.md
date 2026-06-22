@@ -39,9 +39,9 @@
 - 固定前缀简码：`scripts/cangjie/prototypes/fixed_prefix_code.txt`
 - 二简：`scripts/cangjie/prototypes/two_code.txt`
 - 三简：`scripts/cangjie/prototypes/three_code.txt`
-- 前缀避重三码：`scripts/cangjie/prototypes/dedup_prefix_code_3.txt`
+- 前缀避重二/三码：`scripts/cangjie/prototypes/prefix_code_2_{sicang5,wucang5}.txt`、`scripts/cangjie/prototypes/prefix_code_3_{sicang5,wucang5}.txt`
 - 四简：`scripts/cangjie/prototypes/four_code.txt`（启用 `--s4` 时生成）
-- 前缀避重四码：`scripts/cangjie/prototypes/dedup_prefix_code_4.txt`
+- 前缀避重四/五码：`scripts/cangjie/prototypes/prefix_code_4_sicang5.txt`、`prefix_code_4_wucang5.txt`、`prefix_code_5_wucang5.txt`
 
 旧的 `z_code.txt` 只作为过渡文件名保留，不再承载新的 `z?`、`z??` 或 `z???` 规则；`root_code.txt` 只放真正的字根字和键本体码，不放 `难	xz`、`重	zz` 这类高频普通字特殊码，避免它们被排除出二三简候选。
 
@@ -239,8 +239,8 @@ Sicang5/Wucang5 默认不生成 `原码 + z/x` 后缀码，避免同一个字同
 1. **前缀短码层**：为高频、无普通简码、当前非首选的字分配可由原码推导的 `z/x` 前缀码；所有前缀均按全码候选位固定映射，第 2 候选用 `z` 系，第 3 候选用 `x` 系，第 4 候选用 `zx` 系，第 5 候选用 `xz` 系。
    - 二键层：主体键按首码 > 末码尝试；第 2 候选尝试 `z + 主体键`，第 3 候选尝试 `x + 主体键`；已被字根/普通简码占用的码位仍自动跳过；默认用 `--dedup-prefix-level2-weights sc`，按全局高频重码痛点竞争，不要求节省码长。
    - 三键及更深层：按候选位 marker 加原码前段生成。Sicang5 marker 为第 2 候选 `z/zz/zzz`、第 3 候选 `x/xx/xxx`、第 4 候选 `zx/zxx`、第 5 候选 `xz/xzz`；Wucang5 在五码边界内分别补到 `zzzz`、`xxxx`、`zxxx`、`xzzz`。同一层级内高频字优先竞争短前缀码。
-   - 二键层和三键层使用四码投影基线生成，Sicang5 与 Wucang5 共享同一套审阅文件；候选源只看普通简码和全码让位后的自然源，不包含后缀救援码。
-2. **方案专属深层前缀层**：排除已获得共享短前缀的字，再按方案最大码长生成：
+   - 二键层和三键层按方案基线独立生成：Sicang5 使用四码投影基线，Wucang5 使用五码实际候选基线；候选源只看普通简码和全码让位后的自然源，不包含后缀救援码。
+2. **方案专属深层前缀层**：排除已获得短前缀的字，再按方案最大码长生成：
    - Sicang5 四码前缀层处理三码原码的精确前缀救援，以及四码全码第 2-5 候选。
    - Wucang5 四码前缀短码层按同一候选位 marker 生成，不复用 Sicang5 的四码选重结果。
    - Wucang5 五码前缀选重层对应 Sicang5 四码选重层，处理五码全码第 2-5 候选。
@@ -424,15 +424,15 @@ one_code_tc.txt   繁体专精一简
 | `root_code.txt` | 字根字、特殊键本体码，例如 `日	az` | 极少改动，人工维护 |
 | `one_code.txt` | 单键一码直达，包含最终定稿的 `a-z` | 人工定稿 |
 | `fixed_prefix_code.txt` | 旧固定 `z?`、`x?` 二码补丁；默认不加载 | 显式启用 |
-| `prefix_code_2.txt` | `z?`、`x?` 高频前缀短码审阅产物 | 构建末尾自动覆盖生成 |
-| `prefix_code_3.txt` | `z??`、`x??` 及 `zz?`、`xx?` 高频前缀短码审阅产物 | 构建末尾自动覆盖生成 |
+| `prefix_code_2_sicang5.txt` / `prefix_code_2_wucang5.txt` | `z?`、`x?` 高频前缀短码审阅产物 | 构建末尾自动覆盖生成 |
+| `prefix_code_3_sicang5.txt` / `prefix_code_3_wucang5.txt` | `z??`、`x??` 及 `zz?`、`xx?` 高频前缀短码审阅产物 | 构建末尾自动覆盖生成 |
 | `prefix_code_4_sicang5.txt` | Sicang5 `z???`、`x???` 及 `zz??`、`xx??` 前缀消重审阅产物 | 构建末尾自动覆盖生成 |
 | `prefix_code_4_wucang5.txt` | Wucang5 `z???`、`x???` 及 `zz???`、`xx???` 四码前缀短码审阅产物 | 构建末尾自动覆盖生成 |
 | `prefix_code_5_wucang5.txt` | Wucang5 `z????`、`x????` 五码第 2/3 候选前缀选重码审阅产物 | 构建末尾自动覆盖生成 |
 | `suffix_code_sicang5.txt` | Sicang5 `z/x` 后缀兼容层审阅产物；默认构建为空 | 构建末尾自动覆盖生成 |
 | `suffix_code_wucang5.txt` | Wucang5 `z/x` 后缀兼容层审阅产物；默认构建为空 | 构建末尾自动覆盖生成 |
 
-自动前缀和后缀兼容层仍由构建算法决定，`prefix_code_*.txt` 与 `suffix_code_*.txt` 是审阅产物，不是人工输入源；下次构建会覆盖。`prefix_code_2.txt` 和 `prefix_code_3.txt` 默认使用 `--dedup-prefix-source-max-code-length 4` 的四码投影基线，保证 Sicang5/Wucang5 的二三码前缀一致；二码前缀只按原码首码 > 末码尝试，不使用包含码或字根锚点；四码及以上前缀按方案独立生成。前缀权重默认对标普通简码层：二码前缀对标一简用 `sc`，三码和更深层前缀用 `sc_daily`。
+自动前缀和后缀兼容层仍由构建算法决定，`prefix_code_*.txt` 与 `suffix_code_*.txt` 是审阅产物，不是人工输入源；下次构建会覆盖。二三码前缀按方案基线独立生成：Sicang5 默认使用 `--dedup-prefix-source-max-code-length 4` 的四码投影基线，Wucang5 默认使用 `5` 的五码实际候选基线；二码前缀只按原码首码 > 末码尝试，不使用包含码或字根锚点。前缀权重默认对标普通简码层：二码前缀对标一简用 `sc`，三码和更深层前缀用 `sc_daily`。
 
 推荐加载顺序：
 
