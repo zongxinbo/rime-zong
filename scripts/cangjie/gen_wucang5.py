@@ -20,6 +20,8 @@ from core.cangjie_builder import (
     FOUR_CODE_PATH,
     ONE_CODE_PATH,
     FIXED_PREFIX_CODE_PATH,
+    PREFIX_CODE_2_WUCANG5_PATH,
+    PREFIX_CODE_3_WUCANG5_PATH,
     PREFIX_CODE_4_WUCANG5_PATH,
     PREFIX_CODE_5_WUCANG5_PATH,
     THREE_CODE_PATH,
@@ -85,8 +87,8 @@ def main():
                         help="z/x 四码前缀选重只处理该源码长度；默认 4")
     parser.add_argument("--dedup-prefix-deep-rank-multiplier", type=float, default=1.5,
                         help="第 3 候选及以后进入前缀短码层时的痛点倍率；默认 1.5")
-    parser.add_argument("--dedup-prefix-source-max-code-length", type=int, default=4,
-                        help="z/x 前缀生成使用的投影基线码长；默认 4，保证 Sicang5/Wucang5 共享短前缀口径一致")
+    parser.add_argument("--dedup-prefix-source-max-code-length", type=int, default=5,
+                        help="z/x 前缀生成使用的投影基线码长；Wucang5 默认 5，按五码实际候选生成")
     parser.add_argument("--dedup-prefix-level2-weights", choices=["sc", "sc_daily", "sc_balanced"], default="sc",
                         help="z?/x? 二码前缀权重；默认 sc，对标普通一码")
     parser.add_argument("--dedup-prefix-level3-weights", choices=["sc", "sc_daily", "sc_balanced"], default="sc_daily",
@@ -198,6 +200,10 @@ def main():
         dedup_prefix_full_source_length=args.dedup_prefix_full_source_length,
         dedup_prefix_deep_rank_multiplier=args.dedup_prefix_deep_rank_multiplier,
         dedup_prefix_source_max_code_length=args.dedup_prefix_source_max_code_length,
+        dedup_prefix_short_paths={
+            2: PREFIX_CODE_2_WUCANG5_PATH,
+            3: PREFIX_CODE_3_WUCANG5_PATH,
+        },
         dedup_prefix_deep_paths={
             4: PREFIX_CODE_4_WUCANG5_PATH,
             5: PREFIX_CODE_5_WUCANG5_PATH,

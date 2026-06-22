@@ -403,6 +403,7 @@ def generate_dict(
     dedup_prefix_deep_rank_multiplier: float = 1.5,
     dedup_prefix_source_max_code_length: int | None = 4,
     dedup_prefix_deep_paths: dict[int, Path] | None = None,
+    dedup_prefix_short_paths: dict[int, Path] | None = None,
     dedup_prefix_deep_short_levels: tuple[int, ...] = (),
     dedup_prefix_deep_full_source_length: int | None = None,
     dedup_prefix_short_level_char_freqs: dict[int, dict[str, int]] | None = None,
@@ -527,6 +528,11 @@ def generate_dict(
 
         shared_entries_with_levels: list[tuple[int, tuple[str, int | float, int, int, str]]] = []
         if dedup_prefix_short:
+            if dedup_prefix_short_paths is None:
+                dedup_prefix_short_paths = {
+                    2: PREFIX_CODE_2_PATH,
+                    3: PREFIX_CODE_3_PATH,
+                }
             shared_source_entries, shared_leader_chars = build_prefix_source(dedup_prefix_source_max_code_length)
             shared_entries_with_levels = build_dedup_prefix_entries(
                 shared_source_entries,
@@ -547,10 +553,7 @@ def generate_dict(
             )
             prefix_counts.update(write_prefix_prototypes(
                 shared_entries_with_levels,
-                {
-                    2: PREFIX_CODE_2_PATH,
-                    3: PREFIX_CODE_3_PATH,
-                },
+                dedup_prefix_short_paths,
             ))
             append_prefix_entries(shared_entries_with_levels)
 
