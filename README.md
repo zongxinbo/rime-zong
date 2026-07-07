@@ -6,10 +6,9 @@ Rime 方案集合，包含拼音、自然码、仓颉、郑码、四角号码和
 
 | Schema | 名称 |
 | --- | --- |
+| [`sicang5`](schemas/cangjie/sicang5/sicang5.schema.yaml) | 四码仓颉 |
 | [`wucang5`](schemas/cangjie/wucang5/wucang5.schema.yaml) | 五码仓颉 |
 | [`sancang5`](schemas/cangjie/sancang5/sancang5.schema.yaml) | 三码仓颉 |
-| [`cangjie5_ice`](schemas/cangjie/cangjie5/cangjie5_ice.schema.yaml) | 倉頡五代·雾凇 |
-| [`pinyin_ice_cangjie5`](schemas/pinyin_ice/pinyin_ice_cangjie5.schema.yaml) | 雾凇拼音·倉頡 |
 | [`zrm`](schemas/shuangpin/zrm/zrm.schema.yaml) | 自然码·仓颉 |
 | [`zrm_single`](schemas/shuangpin/zrm_single/zrm_single.schema.yaml) | 自然码·仓颉·单字 |
 | [`jaroomaji`](schemas/jaroomaji/jaroomaji.schema.yaml) | 日本語 |
